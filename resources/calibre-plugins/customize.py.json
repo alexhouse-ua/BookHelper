@@ -1,0 +1,18 @@
+{
+  "count_pages": {
+    "enabled": true,
+    "description": "Automatically extracts and counts pages from ebook files during ingest"
+  },
+  "extract_isbn": {
+    "enabled": true,
+    "description": "Extracts ISBN metadata from ebook files for accurate metadata matching"
+  },
+  "fix_metadata": {
+    "enabled": true,
+    "description": "Normalizes and fixes metadata during ingest (author name formatting, etc.)"
+  },
+  "extract_cover": {
+    "enabled": true,
+    "description": "Ensures cover images are properly extracted from books during ingest"
+  }
+}

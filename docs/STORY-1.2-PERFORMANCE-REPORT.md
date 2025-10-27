@@ -8,6 +8,32 @@
 
 ## Configuration Steps (Execute Before Monitoring)
 
+### 0. Setup Calibre Plugins (Optional but Recommended)
+
+**Plugins enable page counting and metadata enrichment during ingest.**
+
+Follow: `/docs/STORY-1.2-PLUGINS-SETUP.md` for complete plugin installation.
+
+**Quick Setup:**
+```bash
+# Create plugins directory
+ssh pi@raspberrypi.local
+sudo mkdir -p /library/plugins && sudo chown 1000:1000 /library/plugins
+
+# Copy plugin configuration
+scp resources/calibre-plugins/customize.py.json pi@raspberrypi.local:/library/plugins/
+
+# Restart CWA to load plugins
+docker restart calibre-web-automated
+
+# Verify plugins loaded
+docker logs calibre-web-automated | grep -i plugin
+```
+
+**Expected benefit:** Adds page count field to enriched metadata (AC5 enhancement)
+
+---
+
 ### 1. Verify Ingest Folder
 ```bash
 # SSH to Raspberry Pi
@@ -103,10 +129,17 @@ docker logs -f calibre-web-automated
 
 | Operation | Peak Memory (MB) | Peak CPU (%) | Duration (s) | Notes |
 |-----------|------------------|--------------|--------------|-------|
-| Idle | [FILL] | [FILL] | N/A | Baseline |
-| Single Import | [FILL] | [FILL] | [FILL] | |
-| Metadata Fetch | [FILL] | [FILL] | [FILL] | |
+| Idle (plugins disabled) | [FILL] | [FILL] | N/A | Baseline without plugins |
+| Idle (plugins enabled) | [FILL] | [FILL] | N/A | Plugin memory overhead (~50-100 MB) |
+| Single Import (no plugins) | [FILL] | [FILL] | [FILL] | Standard ingest |
+| Single Import (with page counting) | [FILL] | [FILL] | [FILL] | Plugin overhead ~5-10 sec |
+| Metadata Fetch | [FILL] | [FILL] | [FILL] | Includes API lookup time |
 | Library Scan | [FILL] | [FILL] | [FILL] | ~[X] books |
+
+**Plugin Performance Notes:**
+- Count Pages plugin: ~2-3 sec overhead per EPUB
+- All plugins combined: ~5-10 sec per book acceptable (under 30s AC4 target)
+- Plugin memory: ~50-100 MB additional (fits within <600MB idle target)
 
 ### Stability Observations
 
@@ -137,8 +170,8 @@ dmesg | grep -i "out of memory"
 | 1 | CWA auto-ingest monitoring designated folder | [PASS/FAIL] | [Config screenshot/logs] |
 | 2 | Hardcover.app configured as primary source | [PASS/FAIL] | [Settings verification] |
 | 3 | Google Books configured as fallback | [PASS/FAIL] | [Settings verification] |
-| 4 | Test ebook imported within 30 seconds | [PASS/FAIL] | [Measured: X seconds] |
-| 5 | Enriched metadata present (title/author/cover/description/pages) | [PASS/FAIL] | [Book details inspection] |
+| 4 | Test ebook imported within 30 seconds | [PASS/FAIL] | [Measured: X seconds] (with plugins: ~5-10 sec overhead) |
+| 5 | Enriched metadata present (title/author/cover/description/**pages**) | [PASS/FAIL] | [Book details inspection] - **Pages field requires Count Pages plugin** |
 | 6 | EPUB optimization (epub-fixer) enabled | [PASS/FAIL] | [Settings verification] |
 | 7 | Hardcover API authenticated and validated | [PASS/FAIL] | [Test connection result] |
 | 8 | 1-week incremental ingestion (1-2 books/drop) | [PASS/FAIL] | [X test cycles completed] |

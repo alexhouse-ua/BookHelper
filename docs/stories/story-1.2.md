@@ -154,18 +154,33 @@ Prepared all tooling and documentation required for Story 1.2 execution:
    - Captures: timestamp, operation type, memory (MB), CPU (%), notes
    - Outputs CSV format to `/tmp/cwa-metrics-1.2.csv`
    - Detects operations from container logs (import/metadata_fetch/library_scan/idle)
+   - Validated against Docker API v1.24+ documentation
 
 2. **Performance Report Template:** Created `/docs/STORY-1.2-PERFORMANCE-REPORT.md`
    - Includes complete configuration steps for CWA auto-ingest setup
    - Sections: baseline metrics, test ingestion events, peak usage, stability observations
    - AC validation checklist (all 14 ACs)
    - Go/no-go decision framework with assessment criteria
+   - Plugin performance monitoring guidance (optional but recommended)
 
-3. **Infrastructure Verification:** Reviewed `docker-compose.yml`
+3. **Plugins Setup Guide:** Created `/docs/STORY-1.2-PLUGINS-SETUP.md`
+   - Complete guide for installing Calibre plugins (Count Pages, ISBN extraction, metadata fixing)
+   - Page counting plugin enables AC5 "enriched metadata" validation
+   - Plugin overhead analysis: ~5-10 sec/book (acceptable within 30s AC4 target)
+   - Performance monitoring strategy for plugin validation
+   - Troubleshooting plugin issues
+
+4. **Plugin Configuration:** Created `/resources/calibre-plugins/customize.py.json`
+   - Template for Calibre plugin configuration
+   - Includes: count_pages, extract_isbn, fix_metadata, extract_cover plugins
+   - Ready to copy to RPi and mount via docker-compose
+
+5. **Infrastructure Updates:** Updated `docker-compose.yml`
    - ✅ Ingest folder already configured: `/library/ingest` → `/cwa-book-ingest`
    - ✅ Hardcover API token already present in environment
    - ✅ Memory limits appropriate: 1500M limit, 400M reservation
    - ✅ Auto-restart policy: unless-stopped
+   - ✅ **NEW:** Plugin volume mount added: `/library/plugins:/config/.config/calibre/plugins`
 
 **Manual Execution Required:**
 
@@ -200,6 +215,8 @@ This story requires **1-week observation period** with real hardware and real-ti
 ### File List
 
 - Story file: `/docs/stories/story-1.2.md` (updated 2025-10-27)
-- Performance report template: `/docs/STORY-1.2-PERFORMANCE-REPORT.md` (created 2025-10-27)
+- Performance report: `/docs/STORY-1.2-PERFORMANCE-REPORT.md` (created 2025-10-27, updated with plugins)
+- Plugins setup guide: `/docs/STORY-1.2-PLUGINS-SETUP.md` (created 2025-10-27)
 - Monitoring script: `/resources/scripts/monitor-resources-1.2.py` (created 2025-10-27)
-- Docker configuration: `/docker-compose.yml` (reviewed, no changes needed)
+- Plugin config template: `/resources/calibre-plugins/customize.py.json` (created 2025-10-27)
+- Docker configuration: `/docker-compose.yml` (updated 2025-10-27: added plugins volume)

@@ -16,6 +16,7 @@ services:
       - cwa_config:/config
       - /library/ingest:/cwa-book-ingest
       - /library:/calibre-library
+      - /library/plugins:/config/.config/calibre/plugins
 
     ports:
       - "8083:8083"
