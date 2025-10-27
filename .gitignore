@@ -1,6 +1,59 @@
+# Development Tools
 /.claude
 /.gemini
 /.github
 /.vscode
+/.idea
+*~
+*.swp
+*.swo
+
+# Project Directories
 /bmad
 /BMAD-METHOD
+
+# Environment and Secrets
+.env
+.env.local
+.env.*.local
+credentials.json
+secrets.json
+
+# OS Files
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Dependencies (if needed in future)
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+
+# Temporary and Backup Files
+*.log
+*.bak
+*.tmp
+*.backup
+*.swp
+*~
+
+# Docker Compose Overrides (local development)
+docker-compose.override.yml
+
+# Test Artifacts (local runs, not part of repo)
+# Note: test results will be reviewed before committing
+cwa_stats.log
+memory_investigation.log
+check_memory.sh
+download_books.sh
+test_*.sh
+
+# System Files
+*.pid
+.lock
