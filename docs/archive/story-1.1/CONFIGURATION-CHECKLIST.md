@@ -154,7 +154,7 @@ Before deploying, verify:
 
 **Minimum configuration to get started:**
 1. Update `TZ` to your timezone
-2. Deploy with: `docker-compose up -d`
+2. Deploy with: `docker compose up -d`
 3. Access CWA at: http://raspberrypi.local:8083
 4. Log in with: `admin` / `admin123`
 5. Change password immediately

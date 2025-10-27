@@ -36,7 +36,7 @@ I have completed the **development phase** of Story 1.1 by creating:
 ```bash
 # Quick start once deployed:
 cd ~/BookHelper
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 2. Task-by-Task Deployment Guides
@@ -73,7 +73,7 @@ docker-compose up -d
    - Install Docker Engine (ARM-compatible)
    - Install Docker Compose
    - Create /library directory structure
-   - Deploy containers: `docker-compose up -d`
+   - Deploy containers: `docker compose up -d`
    - Verify web UI accessible: `http://raspberrypi.local:8083`
 
 ### Phase 2: Validation Testing (30 minutes)
@@ -204,7 +204,7 @@ Health Checks
 ### Web UI Not Accessible
 ```bash
 # 1. Check containers running
-docker-compose ps
+docker compose ps
 # Expected: "Up"
 
 # 2. Verify port
@@ -219,23 +219,23 @@ hostname -I  # Get RPi IP
 ### Memory Too High
 ```bash
 # Check current usage
-docker stats bookhelper_cwa_1 --no-stream
+docker stats calibre-web-automated --no-stream
 
 # If >750MB:
 # 1. Restart container
-docker-compose restart cwa
+docker compose restart cwa
 
 # 2. Check logs
-docker-compose logs cwa | tail -20
+docker compose logs cwa | tail -20
 ```
 
 ### Library Scan Fails
 ```bash
 # Monitor in real-time
-docker-compose logs -f cwa
+docker compose logs -f cwa
 
 # Stop and restart if hung
-docker-compose restart cwa
+docker compose restart cwa
 sleep 30
 # Then retry scan
 ```
@@ -346,7 +346,7 @@ Once Story 1.1 is marked **Done**:
 If you encounter issues:
 
 1. **Check first:** `docs/DEPLOYMENT-DOCUMENTATION-TASK-9.md` (Troubleshooting section)
-2. **Review logs:** `docker-compose logs cwa | tail -50`
+2. **Review logs:** `docker compose logs cwa | tail -50`
 3. **Document findings:** Add to story completion notes
 4. **Continue:** Most issues are recoverable; restart container and retry
 

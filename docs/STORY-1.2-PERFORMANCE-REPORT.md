@@ -32,14 +32,18 @@ ls -la /library/ingest
 ### 3. Configure Metadata Providers
 Navigate to: **Admin** → **Settings** → **Metadata Providers**
 
-**Primary: Hardcover.app**
-- ✅ Enable Hardcover
-- ✅ API Token: Already configured in docker-compose.yml (HARDCOVER_TOKEN env var)
-- Test: Click "Test Connection" → Verify success
+**Primary: Hardcover.app** ⚠️
+- Note: Hardcover.app integration is listed as "in progress" in CWA v3 documentation
+- API Token is pre-configured in docker-compose.yml (HARDCOVER_TOKEN env var)
+- If Hardcover unavailable: Google Books fallback will be used
+- Attempt to test Hardcover connection:
+  - If "Test Connection" succeeds → Primary is active
+  - If fails → Google Books fallback will handle metadata
 
 **Fallback: Google Books**
-- ✅ Enable Google Books
+- ✅ Enable Google Books (recommended, official docs confirm availability)
 - ✅ Set as fallback (priority 2)
+- Free tier: 1000 requests/day (adequate for incremental ingestion pattern)
 
 ### 4. Start Monitoring
 ```bash
@@ -58,13 +62,21 @@ tail -f /tmp/monitor.log
 ### 5. Initial Baseline Test
 ```bash
 # Drop test EPUB into ingest folder
-# Use a book with ISBN for Hardcover metadata test
-scp test-book.epub pi@raspberrypi.local:/library/ingest/
+# Use books WITH and WITHOUT ISBN:
+# - Book with ISBN: tests Hardcover/Google Books lookup
+# - Book without ISBN: tests fallback title/author matching
 
-# Watch CWA logs
+scp test-book-isbn.epub pi@raspberrypi.local:/library/ingest/
+scp test-book-no-isbn.epub pi@raspberrypi.local:/library/ingest/
+
+# Watch CWA logs for import and metadata fetch
 docker logs -f calibre-web-automated
 
-# Expected: Import completes in <30 seconds with full metadata
+# Expected:
+# - Import completes in <30 seconds
+# - Full metadata populated (title, author, cover, description, page count)
+# - If Hardcover fails: Google Books fallback is used
+# - Files removed from /library/ingest/ after processing (per CWA design)
 ```
 
 ---

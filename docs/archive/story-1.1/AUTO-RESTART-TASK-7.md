@@ -20,19 +20,19 @@ This task validates that the CWA and Syncthing containers automatically restart 
 
 **Step 1: Note current container status**
 ```bash
-cwa ps
+docker compose ps
 # Record the container ID/status
 ```
 
 **Step 2: Stop CWA container**
 ```bash
-cwa stop calibre-web-automated
+docker compose stop calibre-web-automated
 sleep 2
 ```
 
 **Step 3: Verify container stopped**
 ```bash
-cwa ps
+docker compose ps
 # Expected: calibre-web-automated shows "Exited"
 ```
 
@@ -41,7 +41,7 @@ cwa ps
 # With restart policy set to "always", container should auto-restart
 # This may take 2-10 seconds depending on system
 sleep 5
-cwa ps
+docker compose ps
 # Expected: calibre-web-automated shows "Up X seconds"
 ```
 
@@ -69,20 +69,20 @@ curl -s http://raspberrypi.local:8083/ | head -20
 
 **Step 1: Stop Syncthing container**
 ```bash
-cwa stop syncthing
+docker compose stop syncthing
 sleep 2
 ```
 
 **Step 2: Verify container stopped**
 ```bash
-cwa ps
+docker compose ps
 # Expected: syncthing shows "Exited"
 ```
 
 **Step 3: Wait and verify auto-restart**
 ```bash
 sleep 5
-cwa ps
+docker compose ps
 # Expected: syncthing shows "Up X seconds"
 ```
 
@@ -116,7 +116,7 @@ curl -s http://raspberrypi.local:8384/ | head -20
 **Step 1: Verify current state before reboot**
 ```bash
 # Check all containers running
-cwa ps
+docker compose ps
 
 # Record time
 echo "Pre-reboot time: $(date)"
@@ -146,7 +146,7 @@ ssh pi@raspberrypi.local
 sleep 30
 
 # Check container status
-cwa ps
+docker compose ps
 # Expected: All containers "Up" (not "Exited")
 ```
 
@@ -163,7 +163,7 @@ http://raspberrypi.local:8083
 **Step 6: Check container startup logs**
 ```bash
 # Verify clean startup (no errors)
-cwa logs --tail=30 calibre-web-automated | head -20
+docker compose logs --tail=30 calibre-web-automated | head -20
 
 # Look for:
 # [INFO] Calibre-Web-Automated started
@@ -188,7 +188,7 @@ After any of the above restart tests, verify data is preserved:
 
 ```bash
 # Step 1: Count books in library
-cwa bash -c 'sqlite3 /calibre-library/metadata.db "SELECT COUNT(*) FROM books;" 2>/dev/null || echo "0"'
+docker compose exec calibre-web-automated bash -c 'sqlite3 /calibre-library/metadata.db "SELECT COUNT(*) FROM books;" 2>/dev/null || echo "0"'
 # Should match count from Task 5
 
 # Step 2: Access library via web UI
@@ -255,28 +255,28 @@ docker inspect calibre-web-automated --format='{{.HostConfig.RestartPolicy}}'
 #     restart: unless-stopped
 
 # Then restart:
-cwa down
-cwa up -d
+docker compose down
+docker compose up -d
 ```
 
 ### Issue: Container crashes on restart
 
 **Symptoms:**
 ```bash
-cwa ps
+docker compose ps
 # calibre-web-automated shows: Exited (1) 5 minutes ago (keeps restarting and crashing)
 ```
 
 **Solution:**
 1. Check logs for crash reason:
    ```bash
-   cwa logs calibre-web-automated | tail -50
+   docker compose logs calibre-web-automated | tail -50
    ```
 
 2. Common causes:
    - Port 8083 already in use: `sudo lsof -i :8083`
    - Missing volume/mount: Check /library and /config existence and ownership
-   - Insufficient memory: Check `cwa stats calibre-web-automated`
+   - Insufficient memory: Check `docker compose stats calibre-web-automated`
    - Wrong image: Verify image version in docker-compose.yml
 
 ### Issue: Containers don't restart after system reboot
@@ -296,7 +296,7 @@ cwa ps
 
 3. Check if docker daemon started:
    ```bash
-   cwa ps
+   docker compose ps
    # If daemon didn't start, see error about connection
    # May take 30 seconds after boot for Docker to initialize
    ```

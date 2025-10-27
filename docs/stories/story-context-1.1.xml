@@ -202,7 +202,7 @@
     <interface>
       <name>Docker Compose CLI</name>
       <kind>Command-Line Interface</kind>
-      <signature>docker-compose up -d, docker-compose ps, docker-compose stop, docker-compose logs, docker stats</signature>
+      <signature>docker compose up -d, docker compose ps, docker compose stop, docker compose logs, docker stats</signature>
       <protocol>Docker daemon socket</protocol>
       <authentication>User must be in docker group (no sudo required)</authentication>
       <path>RPi system; Docker socket at /var/run/docker.sock</path>
@@ -216,11 +216,11 @@
     </standards>
 
     <locations>
-      Test artifacts and logs should be stored in project root or docs/test-results/ directory. Docker Compose logs available via: docker-compose logs cwa, docker-compose logs syncthing. Resource monitoring output should be captured to file during Story 1.1 Task 4. Manual test steps documented in narrative form in story completion notes.
+      Test artifacts and logs should be stored in project root or docs/test-results/ directory. Docker Compose logs available via: docker compose logs cwa, docker compose logs syncthing. Resource monitoring output should be captured to file during Story 1.1 Task 4. Manual test steps documented in narrative form in story completion notes.
     </locations>
 
     <ideas>
-      <testIdea acId="AC1">Docker Compose Validation: Run docker-compose config to validate YAML syntax and required fields (services, volumes, restart policies). Verify CWA and Syncthing service definitions include all necessary configurations.</testIdea>
+      <testIdea acId="AC1">Docker Compose Validation: Run docker compose config to validate YAML syntax and required fields (services, volumes, restart policies). Verify CWA and Syncthing service definitions include all necessary configurations.</testIdea>
 
       <testIdea acId="AC2">HTTP Endpoint Health: Use curl to test CWA web UI accessibility. GET http://raspberrypi.local:8083 should return 200 OK. Verify login page loads and version string is visible (v3.1.0+). Test from local network client (not directly on RPi).</testIdea>
 
@@ -230,11 +230,11 @@
 
       <testIdea acId="AC5">Load Test - Library Scan: Start docker stats in background to monitor CPU/memory. Trigger library scan on 20+ book collection. Monitor scan progress in CWA logs. Verify completion without crashes, timeouts, or OOM errors. Record scan duration and peak memory usage.</testIdea>
 
-      <testIdea acId="AC6">Restart Policy Test: Stop CWA container (docker-compose stop cwa). Wait 5 seconds. Verify auto-restart via docker-compose ps. Simulate full system reboot (if feasible). Verify services auto-start post-reboot and web UI is accessible. Document restart behavior in logs.</testIdea>
+      <testIdea acId="AC6">Restart Policy Test: Stop CWA container (docker compose stop cwa). Wait 5 seconds. Verify auto-restart via docker compose ps. Simulate full system reboot (if feasible). Verify services auto-start post-reboot and web UI is accessible. Document restart behavior in logs.</testIdea>
 
-      <testIdea acId="AC7">Multi-Service Health: Run docker-compose ps to verify all services (cwa, syncthing) show status: Up. Check docker-compose logs for critical errors. Verify no service crashloops. Confirm port mappings (8083 for CWA, 8384 for Syncthing) are correct.</testIdea>
+      <testIdea acId="AC7">Multi-Service Health: Run docker compose ps to verify all services (cwa, syncthing) show status: Up. Check docker compose logs for critical errors. Verify no service crashloops. Confirm port mappings (8083 for CWA, 8384 for Syncthing) are correct.</testIdea>
 
-      <testIdea acId="AC8">Log Analysis: Review docker-compose logs cwa output for errors, warnings, or anomalies. Verify CWA startup sequence completes normally. Check for initialization messages (metadata.db created, services ready). Confirm no persistent error patterns. Generate summary of log health check.</testIdea>
+      <testIdea acId="AC8">Log Analysis: Review docker compose logs cwa output for errors, warnings, or anomalies. Verify CWA startup sequence completes normally. Check for initialization messages (metadata.db created, services ready). Confirm no persistent error patterns. Generate summary of log health check.</testIdea>
     </ideas>
   </tests>
 

@@ -2,7 +2,7 @@ services:
   calibre-web-automated:
     image: ghcr.io/crocodilestick/calibre-web-automated:latest
     container_name: calibre-web-automated
-    restart: unless-stopped
+    restart: always
 
     environment:
       - PUID=1000
@@ -37,7 +37,7 @@ services:
   syncthing:
     image: syncthing/syncthing:latest
     container_name: syncthing
-    restart: unless-stopped
+    restart: always
     network_mode: host
 
     environment:

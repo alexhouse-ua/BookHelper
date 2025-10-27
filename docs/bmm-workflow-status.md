@@ -12,7 +12,7 @@ WORKFLOW_PATH: greenfield-level-2.yaml
 ## Current State
 
 CURRENT_PHASE: 4-Implementation
-CURRENT_WORKFLOW: Story 1.1: Deploy Calibre-Web-Automated - Complete
+CURRENT_WORKFLOW: Story 1.2: Auto-Ingestion + Metadata Enrichment (Ready for Development)
 CURRENT_AGENT: dev
 PHASE_1_COMPLETE: true
 PHASE_2_COMPLETE: true
@@ -21,45 +21,39 @@ PHASE_4_COMPLETE: false
 
 ## Next Action
 
-NEXT_ACTION: Story 1.2: Configure hardware performance validation checkpoint
-NEXT_COMMAND: *develop-story 1.2
+NEXT_ACTION: Implement Story 1.2 with realistic 1-week performance validation and monitoring
+NEXT_COMMAND: Load DEV agent and run story implementation workflow
 NEXT_AGENT: dev
 
-## Story Backlog
+## Story Backlog (REVISED - Course Correction Applied)
 
-**Epic 1: Core Library Server & Database Foundation** (6 stories)
-- Story 1.1: Deploy Calibre-Web-Automated on Raspberry Pi 4
-- Story 1.2: Configure hardware performance validation checkpoint
-- Story 1.3: Configure auto-ingestion workflow with Hardcover metadata
-- Story 1.4: Design and implement unified database schema
-- Story 1.5: Implement library backup to separate storage
-- Story 1.6: Document Calibre CLI fallback procedures
+**Epic 1: Core Library Server & Database Foundation** (3 stories)
+- Story 1.1: Deploy CWA + Unified Database Foundation
+- Story 1.2: Auto-Ingestion + Metadata Enrichment
+- Story 1.3: Fallback Procedures & Operational Resilience
 
-**Epic 2: Device Sync & Remote Access** (4 stories)
+**Epic 2: Device Sync & Remote Access** (3 stories)
 - Story 2.1: Configure Syncthing for one-way library sync to Boox Palma 2
-- Story 2.2: Configure OPDS catalog for iOS Readest access
-- Story 2.3: Configure Tailscale for remote library access
-- Story 2.4: Enable KOSync progress sync across devices
+- Story 2.2: OPDS + Tailscale + KOSync Integration
+- (Story 2.3-2.4 consolidated into 2.2)
 
-**Epic 3: Ebook Statistics Backup & Analytics** (4 stories)
+**Epic 3: Ebook Statistics Backup & Analytics** (2 stories)
 - Story 3.1: Configure one-way statistics backup from Boox to RPi
-- Story 3.2: Build ETL pipeline for statistics extraction
-- Story 3.3: Set up SQL query interface and validate analytics
-- Story 3.4: Implement monitoring and alerting system
+- Story 3.2: ETL Pipeline + Analytics Interface + Monitoring
+- (Stories 3.3-3.4 consolidated into 3.2)
 
-**Epic 4: Audiobook Integration** (3 stories)
+**Epic 4: Audiobook Integration** (2 stories)
 - Story 4.1: Set up BookPlayer and configure Hardcover sync
-- Story 4.2: Extract audiobook statistics from Hardcover API
-- Story 4.3: Integrate audiobook data into unified database
+- Story 4.2: Audiobook Schema Extension + ETL Integration
+- (Story 4.3 consolidated into 4.2)
 
-**Epic 5: Historical Data Migration & Timeline Consolidation** (5 stories)
-- Story 5.1: Set up sandbox testing environment for migration
-- Story 5.2: Build Kindle reading history parser and import script
-- Story 5.3: Build Audible listening history parser and import script
-- Story 5.4: Implement data validation and rollback mechanism
-- Story 5.5: Execute Hardcover reconciliation and create unified timeline
+**Epic 5: Historical Data Migration & Timeline Consolidation** (3-4 stories)
+- Story 5.1: Sandbox + Kindle/Audible Parser Development
+- Story 5.2: Data Validation + Rollback Mechanism
+- Story 5.3: Hardcover Reconciliation + Unified Timeline
+- (Stories 5.2-5.3 may be further consolidated to 5.2 if validation permits)
 
-**Total: 21 stories across 5 epics**
+**Total: 12-14 stories across 5 epics** (consolidated from 21 for pragmatic execution)
 
 ## Completed Stories
 

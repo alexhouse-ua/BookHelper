@@ -3,7 +3,7 @@
 **Author:** Alex
 **Date:** 2025-10-26
 **Project Level:** 2
-**Target Scale:** Medium project - 5 epics, 16-21 stories total
+**Target Scale:** Medium project - 5 epics, 12-14 stories total (revised from 21 to align with realistic execution patterns)
 
 ---
 
@@ -35,121 +35,87 @@ This is the foundation epic - no dependencies on other work. All subsequent epic
 
 ---
 
-**Story 1.1: Deploy Calibre-Web-Automated on Raspberry Pi 4**
+**Story 1.1: Deploy CWA + Unified Database Foundation**
 
-As a reader,
-I want a self-hosted library server running on my Raspberry Pi 4,
-So that I can manage my ebook library with a web interface and prepare for automated workflows.
+As a developer,
+I want to deploy Calibre-Web-Automated on Raspberry Pi 4 with Neon.tech PostgreSQL schema and encrypted backup,
+So that I have operational library infrastructure with analytics data foundation and disaster recovery.
 
 **Acceptance Criteria:**
 1. Docker Compose stack configured for CWA v3.1.0+ on Raspberry Pi 4 2GB
-2. CWA web UI accessible on local network (e.g., http://raspberrypi.local:8083)
-3. Basic Calibre library initialized and accessible through web interface
-4. Memory usage validated under idle conditions (<600MB for CWA container)
-5. Test library scan with 20+ books completes without crashes or OOM errors
-6. CWA container automatically restarts on reboot (Docker restart policy configured)
+2. CWA web UI accessible on local network (http://raspberrypi.local:8083/)
+3. Basic Calibre library initialized with 20+ books test
+4. Idle memory usage <600MB for CWA container
+5. CWA container auto-restarts on reboot (Docker restart policy configured)
+6. Neon.tech free-tier PostgreSQL created and accessible
+7. Books dimension table created with: book_id, title, author, isbn, source, media_type
+8. Reading_sessions fact table created with: session_id, book_id, start_time, end_time, pages_read, media_type, device
+9. Database connection tested from development environment
+10. Schema supports ebook + audiobook data (media_type differentiates)
+11. Koofr WebDAV storage configured as backup destination
+12. rclone installed with encrypted remote (AES-256) pointing to Koofr
+13. Initial backup completed successfully; files verified encrypted in Koofr
+14. Nightly backup scheduled via cron/systemd timer
+15. Backup logs created showing success/failure status
+16. Schema documentation created (ERD + field definitions)
 
 **Prerequisites:** Raspberry Pi 4 2GB with Docker installed
 
 ---
 
-**Story 1.2: Configure hardware performance validation checkpoint**
-
-As a developer,
-I want to validate RPi 4 2GB can handle realistic library workloads,
-So that I discover hardware limitations early before building dependent features.
-
-**Acceptance Criteria:**
-1. Load test with 100+ ebook library scan completed successfully
-2. Memory usage during scan remains <1.5GB total system usage (leaving ~500MB buffer)
-3. Metadata fetch operations complete without timeouts or crashes
-4. Documentation created with observed resource usage patterns
-5. Decision documented: Continue with RPi 4 OR upgrade to RPi 5 (if validation fails)
-6. If upgrade needed, migration plan documented before proceeding to next stories
-
-**Prerequisites:** Story 1.1 complete (CWA deployed)
-
----
-
-**Story 1.3: Configure auto-ingestion workflow with Hardcover metadata**
+**Story 1.2: Auto-Ingestion + Metadata Enrichment**
 
 As a reader,
-I want to drop ebook files into a folder and have them automatically added to my library with complete metadata,
-So that I spend zero time on manual metadata lookups.
+I want to drop ebook files into a folder and have them automatically added with complete metadata, with validated performance under realistic usage,
+So that library ingestion is zero-touch and hardware performance is confirmed for production.
 
 **Acceptance Criteria:**
 1. CWA auto-ingest configured to monitor designated ingest folder
-2. Hardcover.app metadata provider configured as primary source in CWA
+2. Hardcover.app metadata provider configured as primary source
 3. Google Books configured as fallback metadata provider
 4. Test ebook dropped into folder is automatically imported within 30 seconds
 5. Imported book has enriched metadata: title, author, cover art, description, page count
 6. EPUB format optimization (epub-fixer) enabled in CWA settings
-7. Hardcover API authentication configured and validated (if required)
+7. Hardcover API authentication configured and validated
+8. Realistic workload validation: Monitor CWA during 1-week incremental ingestion (1-2 books/drop, typical usage)
+9. Memory remains <600MB idle, <1GB during metadata fetch
+10. Metadata enrichment maintains <30 seconds per book average
+11. Library scan (~20-50 books) completes in <2 minutes
+12. No crashes, database corruption, or OOM errors observed
+13. Documentation created with observed resource usage patterns
+14. Go/no-go decision documented: Continue RPi 4 OR note constraints for future planning
 
-**Prerequisites:** Story 1.1 complete (CWA deployed)
+**Prerequisites:** Story 1.1 complete (CWA deployed, schema initialized)
 
 ---
 
-**Story 1.4: Design and implement unified database schema**
+**Story 1.3: Fallback Procedures & Operational Resilience**
 
 As a developer,
-I want a unified PostgreSQL database schema that can store ebook and audiobook reading statistics,
-So that Epic 3 and Epic 5 can aggregate data from multiple sources into queryable analytics.
+I want documented Calibre CLI fallback procedures and monitoring/alerting for backup health,
+So that I have runbooks and observability if CWA auto-ingest fails or backups become stale.
 
 **Acceptance Criteria:**
-1. Neon.tech free-tier PostgreSQL database created and accessible
-2. Schema designed for books dimension table (book_id, title, author, isbn, source, etc.)
-3. Schema designed for reading_sessions fact table (session_id, book_id, start_time, end_time, pages_read, media_type, device)
-4. Schema supports both ebook and audiobook data (media_type field differentiates)
-5. Database connection tested from development environment (psycopg2 or sqlalchemy)
-6. Initial tables created with proper indexes on common query fields
-7. Schema documentation created showing table relationships and field definitions
-
-**Prerequisites:** None (can run in parallel with Stories 1.1-1.3)
-
----
-
-**Story 1.5: Implement library backup to separate storage**
-
-As a reader,
-I want my ebook library backed up to storage separate from my primary PC,
-So that I don't lose my entire library if my PC fails.
-
-**Acceptance Criteria:**
-1. Koofr WebDAV storage configured as backup destination (10GB free tier)
-2. rclone installed and configured with encrypted remote pointing to Koofr
-3. Backup script created to sync library files from CWA to Koofr (one-way: CWA → cloud)
-4. Backup script excludes temp files and includes only library ebooks + metadata.db
-5. Initial backup completed successfully (verify files accessible in Koofr)
-6. Cron job or systemd timer configured for nightly backups (e.g., 3 AM)
-7. Backup logs created showing success/failure status
-
-**Prerequisites:** Story 1.3 complete (library has content to backup)
-
----
-
-**Story 1.6: Document Calibre CLI fallback procedures**
-
-As a developer,
-I want documented procedures for using Calibre CLI if CWA auto-ingest fails,
-So that I have a fallback plan if CWA stability risks are realized.
-
-**Acceptance Criteria:**
-1. Documentation created showing how to add books via calibredb command
+1. Documentation created showing how to add books via calibredb CLI
 2. Metadata fetch command documented (calibredb fetch-ebook-metadata)
-3. Batch import script provided for processing multiple files
+3. Batch import script provided for processing multiple files via CLI
 4. Instructions for triggering CWA rescan after manual Calibre CLI additions
 5. Troubleshooting guide for common CWA ingest failure modes
-6. Backup/restore procedure for metadata.db documented
+6. metadata.db backup/restore procedure documented
+7. Monitoring script created to check: backup age, library backup age, Syncthing sync status
+8. Alert mechanism configured (email, log file, or terminal notification)
+9. Monitoring script runs on schedule (e.g., hourly via cron)
+10. Alert logs maintained with timestamps and failure descriptions
+11. Documentation created for troubleshooting common failure modes
 
-**Prerequisites:** Story 1.3 complete (understand auto-ingest to document fallback)
+**Prerequisites:** Story 1.2 complete (auto-ingest operational)
 
 ---
 
 **Epic 1 Summary:**
-- **Total Stories:** 6
-- **Story Dependencies:** 1.1 → 1.2 sequential; 1.3 depends on 1.1; 1.4 parallel; 1.5 depends on 1.3; 1.6 depends on 1.3
-- **Completion Criteria:** CWA operational and performance-validated on RPi 4, auto-ingestion working with Hardcover metadata, unified database schema ready for analytics, library backup operational, fallback procedures documented
+- **Total Stories:** 3 (consolidated from 6)
+- **Story Dependencies:** 1.1 → 1.2 sequential; 1.3 depends on 1.2
+- **Completion Criteria:** CWA operational with realistic performance validation, auto-ingestion working with metadata enrichment and fallback, unified database schema ready for analytics, backup operational and monitored
 
 ---
 
@@ -562,14 +528,14 @@ So that I have a validated, complete reading timeline across all sources.
 
 **Total Project Scope:**
 - **5 Epics**
-- **21 Stories** (Epic 1: 6, Epic 2: 4, Epic 3: 4, Epic 4: 3, Epic 5: 5)
+- **12-14 Stories** (Epic 1: 3, Epic 2: 3, Epic 3: 2, Epic 4: 2, Epic 5: 3-4) [Revised from 21 stories]
 - **Estimated Timeline:** Medium project (Level 2)
 - **Epic Sequencing:** 1 → 2 → 3 → 4 → 5 (with Epic 4 optionally deferrable)
 
 **Story Count Alignment with PRD:**
 - PRD estimated: 16-21 stories
-- Actual detailed breakdown: 21 stories
-- Variance: 0% (at upper end of estimate range)
+- Actual detailed breakdown: 12-14 stories (revised to align with execution reality)
+- Variance: -33% (consolidated for pragmatic delivery without scope reduction)
 
 **Next Steps:**
 Proceed to Phase 3 (Solutioning) with architecture design workflow, or begin Phase 4 (Implementation) with sprint planning and Story 1.1 execution.

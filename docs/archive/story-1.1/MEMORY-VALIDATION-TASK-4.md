@@ -22,8 +22,8 @@ This task validates that the CWA container uses less than 600 MB of memory in id
 First, ensure containers are running cleanly:
 ```bash
 # Stop and restart containers to get a clean baseline
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 
 # Wait 30 seconds for CWA to initialize
 sleep 30
@@ -34,10 +34,10 @@ sleep 30
 Start Docker stats monitoring in a separate terminal:
 ```bash
 # Monitor continuously (press Ctrl+C to stop)
-docker stats bookhelper_cwa_1 --no-stream
+docker stats calibre-web-automated --no-stream
 
 # For continuous monitoring with timestamp
-watch -n 5 'docker stats bookhelper_cwa_1 --no-stream'
+watch -n 5 'docker stats calibre-web-automated --no-stream'
 ```
 
 ### Step 3: Capture Baseline Measurements
@@ -46,7 +46,7 @@ Measure idle memory at multiple intervals (container fully initialized, no libra
 
 ```bash
 # Terminal 1: Continuous monitoring
-docker stats bookhelper_cwa_1 --format "table {{.Container}}\t{{.MemUsage}}"
+docker stats calibre-web-automated --format "table {{.Container}}\t{{.MemUsage}}"
 
 # Allow CWA to settle for 2 minutes
 # Record readings at: 1 min, 2 min, 5 min
@@ -74,8 +74,8 @@ capture_memory() {
   sleep ${delay}
 
   # Extract memory usage from docker stats
-  memory=$(docker stats bookhelper_cwa_1 --no-stream --format "{{.MemUsage}}" | cut -d'/' -f1 | tr -d ' ')
-  cpu=$(docker stats bookhelper_cwa_1 --no-stream --format "{{.CPUPerc}}" | tr -d ' ')
+  memory=$(docker stats calibre-web-automated --no-stream --format "{{.MemUsage}}" | cut -d'/' -f1 | tr -d ' ')
+  cpu=$(docker stats calibre-web-automated --no-stream --format "{{.CPUPerc}}" | tr -d ' ')
 
   echo "${label}: Memory=${memory}, CPU=${cpu}"
 }
@@ -91,7 +91,7 @@ capture_memory 180 "5-min idle"
 
 # Final summary
 echo ""
-echo "Final status: $(docker-compose ps cwa)"
+echo "Final status: $(docker compose ps calibre-web-automated)"
 echo "End time: $(date)"
 ```
 
@@ -135,18 +135,18 @@ chmod +x check_memory.sh
 
 ### Format 1: Raw Docker Stats
 ```bash
-docker stats bookhelper_cwa_1 --no-stream --format "table {{.Container}}\t{{.MemUsage}}\t{{.CPUPerc}}\t{{.NetIO}}"
+docker stats calibre-web-automated --no-stream --format "table {{.Container}}\t{{.MemUsage}}\t{{.CPUPerc}}\t{{.NetIO}}"
 ```
 
 **Output:**
 ```
-CONTAINER            MEM USAGE     CPU %      NET I/O
-bookhelper_cwa_1     520M / 1.5G   1.2%       1.2MB / 890kB
+CONTAINER               MEM USAGE     CPU %      NET I/O
+calibre-web-automated  520M / 1.5G   1.2%       1.2MB / 890kB
 ```
 
 ### Format 2: Memory Only (Simple)
 ```bash
-docker stats bookhelper_cwa_1 --no-stream --format "{{.MemUsage}}"
+docker stats calibre-web-automated --no-stream --format "{{.MemUsage}}"
 # Output: 520MiB / 1.457GiB
 ```
 
@@ -154,7 +154,7 @@ docker stats bookhelper_cwa_1 --no-stream --format "{{.MemUsage}}"
 
 ## Validation Checklist
 
-- [ ] Container is running (`docker-compose ps` shows "Up")
+- [ ] Container is running (`docker compose ps` shows "Up")
 - [ ] CWA fully initialized (logs show "Server listening on port 8083")
 - [ ] No active library operations (library is empty/idle)
 - [ ] Measurement taken at 2-minute mark
@@ -170,22 +170,22 @@ docker stats bookhelper_cwa_1 --no-stream --format "{{.MemUsage}}"
 
 1. **Check CWA logs for errors:**
 ```bash
-docker-compose logs cwa | grep -i "error\|warning\|memory"
+docker compose logs calibre-web-automated | grep -i "error\|warning\|memory"
 ```
 
 2. **Review container configuration:**
 ```bash
-docker-compose config | grep -A 10 "cwa:"
+docker compose config | grep -A 10 "calibre-web-automated:"
 ```
 
 3. **Check for running processes inside container:**
 ```bash
-docker-compose exec cwa ps aux
+docker compose exec calibre-web-automated ps aux
 ```
 
 4. **Analyze memory allocation in container:**
 ```bash
-docker inspect bookhelper_cwa_1 --format='{{.HostConfig.Memory}}'
+docker inspect calibre-web-automated --format='{{.HostConfig.Memory}}'
 # Should show: 1572864000 (1.5GB in bytes)
 ```
 
@@ -197,13 +197,13 @@ docker inspect bookhelper_cwa_1 --format='{{.HostConfig.Memory}}'
   echo "Timestamp: $(date)"
   echo ""
   echo "=== Container Logs ==="
-  docker-compose logs --tail=50 cwa
+  docker compose logs --tail=50 calibre-web-automated
   echo ""
   echo "=== Memory Status ==="
-  docker stats bookhelper_cwa_1 --no-stream
+  docker stats calibre-web-automated --no-stream
   echo ""
   echo "=== Processes ==="
-  docker-compose exec cwa ps aux
+  docker compose exec calibre-web-automated ps aux
 } > memory_investigation.log
 ```
 

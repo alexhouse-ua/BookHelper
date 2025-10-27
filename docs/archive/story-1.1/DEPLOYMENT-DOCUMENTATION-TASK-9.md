@@ -199,22 +199,22 @@ Response time: <200ms per request
 **Real-time resource monitoring:**
 ```bash
 # Option 1: Docker stats (simplest)
-docker stats bookhelper_cwa_1
+docker stats calibre-web-automated
 
 # Option 2: Continuous monitoring with timestamp
-watch -n 5 'docker stats bookhelper_cwa_1 --no-stream'
+watch -n 5 'docker stats calibre-web-automated --no-stream'
 
 # Option 3: Log to file for analysis
-docker stats bookhelper_cwa_1 --no-stream > stats.log &
+docker stats calibre-web-automated --no-stream > stats.log &
 ```
 
 **Container health check:**
 ```bash
 # Check health status
-docker inspect bookhelper_cwa_1 --format='{{.State.Health}}'
+docker inspect calibre-web-automated --format='{{.State.Health}}'
 
 # View health check logs
-docker inspect bookhelper_cwa_1 --format='{{json .State.Health}}' | jq .
+docker inspect calibre-web-automated --format='{{json .State.Health}}' | jq .
 ```
 
 **System-level monitoring (on RPi):**
@@ -233,12 +233,12 @@ top      # CPU usage (press 'q' to exit)
 
 #### Issue 1: Containers Won't Start
 **Symptoms:**
-- `docker-compose ps` shows "Exited" or "Error"
+- `docker compose ps` shows "Exited" or "Error"
 
 **Diagnosis:**
 ```bash
 # Check startup logs
-docker-compose logs cwa | tail -50
+docker compose logs cwa | tail -50
 
 # Common causes:
 # - Port already in use: sudo lsof -i :8083
@@ -265,7 +265,7 @@ docker-compose logs cwa | tail -50
 **Diagnosis:**
 ```bash
 # Step 1: Verify containers running
-docker-compose ps
+docker compose ps
 # Expected: All "Up"
 
 # Step 2: Check network connectivity
@@ -277,13 +277,13 @@ sudo netstat -tuln | grep 8083
 # Expected: Shows 0.0.0.0:8083
 
 # Step 4: Check container logs
-docker-compose logs cwa | grep -i "listening\|port"
+docker compose logs cwa | grep -i "listening\|port"
 ```
 
 **Solutions:**
 1. **Containers not running:** Start them
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 2. **mDNS unavailable:** Use direct IP
    ```bash
@@ -304,11 +304,11 @@ docker-compose logs cwa | grep -i "listening\|port"
 **Diagnosis:**
 ```bash
 # Check memory trend
-docker stats bookhelper_cwa_1 --no-stream
+docker stats calibre-web-automated --no-stream
 
 # Check for memory leaks (observe over 5 minutes)
 for i in {1..5}; do
-  docker stats bookhelper_cwa_1 --no-stream
+  docker stats calibre-web-automated --no-stream
   sleep 60
 done
 ```
@@ -316,9 +316,9 @@ done
 **Solutions:**
 1. **Restart container** (may help if memory leak)
    ```bash
-   docker-compose restart cwa
+   docker compose restart cwa
    sleep 30
-   docker stats bookhelper_cwa_1
+   docker stats calibre-web-automated
    ```
 2. **Reduce cache size** (if supported by CWA)
    - Adjust environment variables in docker-compose.yml
@@ -335,19 +335,19 @@ done
 **Diagnosis:**
 ```bash
 # Check scan logs
-docker-compose logs cwa | grep -i "scan"
+docker compose logs cwa | grep -i "scan"
 
 # Monitor memory during scan
-docker stats bookhelper_cwa_1
+docker stats calibre-web-automated
 
 # Check for errors
-docker-compose logs cwa | grep -i "error"
+docker compose logs cwa | grep -i "error"
 ```
 
 **Solutions:**
 1. **Stop and restart container**
    ```bash
-   docker-compose restart cwa
+   docker compose restart cwa
    # Wait 30 seconds for recovery
    sleep 30
    ```
@@ -364,17 +364,17 @@ docker-compose logs cwa | grep -i "error"
 
 #### Issue 5: Container Keeps Restarting (Crashloop)
 **Symptoms:**
-- `docker-compose ps` shows rapid status changes
+- `docker compose ps` shows rapid status changes
 - "Exited (1)" in status, then "Up" again
 - Logs show same error repeatedly
 
 **Diagnosis:**
 ```bash
 # Check restart count
-docker inspect bookhelper_cwa_1 --format='{{.RestartCount}}'
+docker inspect calibre-web-automated --format='{{.RestartCount}}'
 
 # View recent logs for error
-docker-compose logs cwa | tail -30
+docker compose logs cwa | tail -30
 ```
 
 **Solutions:**
@@ -382,7 +382,7 @@ docker-compose logs cwa | tail -30
 2. **Temporarily disable auto-restart for debugging**
    ```bash
    # Edit docker-compose.yml: restart: "no"
-   # Then: docker-compose up cwa (run in foreground)
+   # Then: docker compose up cwa (run in foreground)
    ```
 3. **Check system logs for kernel errors**
    ```bash
@@ -444,13 +444,13 @@ if [ -z "$BACKUP_FILE" ]; then
 fi
 
 # Stop containers
-docker-compose stop
+docker compose stop
 
 # Extract backup
 tar -xzf "$BACKUP_FILE" -C /
 
 # Restart containers
-docker-compose up -d
+docker compose up -d
 
 echo "✓ Library restored from backup"
 ```

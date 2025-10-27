@@ -152,15 +152,17 @@ docker compose ps
 Expected output:
 ```
 NAME                    STATUS
-bookhelper_cwa_1        Up X seconds (health: starting)
-bookhelper_syncthing_1  Up X seconds (health: starting)
+calibre-web-automated        Up X seconds (health: starting)
+syncthing  Up X seconds (health: starting)
 ```
+
+>actual names: calibre-web-automated and syncthing
 
 ### Step 2.4: Wait for Initialization
 
 CWA takes ~30 seconds to fully initialize. Monitor progress:
 ```bash
-docker-compose logs -f cwa
+docker compose logs -f cwa
 ```
 
 Wait until you see messages like:
@@ -179,6 +181,8 @@ Verify your RPi is accessible via `raspberrypi.local`:
 # On RPi:
 hostname -I
 # Note your RPi IP address
+
+> 192.168.1.222 172.17.0.1 172.18.0.1 2600:1702:6c80:6400::1c 2600:1702:6c80:6400:b2ec:77eb:726f:6455
 
 # On another device on the network:
 ping raspberrypi.local
@@ -206,7 +210,7 @@ http://<your_rpi_ip>:8083
 **Expected Screen:** CWA login page with version number (v3.1.0+)
 
 **Login with:**
-- Username: `alex`
+- Username: `alexhouse`
 - Password: The password you set in Step 2.2
 
 ### Step 2.7: Verify Basic Library Interface
@@ -225,31 +229,31 @@ If all pages load without errors, **Task 3 is complete!**
 ### Check Current Status
 ```bash
 # Full status of all services
-docker-compose ps
+docker compose ps
 
 # Check service health
-docker-compose ps --services
+docker compose ps --services
 ```
 
 ### View Logs
 ```bash
 # View CWA logs (last 50 lines)
-docker-compose logs --tail=50 cwa
+docker compose logs --tail=50 cwa
 
 # View Syncthing logs
-docker-compose logs --tail=50 syncthing
+docker compose logs --tail=50 syncthing
 
 # Follow logs in real-time
-docker-compose logs -f cwa
+docker compose logs -f cwa
 ```
 
 ### Monitor Resource Usage
 ```bash
 # View real-time memory/CPU usage
-docker stats bookhelper_cwa_1
+docker stats calibre-web-automated
 
 # Record to file for later analysis
-docker stats bookhelper_cwa_1 > cwa_stats.log &
+docker stats calibre-web-automated > cwa_stats.log &
 ```
 
 ---
@@ -271,7 +275,7 @@ docker stats bookhelper_cwa_1 > cwa_stats.log &
 
 **Check 1:** Verify containers are running
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 **Check 2:** Verify port mappings
@@ -282,7 +286,7 @@ sudo netstat -tuln | grep 8083
 
 **Check 3:** Check CWA logs for errors
 ```bash
-docker-compose logs cwa | tail -20
+docker compose logs cwa | tail -20
 ```
 
 **Check 4:** Verify firewall rules
@@ -309,17 +313,17 @@ http://<your_rpi_ip>:8083
 
 To temporarily stop services:
 ```bash
-docker-compose stop
+docker compose stop
 ```
 
 To stop and remove containers (data persists in volumes):
 ```bash
-docker-compose down
+docker compose down
 ```
 
 To remove everything including volumes (⚠️ deletes library data):
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ---
@@ -341,28 +345,28 @@ Once **Part 2.7** is complete (Web UI loads successfully):
 
 ```bash
 # Start services
-docker-compose up -d
+docker compose up -d
 
 # Check status
-docker-compose ps
+docker compose ps
 
 # View logs
-docker-compose logs -f <service_name>
+docker compose logs -f <service_name>
 
 # Stop services
-docker-compose stop
+docker compose stop
 
 # Stop and remove containers
-docker-compose down
+docker compose down
 
 # View resource usage
 docker stats
 
 # Access CWA container shell
-docker-compose exec cwa bash
+docker compose exec cwa bash
 
 # Validate docker-compose.yml syntax
-docker-compose config
+docker compose config
 ```
 
 ---
@@ -371,7 +375,7 @@ docker-compose config
 
 If you encounter issues:
 
-1. Check container logs: `docker-compose logs`
+1. Check container logs: `docker compose logs`
 2. Verify prerequisites are met
 3. Review troubleshooting section above
 4. Document error messages and attach to story notes

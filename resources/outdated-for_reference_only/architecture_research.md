@@ -258,7 +258,7 @@ Standard Docker exec commands provide full shell access to the running container
 docker exec -it calibre-web-automated /bin/bash
 
 # Or with docker-compose
-docker-compose exec calibre-web-automated /bin/bash
+docker compose exec calibre-web-automated /bin/bash
 
 # Alpine-based images may use
 docker exec -it calibre-web-automated /bin/sh

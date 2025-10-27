@@ -150,7 +150,7 @@ Encrypted backup structure:
 **Sequence:**
 1. User prepares RPi: Install OS (Raspberry Pi OS Lite), configure SSH, install Docker
 2. User creates Docker Compose stack with CWA v3.1.0, Syncthing, rclone service configs
-3. User starts services: `docker-compose up -d`
+3. User starts services: `docker compose up -d`
 4. Services initialize: CWA creates metadata.db, Syncthing generates device ID
 5. User accesses CWA web UI: `http://raspberrypi.local:8083/` (mDNS auto-discovery)
 6. User tests with 20+ books: Import sample library, verify web UI responsiveness

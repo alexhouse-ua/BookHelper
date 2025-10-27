@@ -1,8 +1,25 @@
 #!/usr/bin/env python3
 """
 Resource monitoring script for Story 1.2 validation
-Monitors CWA container CPU/memory usage during 1-week ingestion validation
-Outputs CSV with timestamps, operation, memory, CPU, duration
+
+Monitors Calibre-Web-Automated (CWA) container resource usage during 1-week
+incremental ingestion validation using docker stats API (per Docker v1.24+ docs).
+
+Collects every 5 minutes:
+- Timestamp (ISO 8601)
+- Operation type (idle, import, metadata_fetch, library_scan) from CWA logs
+- Memory usage (MB) from docker stats
+- CPU usage (%) from docker stats
+- Notes field for manual observations
+
+Output: CSV file at /tmp/cwa-metrics-1.2.csv
+
+Performance Targets (per Story 1.2 ACs):
+- Idle memory: <600 MB
+- Peak memory during metadata fetch: <1 GB
+- Metadata enrichment: <30 seconds per book
+- Library scan (~20-50 books): <2 minutes
+- No crashes or OOM errors
 """
 
 import subprocess
@@ -18,7 +35,16 @@ INTERVAL_SECONDS = 300  # 5 minutes
 OUTPUT_FILE = "/tmp/cwa-metrics-1.2.csv"
 
 def get_container_stats():
-    """Get container CPU and memory stats using docker stats"""
+    """Get container CPU and memory stats using docker stats
+
+    Uses docker stats API per Docker documentation:
+    - memory_stats: current memory usage in bytes (converted to MB)
+    - cpu_stats: percentage of CPU used relative to system limits
+
+    Output format from 'docker stats --no-stream':
+    MEMORY        CPU%
+    512MiB / 1.465GiB    25.5%
+    """
     try:
         result = subprocess.run(
             ["docker", "stats", CONTAINER_NAME, "--no-stream", "--format",
@@ -31,11 +57,11 @@ def get_container_stats():
         # Parse output: "512MiB / 1.465GiB    25.5%"
         parts = result.stdout.strip().split('\t')
 
-        # Memory: "512MiB / 1.465GiB"
+        # Memory: "512MiB / 1.465GiB" (current usage / limit)
         mem_usage = parts[0].split('/')[0].strip()
         mem_mb = parse_memory_to_mb(mem_usage)
 
-        # CPU: "25.5%"
+        # CPU: "25.5%" (percentage of available CPU)
         cpu_pct = float(parts[1].strip().rstrip('%'))
 
         return mem_mb, cpu_pct
@@ -45,21 +71,31 @@ def get_container_stats():
         return None, None
 
 def parse_memory_to_mb(mem_str):
-    """Convert memory string like '512MiB' or '1.5GiB' to MB"""
+    """Convert memory string from docker stats to MB
+
+    Handles formats: GiB (binary), MiB (binary), GB (decimal), MB (decimal)
+    Per Docker documentation, uses binary units (GiB, MiB) by default.
+
+    Args:
+        mem_str: Memory string like '512MiB', '1.5GiB', '1GB', '512MB'
+
+    Returns:
+        Memory in MB as float
+    """
     mem_str = mem_str.strip()
 
     if 'GiB' in mem_str:
         value = float(mem_str.rstrip('GiB'))
-        return value * 1024
+        return value * 1024  # Binary gigabyte to MB
     elif 'MiB' in mem_str:
         value = float(mem_str.rstrip('MiB'))
-        return value
+        return value  # Already in MB equivalent
     elif 'GB' in mem_str:
         value = float(mem_str.rstrip('GB'))
-        return value * 1000
+        return value * 1000  # Decimal gigabyte to MB
     elif 'MB' in mem_str:
         value = float(mem_str.rstrip('MB'))
-        return value
+        return value  # Already in MB
     else:
         return 0
 

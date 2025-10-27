@@ -178,11 +178,24 @@ This story requires **1-week observation period** with real hardware and real-ti
 - Analyze data and complete AC validation
 - Make go/no-go decision based on observed performance
 
-**Current State:** All tooling prepared. Ready for manual execution by user on RPi hardware.
+**Current State:** All tooling prepared and validated against official documentation. Ready for manual execution by user on RPi hardware.
+
+**Documentation Validation (2025-10-27):**
+- Validated monitoring script against Docker API docs (v1.24+) - ✅ Correct
+- Validated CWA configuration steps against official CWA v3 docs - ✅ Correct
+- Noted: Hardcover.app integration marked "in progress" in CWA v3 docs - ⚠️ Added caveat to report
+- Validated Google Books API as fallback - ✅ Available, 1000 req/day free tier
+- Confirmed EPUB fixer feature and configuration - ✅ Available
+- Confirmed auto-ingest behavior (files removed after processing) - ✅ Correct
 
 ### Completion Notes List
 
 *Story not yet complete - awaiting 1-week validation execution and data collection*
+
+**Known Risks Documented:**
+- Hardcover.app integration status: In-progress per CWA v3 documentation
+- Mitigation: Performance report includes Google Books fallback validation
+- CWA auto-ingest noted as "implementation hack" in architecture.md - monitoring will catch failures
 
 ### File List
 

@@ -73,6 +73,7 @@ The Calibre database is stored at `/calibre-library/metadata.db` and persists ac
   - [ ] Run: `docker stats calibre-web-automated` (check MEMORY USAGE column)
   - [ ] Record idle memory in test log (target: <600 MB)
   - [ ] If idle > 600 MB: Investigate and document findings (may indicate config issue or image bloat)
+  - *Validation record: `docs/archive/story-1.1/MEMORY-VALIDATION-TASK-4.md`*
 
 ### Library Initialization and Test
 
@@ -85,6 +86,7 @@ The Calibre database is stored at `/calibre-library/metadata.db` and persists ac
   - [ ] Verify all 20+ test books imported successfully (may take 2-5 minutes)
   - [ ] Confirm ingestion completes without crashes or OOM errors
   - [ ] Ingest folder will be cleaned after books are imported
+  - *Setup record: `docs/archive/story-1.1/TEST-LIBRARY-SETUP-TASK-5.md`*
 
 - [x] **Task 6: Test basic library browsing** (AC: 3)
   - [ ] Navigate to library in web UI: Books → All Books
@@ -94,6 +96,7 @@ The Calibre database is stored at `/calibre-library/metadata.db` and persists ac
   - [ ] Search for a book by title—verify search returns correct result
   - [ ] Test pagination/sorting if available
   - [ ] Verify no permission errors in library interface
+  - *QA record: `docs/archive/story-1.1/LIBRARY-BROWSING-TASK-6.md`*
 
 ### Docker Auto-Restart Validation
 
@@ -104,6 +107,7 @@ The Calibre database is stored at `/calibre-library/metadata.db` and persists ac
   - [ ] Simulate full system reboot (if feasible in test environment): `sudo reboot`
   - [ ] After reboot, verify containers auto-started: `docker compose ps`
   - [ ] Confirm CWA web UI and library accessible post-reboot
+  - *DevOps record: `docs/archive/story-1.1/AUTO-RESTART-TASK-7.md`*
 
 ### Testing
 
@@ -114,6 +118,7 @@ The Calibre database is stored at `/calibre-library/metadata.db` and persists ac
   - [ ] Load test: Monitor memory during 2-minute operation; verify <1 GB peak
   - [ ] Smoke test: All AC criteria verified and documented in test report
   - [ ] Manual verification: User (Alex) confirms all AC met
+  - *Test record: `docs/archive/story-1.1/ACCEPTANCE-TEST-SUITE-TASK-8.md`*
 
 ### Documentation
 
@@ -124,6 +129,7 @@ The Calibre database is stored at `/calibre-library/metadata.db` and persists ac
   - [x] Record hardware specs: RPi 4 model, RAM, OS version, Docker versions used
   - [x] Create backup of docker-compose.yml to version control
   - [x] Add comments to Compose file explaining each service and configuration choice
+  - *Implementation record: `docs/archive/story-1.1/DEPLOYMENT-DOCUMENTATION-TASK-9.md`*
 
 ## Dev Notes
 
