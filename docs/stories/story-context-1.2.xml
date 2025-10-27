@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>1.2</story-id>
+    <epic-id>1</epic-id>
+    <story-title>Auto-Ingestion + Metadata Enrichment</story-title>
+    <story-status>ContextReadyDraft</story-status>
+    <generated-date>2025-10-27</generated-date>
+    <project>BookHelper</project>
+  </metadata>
+
+  <story-statement>
+    <as-a>reader</as-a>
+    <i-want>drop ebook files into a folder and have them automatically added with complete metadata, with validated performance under realistic usage</i-want>
+    <so-that>library ingestion is zero-touch and hardware performance is confirmed for production</so-that>
+  </story-statement>
+
+  <acceptance-criteria count="14">
+    <ac id="1">CWA auto-ingest configured to monitor designated ingest folder</ac>
+    <ac id="2">Hardcover.app metadata provider configured as primary source</ac>
+    <ac id="3">Google Books configured as fallback metadata provider</ac>
+    <ac id="4">Test ebook dropped into folder is automatically imported within 30 seconds</ac>
+    <ac id="5">Imported book has enriched metadata: title, author, cover art, description, page count</ac>
+    <ac id="6">EPUB format optimization (epub-fixer) enabled in CWA settings</ac>
+    <ac id="7">Hardcover API authentication configured and validated</ac>
+    <ac id="8">Realistic workload validation: Monitor CWA during 1-week incremental ingestion (1-2 books/drop, typical usage)</ac>
+    <ac id="9">Memory remains &lt;600MB idle, &lt;1GB during metadata fetch</ac>
+    <ac id="10">Metadata enrichment maintains &lt;30 seconds per book average</ac>
+    <ac id="11">Library scan (~20-50 books) completes in &lt;2 minutes</ac>
+    <ac id="12">No crashes, database corruption, or OOM errors observed</ac>
+    <ac id="13">Documentation created with observed resource usage patterns</ac>
+    <ac id="14">Go/no-go decision documented: Continue RPi 4 OR note constraints for future planning</ac>
+  </acceptance-criteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper Epic Breakdown</title>
+        <section>Epic 1 § Story 1.2: Auto-Ingestion + Metadata Enrichment</section>
+        <snippet>As a reader, I want to drop ebook files into a folder and have them automatically added with complete metadata, with validated performance under realistic usage, So that library ingestion is zero-touch and hardware performance is confirmed for production.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Core Library Server &amp; Database Foundation</title>
+        <section>§ Workflows and Sequencing § Story 1.2: Auto-Ingestion Workflow Configuration</section>
+        <snippet>Metadata enrichment workflow: Create monitored folder, configure CWA auto-ingest, set Hardcover as primary, Google Books as fallback, test ingestion completion &lt;30 seconds with enriched metadata.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Core Library Server &amp; Database Foundation</title>
+        <section>§ Services and Modules § Metadata Enrichment Pipeline</section>
+        <snippet>Hardcover API lookups during auto-ingest; Google Books fallback. ISBN/title/author from file metadata → Enriched book records: title, author, cover art, description, page count. CWA built-in + custom script hooks.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>§ 3.3. Library Management Layer</section>
+        <snippet>Ingestion: New ebooks automatically ingested. User drops file into monitored folder, triggering CWA auto-ingest. Metadata: Automatically enriched using Hardcover.app provider (primary) with fallbacks to Google Books and Open Library.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>§ 4. Critical Warnings &amp; Risk Mitigation § CWA Auto-Ingest Stability Risk</section>
+        <snippet>Former contributor noted auto-ingest is a "hack" and may be unstable. Mitigation: Monitor CWA logs for ingest errors; Calibre CLI fallback documented; metadata.db backed up before bulk imports.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>§ Requirements § Functional Requirements § FR005</section>
+        <snippet>System shall automatically ingest ebooks through monitored folder with Hardcover API metadata enrichment and format optimization.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>§ User Journeys § Journey 1: Adding a New Ebook</section>
+        <snippet>Ingestion: User drops file into monitored folder. System detects file, triggers CWA auto-ingest, enriches metadata via Hardcover API, optimizes format, adds to library. Completion: &lt;30 seconds from file drop to device availability.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>calibre-web-automated service</symbol>
+        <reason>Core service running auto-ingest; exposes web UI on port 8083; mounts library volume and ingest folder</reason>
+      </artifact>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>environment variables for CWA</symbol>
+        <reason>Admin credentials, library paths, auto-ingest folder configuration</reason>
+      </artifact>
+      <artifact>
+        <path>resources/scripts/monitor-resources-1.2.py</path>
+        <kind>monitoring script</kind>
+        <symbol>CPU/memory collection during 1-week validation</symbol>
+        <reason>Collects metrics: idle memory, peak memory during metadata enrichment, operation duration; outputs CSV for analysis</reason>
+      </artifact>
+    </code>
+
+    <interfaces>
+      <interface>
+        <name>Calibre-Web-Automated HTTP API</name>
+        <kind>REST API</kind>
+        <signature>GET /api/books - List all books; POST /api/metadata/enrich - Trigger metadata lookup</signature>
+        <path>Exposed on port 8083 (http://raspberrypi.local:8083/)</path>
+      </interface>
+      <interface>
+        <name>Hardcover.app API</name>
+        <kind>REST API (HTTPS)</kind>
+        <signature>POST /graphql - GraphQL endpoint for metadata queries; ISBN/title/author lookups</signature>
+        <path>External service; API key required (validate in AC 7)</path>
+      </interface>
+      <interface>
+        <name>Google Books API</name>
+        <kind>REST API (HTTPS)</kind>
+        <signature>GET /books/v1/volumes?q={query} - Metadata fallback search</signature>
+        <path>External service; fallback provider if Hardcover unavailable or rate-limited</path>
+      </interface>
+      <interface>
+        <name>Auto-Ingest File System Monitoring</name>
+        <kind>File System Event</kind>
+        <signature>CWA monitors /library/ingest/ folder; triggers import on new file detection</signature>
+        <path>Folder configured in CWA web UI settings; monitored continuously</path>
+      </interface>
+    </interfaces>
+
+    <constraints>
+      <constraint>
+        <name>Performance Target: Metadata Enrichment</name>
+        <source>tech-spec-epic-1.md § Non-Functional Requirements</source>
+        <detail>Metadata lookup must complete in &lt;30 seconds per book (Hardcover API + fallback to Google Books acceptable)</detail>
+      </constraint>
+      <constraint>
+        <name>Memory Usage Target</name>
+        <source>tech-spec-epic-1.md § Performance</source>
+        <detail>RPi 4 2GB resource constraint: idle &lt;600MB, peak during metadata fetch &lt;1GB (leaving 500MB safety buffer)</detail>
+      </constraint>
+      <constraint>
+        <name>Realistic Load Pattern</name>
+        <source>Course Correction 2025-10-27</source>
+        <detail>Story 1.2 validates ACTUAL usage: 1-2 books/week incremental ingestion over 1-week cycle, NOT stress test with 100+ simultaneous books</detail>
+      </constraint>
+      <constraint>
+        <name>CWA Auto-Ingest Stability Risk</name>
+        <source>architecture.md § 4 Critical Warnings</source>
+        <detail>Known risk: auto-ingest is implementation "hack" per former contributor. Mitigation: monitor CWA logs; Calibre CLI fallback documented in Story 1.3</detail>
+      </constraint>
+      <constraint>
+        <name>EPUB Format Optimization</name>
+        <source>tech-spec-epic-1.md § Workflows</source>
+        <detail>CWA epub-fixer must be enabled for format compatibility; validates imported EPUBs before library addition</detail>
+      </constraint>
+      <constraint>
+        <name>SQLite Corruption Prevention</name>
+        <source>architecture.md § 4 CRITICAL WARNING</source>
+        <detail>NEVER use file-level sync (Syncthing) for live metadata.db. Use KOSync only for progress sync. Statistics backup is one-way only (Story 3.1 enforces this).</detail>
+      </constraint>
+      <constraint>
+        <name>Hardcover API Rate Limiting</name>
+        <source>tech-spec-epic-1.md § Risks</source>
+        <detail>Bulk metadata lookups may hit Hardcover API rate limits. Fallback to Google Books acceptable. Cache metadata locally if needed.</detail>
+      </constraint>
+    </constraints>
+
+    <dependencies>
+      <docker>
+        <package name="calibre-web-automated" version="3.1.0+" purpose="Library server with KOSync and auto-ingest" />
+        <package name="docker" version="20.10+" purpose="Container runtime" />
+        <package name="docker-compose" version="1.29+" purpose="Multi-container orchestration" />
+      </docker>
+      <infrastructure>
+        <package name="rclone" version="1.60+" purpose="Encrypted backup (from Story 1.1 foundation)" />
+        <package name="syncthing" version="1.20+" purpose="File sync daemon (from Story 1.1 foundation)" />
+      </infrastructure>
+      <external-apis>
+        <api name="Hardcover.app" type="REST (GraphQL)" rate-limit="unspecified" required="primary" fallback="Google Books" />
+        <api name="Google Books API" type="REST" rate-limit="1000 req/day free tier" required="fallback" />
+      </external-apis>
+      <python>
+        <package name="custom monitoring script" version="custom" purpose="CPU/memory metrics collection during 1-week validation" />
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <testing>
+    <standards>
+      <paragraph>Integration testing under realistic incremental load (1-2 books/week over 1-week cycle). Test metrics: auto-ingest completion time (&lt;30s), metadata enrichment success rate, memory usage (idle &lt;600MB, peak &lt;1GB), API fallback behavior, stability/crash detection. All tests run against deployed CWA stack on Raspberry Pi 4 2GB.</paragraph>
+    </standards>
+
+    <locations>
+      <location type="docker-logs">docker logs calibre-web-automated - CWA errors and ingest events</location>
+      <location type="kernel-logs">dmesg | grep OOM - Out-of-memory killer detection</location>
+      <location type="custom-metrics">/resources/scripts/monitor-resources-1.2.py output - CSV file with timestamps, operation, memory, CPU, duration</location>
+      <location type="story-report">/docs/STORY-1.2-PERFORMANCE-REPORT.md - Findings, go/no-go decision, constraints documentation</location>
+    </locations>
+
+    <ideas>
+      <idea ac-id="1">Auto-ingest folder monitored: Create /library/ingest/, configure in CWA UI, verify folder monitored continuously</idea>
+      <idea ac-id="2-3">Metadata providers: Configure Hardcover as primary, Google Books as fallback in CWA; test ISBN hit (Hardcover) and no-ISBN fallback (Google)</idea>
+      <idea ac-id="4-5">Ingestion performance: Drop test EPUB with ISBN → verify import &lt;30s, metadata populated (title, author, cover art, description, page count)</idea>
+      <idea ac-id="6-7">Format optimization: Enable epub-fixer in CWA; test various EPUB formats; validate Hardcover API authentication</idea>
+      <idea ac-id="8-9-10">Realistic 1-week workload: Drop 1-2 test books per day; monitor CPU/memory continuously; verify idle &lt;600MB, metadata fetch &lt;1GB, enrichment &lt;30s/book</idea>
+      <idea ac-id="11">Library scan performance: Trigger CWA library scan (~20-50 book library); measure completion time; target &lt;2 minutes</idea>
+      <idea ac-id="12">Stability observation: Run 1-week cycle; check Docker logs for crashes; check dmesg for OOM; document any errors observed</idea>
+      <idea ac-id="13-14">Documentation and decision: Create /docs/STORY-1.2-PERFORMANCE-REPORT.md; document all observations; provide go/no-go decision (continue RPi 4 vs. note constraints)</idea>
+    </ideas>
+  </testing>
+
+  <implementation-notes>
+    <note type="prerequisite">Story 1.1 must be complete: CWA deployed, Neon.tech schema initialized, Koofr backup configured, Docker stack operational</note>
+    <note type="execution-pattern">1-week validation cycle: 1-2 book drops per cycle (typical Friday/weekend rhythm), continuous monitoring, weekly report checkpoint</note>
+    <note type="risk-mitigation">CWA auto-ingest stability risk: Monitor logs daily; if frequent failures, prepare fallback to Calibre CLI (Story 1.3)</note>
+    <note type="constraint-handling">If memory exceeds 1GB or performance targets missed: Document in report, plan mitigation (USB swap, reduced library, RPi 5 upgrade as future option); NOT a hard blocker</note>
+    <note type="api-handling">Hardcover API rate limiting: If hits occur, fallback to Google Books is acceptable; spread lookups across time if bulk ingestion attempted</note>
+  </implementation-notes>
+
+  <references>
+    <reference>docs/epics.md § Epic 1 § Story 1.2</reference>
+    <reference>docs/tech-spec-epic-1.md § Workflows &amp; Sequencing</reference>
+    <reference>docs/tech-spec-epic-1.md § Services and Modules</reference>
+    <reference>docs/architecture.md § 3.3. Library Management Layer</reference>
+    <reference>docs/architecture.md § 4. Critical Warnings</reference>
+    <reference>docs/PRD.md § Requirements § FR005</reference>
+    <reference>docs/PRD.md § User Journeys § Journey 1</reference>
+    <reference>Course Correction: Epic granularity reduction from 21 → 12-14 stories, 2025-10-27</reference>
+  </references>
+
+</story-context>
