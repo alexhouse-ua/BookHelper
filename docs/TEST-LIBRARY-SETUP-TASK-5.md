@@ -8,12 +8,13 @@
 
 ## Overview
 
-This task loads 20+ sample books into the CWA library and triggers a library scan. Success criteria:
-- All 20+ books imported successfully
-- Library scan completes without errors
+This task loads 20+ sample books into the CWA library via automatic ingestion. Success criteria:
+- All 20+ books copied to ingest folder
+- CWA automatically processes and imports books
+- All books appear in the library with no errors
 - No OOM (Out of Memory) errors or container restarts
 
-**Duration:** 15-20 minutes (including scan time)
+**Duration:** 15-20 minutes (including automatic ingestion time)
 
 ---
 
@@ -116,107 +117,166 @@ ls ~/test_books/ | wc -l
 
 ---
 
-## Part 2: Copy Books to CWA Library
+## Part 2: Copy Books to CWA Ingest Folder
 
-### Step 1: Copy Files to /library
+### Important: Volume Mount Note
+
+The `docker-compose.yml` mounts volumes as follows:
+```yaml
+volumes:
+  - /library/ingest:/cwa-book-ingest      # Ingest folder for new books
+  - /library:/calibre-library              # Final library after processing
+```
+
+- **Ingest folder** (`/library/ingest` on RPi → `/cwa-book-ingest` in container): Place books here for automatic processing
+- **Library folder** (`/library` on RPi → `/calibre-library` in container): Final destination after CWA processes books
+
+### Step 1: Copy Files to /library/ingest
 
 ```bash
-# Copy all books to CWA library
-cp ~/test_books/* /library/
+# Create ingest directory if it doesn't exist
+mkdir -p /library/ingest
+
+# Copy all books to CWA ingest folder
+cp ~/test_books/* /library/ingest/
 
 # Verify copy
-ls -lh /library/ | head -25
+ls -lh /library/ingest/ | head -25
 # Should show 20+ book files
 ```
 
 ### Step 2: Verify File Permissions
 
 ```bash
-# Check permissions (should be readable by CWA container)
-ls -l /library/ | head -10
-chmod 644 /library/*
+# Check permissions (on RPi host)
+ls -l /library/ingest/ | head -10
+chmod 644 /library/ingest/*
 
-# Verify no permission errors
-docker-compose exec cwa ls -la /library | head -10
+# Verify container can see ingest folder
+docker compose exec cwa ls -la /cwa-book-ingest | head -10
+# Should show your book files
+```
+
+### Step 3: Important Note on File Ownership
+
+⚠️ Ensure files are owned by the container user (UID 1000):
+```bash
+# Check current owner
+ls -l /library/ingest/
+
+# If owned by root, change ownership
+sudo chown 1000:1000 /library/ingest/*
+
+# Verify
+ls -l /library/ingest/ | head -5
 ```
 
 ---
 
-## Part 3: Trigger Library Scan
+## Part 3: Monitor Automatic Book Ingestion
 
-### Step 1: Monitor Resource Usage During Scan
+### How CWA Ingest Works
+
+Books placed in `/cwa-book-ingest` are **automatically processed** by CWA:
+1. Files are analyzed and converted if necessary
+2. Books are imported into the Calibre library
+3. Files are deleted from ingest folder after successful import
+
+This process happens automatically. No manual scan button needed.
+
+### Step 1: Monitor Resource Usage During Ingestion
 
 In a separate terminal, start monitoring:
 ```bash
 # Terminal 1: Monitor system resources
-watch -n 2 'docker stats bookhelper_cwa_1'
+watch -n 2 'docker stats calibre-web-automated'
 
-# Terminal 2: Monitor CWA logs
-docker-compose logs -f cwa
+# Terminal 2: Monitor CWA logs (watch for ingest progress)
+docker compose logs -f cwa
 ```
 
-### Step 2: Trigger Library Scan via Web UI
+CWA will begin processing books automatically. Watch for log messages indicating:
+- Books being analyzed
+- Conversion in progress (if needed)
+- Books being imported into library
+
+### Step 2: If Books Don't Auto-Ingest - Manual Trigger
+
+If after 2-3 minutes books haven't appeared in the library:
 
 1. Open CWA web UI: `http://raspberrypi.local:8083`
 2. Log in with admin credentials
-3. Navigate to: **Admin → Library Management**
-4. Click: **Scan for new books** (or similar option)
-5. Watch progress in UI and logs
+3. Look for **"Library Refresh"** button on the upper navbar
+4. Click it to manually trigger ingestion
+5. Monitor logs for progress
 
-### Step 3: Alternative: Trigger via API/CLI
+### Step 3: Common Issue - Permission Problems
 
-If web UI doesn't have scan button:
+If books aren't being ingested, it's likely a permission issue:
+
 ```bash
-# Access CWA container
-docker-compose exec cwa bash
+# Check file ownership in ingest folder
+ls -l /library/ingest/
 
-# Inside container, trigger scan (command varies by CWA version)
-# Check CWA documentation for exact command
-# Examples:
-#   calibredb add-books /library/*
-#   cwa-cli scan-library /library
+# Must be owned by user 1000 (alexhouse), not root
+# If owned by root, change it:
+sudo chown 1000:1000 /library/ingest/*
+
+# Then delete any partially processed books from ingest folder
+# (CWA leaves them there if they fail)
+ls /library/ingest/
+
+# Wait 30 seconds and check logs again
+docker compose logs -f cwa | grep -i "ingest\|error\|import"
 ```
 
 ---
 
-## Part 4: Monitor Scan Progress
+## Part 4: Expected Behavior During Ingestion
 
-### Expected Output
+### Expected CWA Logs Output
 
-**CWA Logs:**
+**Successful ingestion:**
 ```
-[INFO] Library scan initiated
-[INFO] Scanning directory: /library
-[INFO] Found 20 books
-[INFO] Processing: book_01.epub
-[INFO] Processing: book_02.epub
+[INFO] Ingest: Processing /cwa-book-ingest/book_01.epub
+[INFO] Ingest: Analyzing metadata for book_01.epub
+[INFO] Ingest: Importing book_01.epub to library
+[INFO] Ingest: Processing /cwa-book-ingest/book_02.epub
 ...
-[INFO] Indexing metadata...
-[INFO] Library scan complete: 20 books imported
+[INFO] Ingest: Successfully imported 20 books
+[INFO] Ingest: Cleaning up processed files
 ```
 
 **Docker Stats (should see activity):**
 ```
-CONTAINER            CPU %    MEM USAGE
-bookhelper_cwa_1     25%      650MiB / 1.5GiB
+CONTAINER                CPU %    MEM USAGE
+calibre-web-automated    15-30%   600-800 MiB / 1.5GiB
 ```
 
 ### Error Indicators (Watch For)
 
 ```
+❌ PERMISSION ERRORS:
+   "Permission denied"
+   "Cannot read file"
+   "Operation not permitted"
+   → Solution: Check file ownership with ls -l /library/ingest/
+
 ❌ MEMORY ERRORS:
    "Out of memory"
    "OOMKilled"
-   Container restart loops
-
-❌ SCAN ERRORS:
-   "Cannot read file"
-   "Corrupt book"
-   "Permission denied"
+   "Container restart"
+   → Solution: Reduce number of books or increase memory allocation
 
 ❌ DATABASE ERRORS:
    "SQLite locked"
    "Database corruption"
+   → Solution: Restart container and retry
+
+❌ CONVERSION ERRORS:
+   "Cannot convert format"
+   "Unsupported file type"
+   → Solution: Ensure files are valid EPUB/PDF; check CWA settings
 ```
 
 ---
@@ -234,8 +294,8 @@ bookhelper_cwa_1     25%      650MiB / 1.5GiB
 ### Step 2: Count Books in Database
 
 ```bash
-# Query library count (method varies by CWA)
-docker-compose exec cwa bash -c 'sqlite3 /metadata/metadata.db "SELECT COUNT(*) FROM books;"'
+# Query library count from Calibre database
+cwa bash -c 'sqlite3 /calibre-library/metadata.db "SELECT COUNT(*) FROM books;"'
 
 # Should output: 20 (or your book count)
 ```
@@ -262,13 +322,13 @@ In CWA UI:
 
 ### Memory Constraints (AC4, AC5)
 
-During scan:
+During ingestion:
 - [ ] Memory usage < 1.5GB (resource limit)
 - [ ] No OOM errors in logs
 - [ ] No container restarts
 - [ ] Peak memory < 1.0GB (safety margin)
 
-After scan:
+After ingestion:
 - [ ] Memory returns to baseline (<600 MB idle)
 - [ ] No memory leaks evident
 
@@ -282,75 +342,115 @@ After scan:
 
 ### Error Conditions (AC5)
 
-- [ ] No crashes during scan
+- [ ] No crashes during ingestion
 - [ ] No OOM killer invocations
-- [ ] No "database locked" errors
-- [ ] Scan completes to 100%
+- [ ] No "permission denied" errors
+- [ ] All books successfully moved to library
+- [ ] Ingest folder cleaned after processing
 
 ---
 
 ## Troubleshooting
 
-### Issue: Books Not Appearing in UI
+### Issue: Books Not Appearing in Library After Ingest
 
-**Check 1:** Verify files in container
+**Check 1:** Verify files are in ingest folder
 ```bash
-docker-compose exec cwa ls -la /library/
-# Should list your book files
+ls -la /library/ingest/
+# Files should be there (unless they've already been processed and deleted)
 ```
 
-**Check 2:** Check scan logs
+**Check 2:** Check container can see ingest folder
 ```bash
-docker-compose logs cwa | grep -i "scan\|error\|import"
+docker compose exec cwa ls -la /cwa-book-ingest/
+# Should match the files above
 ```
 
-**Check 3:** Restart CWA and retry scan
+**Check 3:** Check CWA logs for ingest errors
 ```bash
-docker-compose restart cwa
-# Wait 30 seconds, then trigger scan again
+docker compose logs cwa | grep -i "ingest\|error\|import\|permission"
 ```
 
-### Issue: Scan Timeout or Hangs
-
-**Check 1:** Monitor logs
+**Check 4:** Verify file ownership (most common issue)
 ```bash
-docker-compose logs -f cwa
+ls -l /library/ingest/
+# Files must be owned by user 1000, not root
+# If incorrect:
+sudo chown 1000:1000 /library/ingest/*
 ```
 
-**Check 2:** Check available memory
+**Check 5:** Manually trigger Library Refresh
+1. Open CWA UI: `http://raspberrypi.local:8083`
+2. Click "Library Refresh" button on navbar
+3. Check logs: `docker compose logs -f cwa`
+
+### Issue: Ingestion Hangs or Times Out
+
+**Check 1:** Monitor container memory
 ```bash
-docker stats bookhelper_cwa_1
+docker stats calibre-web-automated
+# Peak should be < 1.5 GB
 ```
 
-**Check 3:** If truly hung, force restart
+**Check 2:** Check for stuck processes
 ```bash
-docker-compose restart cwa
-# Wait for recovery, check if scan persisted
+docker compose logs -f cwa | tail -20
+# Look for last log entries to see where it got stuck
 ```
 
-### Issue: OOM Errors During Scan
+**Check 3:** Force restart CWA
+```bash
+docker compose restart cwa
+# Wait 2 minutes, then check logs again
+docker compose logs cwa | grep -i "ingest\|processing"
+```
+
+### Issue: OOM (Out of Memory) Errors During Ingestion
 
 **Symptom:**
 ```
 Killed process XXX (CWA) due to OOM
+Container restarted
+```
+
+**Checks:**
+```bash
+# Check memory limit in docker-compose.yml
+cat docker-compose.yml | grep -A 5 "deploy:"
+
+# Check peak memory usage
+docker stats calibre-web-automated --no-stream
+```
+
+**Actions:**
+- [ ] Document memory peak in logs
+- [ ] Check if books are unusually large (> 100 MB each)
+- [ ] Try ingesting fewer books at a time (e.g., 10 instead of 20)
+- [ ] If still failing, consider: "Memory constraint - RPi 4 2GB may not support 20+ large books"
+
+### Issue: File Format Not Supported
+
+**Symptom:**
+```
+[ERROR] Ingest: Unsupported file format: book_01.xyz
 ```
 
 **Action:**
-- [ ] Document memory peak in logs
-- [ ] Check if books are unusually large
-- [ ] Consider reducing library size for RPi 4 2GB
-- [ ] Note as "Memory constraint - may require RPi 5"
+- Ensure all files are EPUB, PDF, or other supported formats
+- Check CWA settings for ignored file types
+- Remove unsupported files from ingest folder
+- Retry: `docker compose restart cwa`
 
 ---
 
 ## Performance Log Template
 
-Save as: `docs/test-results/task-5-library-scan.txt`
+Save as: `docs/test-results/task-5-library-ingest.txt`
 
 ```
 Story: 1.1 - Deploy Calibre-Web-Automated on Raspberry Pi 4
 Task: 5 - Initialize Test Library
-Date: 2025-10-26
+Date: 2025-10-27
 Tester: Alex
 
 === Test Books ===
@@ -358,25 +458,31 @@ Source: Project Gutenberg
 Count: 22 books
 Total Size: 150 MB
 Format: EPUB + PDF mix
+Location: /library/ingest/
 
-=== Scan Results ===
-Start Time: 14:30:15
-End Time: 14:35:42
+=== Ingestion Results ===
+Books Copied to Ingest: 22 books
+Auto-Ingest Start Time: 14:30:15
+Ingest Complete Time: 14:35:42
 Duration: 5 min 27 sec
-Books Imported: 22/22 ✓
+Books in Library DB: 22/22 ✓
+Ingest Folder Cleaned: ✓
 
 === Memory Usage ===
 Idle Before: 520 MB
-Peak During Scan: 850 MB
+Peak During Ingest: 850 MB
 Idle After: 540 MB
 Max Limit: 1500 MB ✓
 
 === Status ===
-✓ All books imported
+✓ All books copied to /library/ingest/
+✓ Auto-ingest completed without manual refresh
+✓ All books imported to library
 ✓ No crashes
 ✓ No OOM errors
 ✓ Search working
 ✓ Detail pages load
+✓ Ingest folder cleaned after processing
 
 Task 5: ✓ COMPLETE
 ```

@@ -202,7 +202,7 @@ Monitor while using UI:
 3. Check browser console (F12) for errors
 4. Restart CWA:
    ```bash
-   docker-compose restart cwa
+   docker compose restart cwa
    sleep 30
    ```
 
@@ -213,7 +213,7 @@ Monitor while using UI:
 2. Try searching by partial title
 3. Check CWA logs:
    ```bash
-   docker-compose logs cwa | grep -i "search"
+   docker compose logs cwa | grep -i "search"
    ```
 
 ### Issue: Slow Page Load
@@ -221,11 +221,11 @@ Monitor while using UI:
 **Solution:**
 1. Check memory usage:
    ```bash
-   docker stats bookhelper_cwa_1
+   docker stats calibre-web-automated
    ```
 2. Monitor CPU:
    ```bash
-   docker stats bookhelper_cwa_1 --no-stream
+   docker stats calibre-web-automated --no-stream
    ```
 3. If high memory (>1GB), restart CWA
 

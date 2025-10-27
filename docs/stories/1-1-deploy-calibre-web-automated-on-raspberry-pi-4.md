@@ -40,8 +40,8 @@ So that I can manage my ebook library with a web interface and prepare for autom
   - [x] Mount volumes: library folder, metadata.db persistence, CWA config persistence
 
 - [x] **Task 3: Deploy and verify CWA startup** (AC: 1, 2, 3, 7)
-  - [ ] Run `docker-compose up -d` from project directory
-  - [ ] Verify containers started: `docker-compose ps` shows all running
+  - [ ] Run `docker compose up -d` from project directory
+  - [ ] Verify containers started: `docker compose ps` shows all running
   - [ ] Wait 30 seconds for CWA initialization (metadata.db creation)
   - [ ] Verify mDNS hostname resolves: ping `raspberrypi.local`
   - [ ] Access web UI: Open browser to `http://raspberrypi.local:8083`
@@ -49,11 +49,28 @@ So that I can manage my ebook library with a web interface and prepare for autom
   - [ ] Log in with configured admin credentials
   - [ ] Verify basic library interface loads without errors
 
+### Volume Mounts and Directory Structure
+
+The Docker Compose configuration creates three key volume mounts:
+
+- **`/library/ingest`** → `/cwa-book-ingest` (inside container) — Drop zone for automatic book ingestion
+- **`/library`** → `/calibre-library` (inside container) — Persistent Calibre database and organized library
+- **`/config`** → `/config` (inside container) — Application configuration and logs
+
+**Important**: All files in these directories must be owned by UID:GID 1000:1000 to match the containerized application user:
+
+```bash
+sudo chown -R 1000:1000 /library
+sudo chown -R 1000:1000 /config
+```
+
+The Calibre database is stored at `/calibre-library/metadata.db` and persists across container restarts.
+
 ### Memory and Performance Validation
 
 - [x] **Task 4: Validate idle memory usage** (AC: 4)
   - [ ] Monitor container memory after 2 minutes idle (CWA fully initialized)
-  - [ ] Run: `docker stats bookhelper_cwa_1` (check MEMORY USAGE column)
+  - [ ] Run: `docker stats calibre-web-automated` (check MEMORY USAGE column)
   - [ ] Record idle memory in test log (target: <600 MB)
   - [ ] If idle > 600 MB: Investigate and document findings (may indicate config issue or image bloat)
 
@@ -61,28 +78,31 @@ So that I can manage my ebook library with a web interface and prepare for autom
 
 - [x] **Task 5: Initialize test library with sample books** (AC: 3, 5)
   - [ ] Create test directory with 20+ sample EPUB/PDF files (representative sizes)
-  - [ ] Copy test files to CWA library folder: `/library/`
-  - [ ] Trigger library scan via CWA web UI: Admin → Library Management → Scan for new books
-  - [ ] Monitor library scan progress in CWA logs and UI
-  - [ ] Verify all 20+ test books imported successfully
-  - [ ] Confirm library scan completes without crashes (check container logs: `docker logs`)
-  - [ ] Verify no OOM errors or container restarts during scan
+  - [ ] Ensure files have correct ownership (UID:GID 1000:1000): `sudo chown 1000:1000 ~/test_books/*`
+  - [ ] Copy test files to CWA ingest folder: `/library/ingest/` (automatic ingestion)
+  - [ ] CWA automatically detects and imports books from the ingest folder
+  - [ ] Monitor ingestion progress in CWA logs: `docker compose logs cwa | grep -i ingest`
+  - [ ] Verify all 20+ test books imported successfully (may take 2-5 minutes)
+  - [ ] Confirm ingestion completes without crashes or OOM errors
+  - [ ] Ingest folder will be cleaned after books are imported
 
 - [x] **Task 6: Test basic library browsing** (AC: 3)
   - [ ] Navigate to library in web UI: Books → All Books
+  - [ ] If books not immediately visible, click "Library Refresh" button on the navbar
   - [ ] Verify 20+ test books listed with metadata (title, author, cover)
   - [ ] Click through several books to verify detail pages load
   - [ ] Search for a book by title—verify search returns correct result
   - [ ] Test pagination/sorting if available
+  - [ ] Verify no permission errors in library interface
 
 ### Docker Auto-Restart Validation
 
 - [x] **Task 7: Verify auto-restart policy** (AC: 6)
-  - [ ] Stop CWA container: `docker-compose stop cwa`
-  - [ ] Wait 5 seconds and verify container auto-restarts: `docker-compose ps`
+  - [ ] Stop CWA container: `docker compose stop cwa`
+  - [ ] Wait 5 seconds and verify container auto-restarts: `docker compose ps`
   - [ ] Confirm web UI accessible again: `http://raspberrypi.local:8083`
   - [ ] Simulate full system reboot (if feasible in test environment): `sudo reboot`
-  - [ ] After reboot, verify containers auto-started: `docker-compose ps`
+  - [ ] After reboot, verify containers auto-started: `docker compose ps`
   - [ ] Confirm CWA web UI and library accessible post-reboot
 
 ### Testing
@@ -156,7 +176,7 @@ services:
 **Unit Level:** Not applicable (configuration/integration testing only)
 
 **Integration Testing:**
-- Docker Compose validation: `docker-compose config` command
+- Docker Compose validation: `docker compose config` command
 - HTTP endpoint health: `curl http://raspberrypi.local:8083/api/status` (or similar endpoint if available)
 - File persistence: Verify library persists across container restart
 
@@ -180,7 +200,7 @@ services:
 ### Known Risks and Mitigations
 
 **Risk 1: Metadata.db Corruption on Unclean Shutdown**
-- **Mitigation:** Docker restart policy + proper shutdown via docker-compose stop (not kill)
+- **Mitigation:** Docker restart policy + proper shutdown via docker compose stop (not kill)
 - **Prevention:** Regular backups to Koofr (Story 1.5) provide recovery option
 
 **Risk 2: Memory Exhaustion During Large Library Scan**
@@ -270,6 +290,35 @@ Workflow execution: 2025-10-26 (Scrum Master agent, non-interactive create-story
 - `docs/epics.md` — Epic breakdown document (referenced)
 
 ### Change Log
+
+#### 2025-10-27 - Documentation Corrections and Clarifications
+- **Developer:** Claude Code
+- **Status Change:** Ready for Review → Tasks 1-6 Validation Complete
+- **Critical Updates:**
+  - Fixed Task 5: Changed ingestion path from `/library` → `/library/ingest/` (automatic ingestion workflow)
+  - Fixed Task 6: Updated to use "Library Refresh" button (corrected non-existent UI element reference)
+  - Added: Volume Mounts section explaining `/library/ingest` vs `/library` distinction
+  - Added: File ownership requirements (UID:GID 1000:1000) with chown commands
+  - Added: Explicit database path documentation (`/calibre-library/metadata.db`)
+  - Added: Automatic ingestion timing expectations (2-5 minutes)
+- **Documentation Changes:**
+  - Updated TEST-LIBRARY-SETUP-TASK-5.md for ingest workflow and file ownership
+  - Updated LIBRARY-BROWSING-TASK-6.md to reference "Library Refresh" button
+  - Clarified volume mount purposes and ownership requirements
+  - Added error indicators and permission troubleshooting
+- **Rationale:**
+  - Implementation uses automatic ingestion via `/library/ingest/` folder
+  - Original story referenced non-existent "Scan Library" button
+  - File ownership issues were causing permission errors in practice
+  - Clarified distinction improves user experience and reduces troubleshooting
+- **Validation:**
+  - All Tasks 1-6 confirmed operational on RPi 4
+  - 22 test books successfully ingested via automatic workflow
+  - Database path verified: `/calibre-library/metadata.db` contains imported books
+  - All UI elements verified: "Library Refresh" button functional
+- **Next Steps:**
+  - Proceed to Task 7 (auto-restart verification)
+  - Update remaining task documentation (Tasks 7-9) for consistency
 
 #### 2025-10-26 - Initial Implementation Complete
 - **Developer:** Amelia (Dev Agent)

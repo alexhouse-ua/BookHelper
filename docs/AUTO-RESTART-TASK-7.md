@@ -20,20 +20,20 @@ This task validates that the CWA and Syncthing containers automatically restart 
 
 **Step 1: Note current container status**
 ```bash
-docker-compose ps
+cwa ps
 # Record the container ID/status
 ```
 
 **Step 2: Stop CWA container**
 ```bash
-docker-compose stop cwa
+cwa stop calibre-web-automated
 sleep 2
 ```
 
 **Step 3: Verify container stopped**
 ```bash
-docker-compose ps
-# Expected: cwa shows "Exited"
+cwa ps
+# Expected: calibre-web-automated shows "Exited"
 ```
 
 **Step 4: Wait and verify auto-restart**
@@ -41,8 +41,8 @@ docker-compose ps
 # With restart policy set to "always", container should auto-restart
 # This may take 2-10 seconds depending on system
 sleep 5
-docker-compose ps
-# Expected: cwa shows "Up X seconds"
+cwa ps
+# Expected: calibre-web-automated shows "Up X seconds"
 ```
 
 **Step 5: Verify web UI is accessible**
@@ -69,20 +69,20 @@ curl -s http://raspberrypi.local:8083/ | head -20
 
 **Step 1: Stop Syncthing container**
 ```bash
-docker-compose stop syncthing
+cwa stop syncthing
 sleep 2
 ```
 
 **Step 2: Verify container stopped**
 ```bash
-docker-compose ps
+cwa ps
 # Expected: syncthing shows "Exited"
 ```
 
 **Step 3: Wait and verify auto-restart**
 ```bash
 sleep 5
-docker-compose ps
+cwa ps
 # Expected: syncthing shows "Up X seconds"
 ```
 
@@ -116,7 +116,7 @@ curl -s http://raspberrypi.local:8384/ | head -20
 **Step 1: Verify current state before reboot**
 ```bash
 # Check all containers running
-docker-compose ps
+cwa ps
 
 # Record time
 echo "Pre-reboot time: $(date)"
@@ -146,7 +146,7 @@ ssh pi@raspberrypi.local
 sleep 30
 
 # Check container status
-docker-compose ps
+cwa ps
 # Expected: All containers "Up" (not "Exited")
 ```
 
@@ -163,7 +163,7 @@ http://raspberrypi.local:8083
 **Step 6: Check container startup logs**
 ```bash
 # Verify clean startup (no errors)
-docker-compose logs --tail=30 cwa | head -20
+cwa logs --tail=30 calibre-web-automated | head -20
 
 # Look for:
 # [INFO] Calibre-Web-Automated started
@@ -174,7 +174,7 @@ docker-compose logs --tail=30 cwa | head -20
 ### Validation
 
 - [ ] RPi rebooted successfully
-- [ ] Containers auto-started (no manual docker-compose up needed)
+- [ ] Containers auto-started (no manual docker compose up needed)
 - [ ] CWA web UI accessible
 - [ ] Syncthing accessible (if checking UI)
 - [ ] No critical errors in startup logs
@@ -188,7 +188,7 @@ After any of the above restart tests, verify data is preserved:
 
 ```bash
 # Step 1: Count books in library
-docker-compose exec cwa bash -c 'sqlite3 /metadata/metadata.db "SELECT COUNT(*) FROM books;" 2>/dev/null || echo "0"'
+cwa bash -c 'sqlite3 /calibre-library/metadata.db "SELECT COUNT(*) FROM books;" 2>/dev/null || echo "0"'
 # Should match count from Task 5
 
 # Step 2: Access library via web UI
@@ -214,23 +214,22 @@ docker-compose exec cwa bash -c 'sqlite3 /metadata/metadata.db "SELECT COUNT(*) 
 
 ```bash
 # Verify restart policy in docker-compose.yml
-grep -A 2 "restart:" docker-compose.yml
+grep -A 2 "restart:" ~/BookHelper/docker-compose.yml
 
 # Expected output:
-#   cwa:
-#     restart: always
-#   syncthing:
-#     restart: always
+#   restart: unless-stopped
+#   or
+#   restart: always
 ```
 
 ### Check Runtime Restart Policy
 
 ```bash
 # Verify Docker enforces the policy
-docker inspect bookhelper_cwa_1 --format='{{.HostConfig.RestartPolicy}}'
+docker inspect calibre-web-automated --format='{{.HostConfig.RestartPolicy}}'
 # Expected: {always 0}
 
-docker inspect bookhelper_syncthing_1 --format='{{.HostConfig.RestartPolicy}}'
+docker inspect syncthing --format='{{.HostConfig.RestartPolicy}}'
 # Expected: {always 0}
 ```
 
@@ -248,36 +247,36 @@ docker inspect bookhelper_syncthing_1 --format='{{.HostConfig.RestartPolicy}}'
 **Solution:**
 ```bash
 # Verify restart policy
-docker inspect bookhelper_cwa_1 --format='{{.HostConfig.RestartPolicy}}'
+docker inspect calibre-web-automated --format='{{.HostConfig.RestartPolicy}}'
 
-# If not set to "always", update docker-compose.yml:
+# If not set to "unless-stopped" or "always", update docker-compose.yml:
 # services:
-#   cwa:
-#     restart: always
+#   calibre-web-automated:
+#     restart: unless-stopped
 
 # Then restart:
-docker-compose down
-docker-compose up -d
+cwa down
+cwa up -d
 ```
 
 ### Issue: Container crashes on restart
 
 **Symptoms:**
 ```bash
-docker-compose ps
-# cwa shows: Exited (1) 5 minutes ago (keeps restarting and crashing)
+cwa ps
+# calibre-web-automated shows: Exited (1) 5 minutes ago (keeps restarting and crashing)
 ```
 
 **Solution:**
 1. Check logs for crash reason:
    ```bash
-   docker-compose logs cwa | tail -50
+   cwa logs calibre-web-automated | tail -50
    ```
 
 2. Common causes:
    - Port 8083 already in use: `sudo lsof -i :8083`
-   - Missing volume/mount: Check /library and /config existence
-   - Insufficient memory: Check `docker stats`
+   - Missing volume/mount: Check /library and /config existence and ownership
+   - Insufficient memory: Check `cwa stats calibre-web-automated`
    - Wrong image: Verify image version in docker-compose.yml
 
 ### Issue: Containers don't restart after system reboot
@@ -289,16 +288,17 @@ docker-compose ps
    sudo systemctl status docker
    ```
 
-2. Verify docker-compose project persists:
+2. Verify docker compose project persists:
    ```bash
    # Ensure docker-compose.yml is in persistent location
-   # (not on tmpfs or temporary mount)
+   # ~/BookHelper/docker-compose.yml should persist across reboots
    ```
 
 3. Check if docker daemon started:
    ```bash
-   docker-compose ps
+   cwa ps
    # If daemon didn't start, see error about connection
+   # May take 30 seconds after boot for Docker to initialize
    ```
 
 ---

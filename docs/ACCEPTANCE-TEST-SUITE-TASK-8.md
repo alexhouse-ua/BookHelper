@@ -25,7 +25,7 @@ This task provides automated and manual tests to verify all 8 acceptance criteri
 Before running tests, ensure:
 ```bash
 # Verify all containers running
-docker-compose ps
+docker compose ps
 # Expected: All containers "Up"
 
 # Verify library populated from Task 5
@@ -51,21 +51,21 @@ Verify that docker-compose.yml is valid and includes all required configuration.
 echo "=== Test 1: Docker Compose Syntax ==="
 
 # Test 1.1: Validate YAML structure
-docker-compose config > /dev/null 2>&1
+docker compose config > /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo "✓ docker-compose.yml syntax valid"
 else
   echo "✗ docker-compose.yml has syntax errors"
-  docker-compose config
+  docker compose config
   exit 1
 fi
 
 # Test 1.2: Verify services defined
-services=$(docker-compose config --services)
+services=$(docker compose config --services)
 echo "✓ Services found: $(echo $services | tr '\n' ', ')"
 
 # Test 1.3: Verify CWA service
-docker-compose config | grep -q "calibrewebautomated:v3.1"
+docker compose config | grep -q "calibrewebautomated:v3.1"
 if [ $? -eq 0 ]; then
   echo "✓ CWA v3.1.0+ configured"
 else
@@ -73,7 +73,7 @@ else
 fi
 
 # Test 1.4: Verify restart policy
-docker-compose config | grep -A 3 "cwa:" | grep -q "restart: always"
+docker compose config | grep -A 3 "cwa:" | grep -q "restart: always"
 if [ $? -eq 0 ]; then
   echo "✓ CWA restart policy set to always"
 else
@@ -82,7 +82,7 @@ else
 fi
 
 # Test 1.5: Verify memory limits
-docker-compose config | grep -q "memory: 1500M"
+docker compose config | grep -q "memory: 1500M"
 if [ $? -eq 0 ]; then
   echo "✓ CWA memory limit set to 1500MB"
 else
@@ -90,7 +90,7 @@ else
 fi
 
 # Test 1.6: Verify ports mapped
-docker-compose config | grep -q "8083:8083"
+docker compose config | grep -q "8083:8083"
 if [ $? -eq 0 ]; then
   echo "✓ Port 8083 mapped for CWA"
 else
@@ -200,7 +200,7 @@ fi
 
 # Test 3.2: Check database exists and is readable
 echo -n "Verifying metadata database... "
-if docker-compose exec cwa test -f /metadata/metadata.db; then
+if cwa test -f /calibre-library/metadata.db; then
   echo "✓ metadata.db exists"
 else
   echo "✗ metadata.db not found"
@@ -209,7 +209,7 @@ fi
 
 # Test 3.3: Count books in database
 echo -n "Counting indexed books... "
-db_count=$(docker-compose exec cwa sqlite3 /metadata/metadata.db "SELECT COUNT(*) FROM books;" 2>/dev/null)
+db_count=$(cwa bash -c 'sqlite3 /calibre-library/metadata.db "SELECT COUNT(*) FROM books;" 2>/dev/null')
 if [ -z "$db_count" ]; then
   db_count=0
 fi
@@ -222,7 +222,7 @@ fi
 
 # Test 3.4: Verify no corruption
 echo -n "Checking database integrity... "
-integrity=$(docker-compose exec cwa sqlite3 /metadata/metadata.db "PRAGMA integrity_check;" 2>/dev/null)
+integrity=$(cwa bash -c 'sqlite3 /calibre-library/metadata.db "PRAGMA integrity_check;" 2>/dev/null')
 if [ "$integrity" = "ok" ]; then
   echo "✓ Database integrity OK"
 else
@@ -232,12 +232,12 @@ fi
 
 # Test 3.5: Check for critical errors in logs
 echo -n "Scanning logs for critical errors... "
-errors=$(docker-compose logs cwa | grep -i "error\|crash\|oom" | wc -l)
+errors=$(cwa logs calibre-web-automated | grep -i "error\|crash\|oom" | wc -l)
 if [ $errors -eq 0 ]; then
   echo "✓ No critical errors"
 else
   echo "⚠ Found $errors error messages in logs"
-  docker-compose logs cwa | grep -i "error" | tail -5
+  cwa logs calibre-web-automated | grep -i "error" | tail -5
 fi
 
 echo ""
@@ -271,7 +271,7 @@ sleep 60
 
 # Capture memory readings
 echo "Capturing memory usage..."
-memory_reading=$(docker stats bookhelper_cwa_1 --no-stream --format "{{.MemUsage}}" | cut -d'/' -f1 | sed 's/[MiB ]//g')
+memory_reading=$(cwa stats calibre-web-automated --no-stream --format "{{.MemUsage}}" | cut -d'/' -f1 | sed 's/[MiB ]//g')
 
 echo "Memory usage: ${memory_reading}MB"
 
@@ -285,8 +285,8 @@ else
   echo "✗ Memory usage ${memory_value}MB >= 600MB (AC4 FAIL)"
   echo ""
   echo "Additional diagnostics:"
-  docker stats bookhelper_cwa_1 --no-stream
-  docker-compose logs cwa | tail -20
+  cwa stats calibre-web-automated --no-stream
+  cwa logs calibre-web-automated | tail -20
   exit 1
 fi
 ```
@@ -314,7 +314,7 @@ echo "=== Test 5: Service Health (AC7, AC8) ==="
 
 # Test 5.1: CWA running
 echo -n "Checking CWA container status... "
-cwa_status=$(docker-compose ps cwa --format "{{.State}}")
+cwa_status=$(docker compose ps cwa --format "{{.State}}")
 if [ "$cwa_status" = "Up" ]; then
   echo "✓ Running"
 else
@@ -324,7 +324,7 @@ fi
 
 # Test 5.2: Syncthing running
 echo -n "Checking Syncthing container status... "
-sync_status=$(docker-compose ps syncthing --format "{{.State}}")
+sync_status=$(docker compose ps syncthing --format "{{.State}}")
 if [ "$sync_status" = "Up" ]; then
   echo "✓ Running"
 else
@@ -343,18 +343,18 @@ fi
 # Test 5.4: Check for error patterns in logs
 echo -n "Scanning logs for critical errors... "
 error_patterns="error\|critical\|failed\|exception"
-critical_errors=$(docker-compose logs | grep -i "$error_patterns" | grep -v "warning" | wc -l)
+critical_errors=$(docker compose logs | grep -i "$error_patterns" | grep -v "warning" | wc -l)
 
 if [ $critical_errors -eq 0 ]; then
   echo "✓ No critical errors"
 else
   echo "⚠ Found $critical_errors potential errors"
-  docker-compose logs | grep -i "$error_patterns" | grep -v "warning" | head -5
+  docker compose logs | grep -i "$error_patterns" | grep -v "warning" | head -5
 fi
 
 # Test 5.5: Health check status (if configured)
 echo -n "Checking container health... "
-health=$(docker inspect bookhelper_cwa_1 --format='{{.State.Health.Status}}' 2>/dev/null)
+health=$(docker inspect calibre-web-automated --format='{{.State.Health.Status}}' 2>/dev/null)
 if [ -n "$health" ]; then
   echo "✓ Health: $health"
 else
@@ -556,7 +556,7 @@ Task 8: ✓ COMPLETE (100% pass rate)
 - Fix any indentation issues
 
 ### If Test 2 Fails (HTTP)
-- Verify containers running: `docker-compose ps`
+- Verify containers running: `docker compose ps`
 - Check firewall: `sudo ufw allow 8083`
 - Verify port not in use: `sudo lsof -i :8083`
 
@@ -571,9 +571,9 @@ Task 8: ✓ COMPLETE (100% pass rate)
 - Investigate logs for memory leaks
 
 ### If Test 5 Fails (Health)
-- Review container logs: `docker-compose logs cwa`
+- Review container logs: `docker compose logs cwa`
 - Check critical errors
-- Restart if persistent: `docker-compose restart cwa`
+- Restart if persistent: `docker compose restart cwa`
 
 ---
 
