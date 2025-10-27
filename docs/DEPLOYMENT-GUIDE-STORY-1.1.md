@@ -58,6 +58,7 @@ Verify Docker installation:
 docker --version
 # Output should be: Docker version 20.10+ (or higher)
 ```
+> Docker version 28.5.1, build e180ab8
 
 ### Step 1.3: Install Docker Compose
 
@@ -69,9 +70,11 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 Verify installation:
 ```bash
-docker-compose --version
+docker compose --version
 # Output should be: Docker Compose version 2.20.0 (or higher)
 ```
+> Docker Compose version v2.40.2
+> Came pre-installed with Docker Engine, syntax is docker compose, not docker-compose
 
 ### Step 1.4: Add User to Docker Group (No Sudo Required)
 
@@ -91,8 +94,8 @@ docker ps
 
 Create the library directories on your RPi:
 ```bash
-mkdir -p /library/ingest /library/metadata
-chmod 755 /library /library/ingest /library/metadata
+sudo mkdir -p /library/ingest /library/metadata
+sudo chmod 755 /library /library/ingest /library/metadata
 ```
 
 Verify:
@@ -110,7 +113,7 @@ ls -la /library
 On your local machine (or RPi if cloning the repo):
 ```bash
 # Option A: Clone the BookHelper repo
-git clone https://github.com/alhouse2/BookHelper.git
+git clone https://github.com/alexhouse-ua/BookHelper.git
 cd BookHelper
 
 # Option B: Copy the docker-compose.yml to your RPi
@@ -138,12 +141,12 @@ nano docker-compose.yml
 From the BookHelper directory on your RPi:
 ```bash
 cd ~/BookHelper
-docker-compose up -d
+docker compose up -d
 ```
 
 Check container startup:
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 Expected output:
