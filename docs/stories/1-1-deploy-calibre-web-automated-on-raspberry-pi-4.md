@@ -1,6 +1,6 @@
 # Story 1.1: Deploy Calibre-Web-Automated on Raspberry Pi 4
 
-Status: Ready for Review
+Status: Complete
 
 ## Story
 
