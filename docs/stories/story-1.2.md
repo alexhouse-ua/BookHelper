@@ -170,12 +170,33 @@ Prepared all tooling and documentation required for Story 1.2 execution:
    - Performance monitoring strategy for plugin validation
    - Troubleshooting plugin issues
 
-4. **Plugin Configuration:** Created `/resources/calibre-plugins/customize.py.json`
+4. **Comprehensive Plugins Setup Guide:** Created `/docs/STORY-1.2-PLUGINS-SETUP.md` (1141 lines)
+   - **Part 1:** Calibre desktop installation and configuration (macOS/Linux/Windows)
+   - **Part 2:** 9 essential plugins with installation, configuration, and usage instructions
+     - Goodreads (metadata source: series, ratings, tags)
+     - Download Metadata (built-in coordinator for API priority)
+     - Extract ISBN (ISBN extraction from files)
+     - Count Pages (EPUB/PDF page counting)
+     - Google Images (high-quality cover fallback)
+     - Kindle Hi-Res Covers (Amazon Kindle store covers)
+     - Reading List (book organization and tracking)
+     - Fix Metadata (normalization and cleaning)
+     - Action Chains (workflow automation engine)
+   - **Part 3:** Complete automated workflow diagram and performance analysis (22-36s per book)
+   - **Part 4:** CWA docker integration (plugin export, sync, mounting, custom columns)
+   - **Part 5:** Calibre desktop development setup (local testing with test books)
+   - **Part 6:** RPi deployment instructions (copy, verify, restart)
+   - **Part 7:** End-to-end ingestion workflow (4 phases with verification)
+   - **Part 8:** Story 1.2 AC mapping and performance targets
+   - **Part 9:** Troubleshooting (5 common issues with solutions)
+   - **Part 10:** Quick reference checklist
+
+5. **Plugin Configuration:** Created `/resources/calibre-plugins/customize.py.json`
    - Template for Calibre plugin configuration
-   - Includes: count_pages, extract_isbn, fix_metadata, extract_cover plugins
+   - Pre-configured for all 9 plugins with feature toggles
    - Ready to copy to RPi and mount via docker-compose
 
-5. **Infrastructure Updates:** Updated `docker-compose.yml`
+6. **Infrastructure Updates:** Updated `docker-compose.yml`
    - ✅ Ingest folder already configured: `/library/ingest` → `/cwa-book-ingest`
    - ✅ Hardcover API token already present in environment
    - ✅ Memory limits appropriate: 1500M limit, 400M reservation
@@ -216,7 +237,11 @@ This story requires **1-week observation period** with real hardware and real-ti
 
 - Story file: `/docs/stories/story-1.2.md` (updated 2025-10-27)
 - Performance report: `/docs/STORY-1.2-PERFORMANCE-REPORT.md` (created 2025-10-27, updated with plugins)
-- Plugins setup guide: `/docs/STORY-1.2-PLUGINS-SETUP.md` (created 2025-10-27)
+- Comprehensive plugins setup guide: `/docs/STORY-1.2-PLUGINS-SETUP.md` (created 2025-10-27, comprehensive 1141-line guide)
+  - 10-part guide covering Calibre desktop setup, 9 plugins, Action Chains automation, CWA docker integration
+  - Includes Goodreads, Download Metadata, Extract ISBN, Count Pages, Google Images, Kindle Hi-Res Covers, Reading List, Fix Metadata, Action Chains
+  - Complete automated workflow with performance analysis (22-36s per book)
+  - Troubleshooting and deployment instructions
 - Monitoring script: `/resources/scripts/monitor-resources-1.2.py` (created 2025-10-27)
 - Plugin config template: `/resources/calibre-plugins/customize.py.json` (created 2025-10-27)
 - Docker configuration: `/docker-compose.yml` (updated 2025-10-27: added plugins volume)
