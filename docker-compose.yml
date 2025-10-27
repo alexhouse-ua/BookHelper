@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  cwa:
+    image: calibrewebautomated:v3.1.0
+    container_name: bookhelper_cwa_1
+    restart: always
+
+    # Environment configuration for CWA
+    environment:
+      - CALIBRE_LIBRARY_PATH=/library
+      - ADMIN_USER=alex
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme123}
+      - PORT=8083
+      - TZ=UTC
+
+    # Port mappings for web UI and KOSync
+    ports:
+      - "8083:8083"  # CWA web UI and KOSync server
+
+    # Volume mounts for data persistence
+    volumes:
+      - /library:/library                    # Main ebook library
+      - cwa_config:/config                   # CWA configuration and cache
+      - cwa_metadata:/metadata               # CWA metadata database
+
+    # Resource constraints (critical for RPi 4 2GB)
+    # Max 1.5GB to prevent system OOM
+    # Reservation 400MB to ensure availability
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+        reservations:
+          memory: 400M
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Stop grace period to allow clean shutdown
+    stop_grace_period: 30s
+
+  syncthing:
+    image: syncthing:latest
+    container_name: bookhelper_syncthing_1
+    restart: always
+
+    # Syncthing configuration
+    environment:
+      - STENV_PUID=1000
+      - STENV_PGID=1000
+      - TZ=UTC
+
+    # Port mappings for Syncthing UI and discovery
+    ports:
+      - "8384:8384"  # Syncthing web UI
+      - "22000:22000/tcp"  # Syncthing protocol
+      - "22000:22000/udp"  # Syncthing protocol discovery
+
+    # Volume mounts for configuration and sync
+    volumes:
+      - syncthing_config:/var/syncthing        # Syncthing configuration
+      - /library:/library                      # Mount library for future sync (ONE-WAY ONLY)
+
+    # Resource constraints for Syncthing
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8384/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Named volumes for data persistence
+volumes:
+  cwa_config:
+    driver: local
+  cwa_metadata:
+    driver: local
+  syncthing_config:
+    driver: local
+
+# Network configuration
+networks:
+  default:
+    name: bookhelper_network
+    driver: bridge
+
+# Project name for docker-compose commands
+# Default: directory name (bookhelper)
+# This ensures consistent container naming across environments

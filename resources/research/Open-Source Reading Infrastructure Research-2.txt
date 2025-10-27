@@ -1,0 +1,898 @@
+﻿Comprehensive Technical Architecture: Integrated Open-Source Reading Infrastructure
+
+
+
+
+Executive Summary: Recommended Open-Source Reading Architecture
+
+
+This report provides an exhaustive technical analysis and a complete architectural recommendation for building an integrated, single-user, open-source reading infrastructure. The architecture is designed for zero ongoing costs, low maintenance, and specific compatibility with iOS (Readest) and Boox Palma 2 (KOReader) devices.
+
+
+Final Recommended Architecture
+
+
+The recommended architecture is a hybrid-server model, bifurcating ebook and audiobook management to leverage the best-in-class tool for each media type. This approach is necessary to meet the conflicting integration requirements of the user's specified devices.
+* Ebook Management will be handled by Calibre-Web-Automated (CWA). CWA serves as the OPDS catalog for both devices and, critically, provides the integrated KOSync server. This KOSync server is the lynchpin, enabling seamless, two-way reading progress synchronization between KOReader (on the Boox Palma) and Readest (on iOS).
+* Audiobook Management will be handled by Audiobookshelf (ABS), the market-leading solution. It will be paired with the official Audiobookshelf iOS App and a server-side utility, shelfbridge, to meet the Hardcover.app integration requirement.
+* Security and Access will be managed exclusively by Tailscale, a mesh VPN. This creates a secure, private network for all devices, eliminating the need to expose any services to the public internet and bypassing the Terms of Service limitations of other solutions.
+* Analytics will be achieved via a Fly.io free-tier PostgreSQL database. This will function as an analytics data warehouse, populated by a nightly ETL (Extract, Transform, Load) script that parses the application-native SQLite databases from CWA and ABS.
+
+
+Architecture Data Flow
+
+
+This architecture can be described by the following data flows:
+1. Host Server (e.g., Raspberry Pi 5 or local server): Runs Docker, which manages containers for:
+   * Calibre-Web-Automated (CWA): Manages the ebooks library and the metadata.db.
+   * Audiobookshelf (ABS): Manages the audiobooks library and the absdatabase.sqlite.
+   * shelfbridge: A utility that reads the absdatabase.sqlite and pushes progress to the Hardcover.app API.
+   * Syncthing: Provides a "Send-Only" file sync of the ebooks library to the Boox Palma 2.
+   * Tailscale Client: Connects the entire host server to the private mesh network.
+   * ETL Cron Script: A nightly Python script that reads the CWA/ABS SQLite files and writes to the Fly.io database.
+2. Cloud Services ($0 Tier):
+   * Tailscale Coordination Server: Manages the mesh VPN connections.
+   * Fly.io PostgreSQL: The central analytics database.
+   * Koofr (10GB Free Tier): Receives cold, automated backups of critical config files and the ebook library via rclone.
+   * Hardcover.app: Receives audiobook progress updates from shelfbridge.
+3. Client Devices:
+   * Boox Palma 2:
+      * Runs KOReader, which syncs ebook files via Syncthing.
+      * Runs the Tailscale client.
+      * Accesses the CWA OPDS feed via Tailscale for on-demand downloads.
+      * Syncs reading progress to the CWA KOSync server via Tailscale.
+   * iOS Device (iPhone):
+      * Runs Readest, which accesses the CWA OPDS feed via Tailscale for on-demand downloads.
+      * Syncs reading progress to the CWA KOSync server via Tailscale.1
+      * Runs the Audiobookshelf App, which connects to the ABS server via Tailscale for streaming/listening.
+      * Runs the Tailscale client.
+
+
+Summary Table: Recommended Components and Rationale
+
+
+
+
+Research Area
+	Recommended Component
+	Rationale & Integration Point
+	1. KOReader Stats Sync
+	Calibre-Web-Automated (CWA) Integrated KOSync Server (v3.1.0+)
+	Consolidates services. Provides the only application-aware path for two-way progress sync between KOReader and Readest.2
+	2. Library File Backup
+	Rclone (Scripted) -> Koofr Free Tier (10GB)
+	rclone is the industry standard for scripted backups.3 Koofr's 10GB free tier is sufficient for critical data (configs, ebook library).4
+	3. Library Server
+	Hybrid: CWA (Ebooks) + Audiobookshelf (Audiobooks)
+	A bifurcated model is required. CWA provides KOSync.5 ABS provides best-in-class audiobook management.6
+	4. Audiobook/Hardcover
+	Audiobookshelf (Server + App) + shelfbridge
+	User must switch to the ABS app. The shelfbridge utility syncs ABS progress to Hardcover.app on the server-side.7
+	5. Unified Database
+	Fly.io Free-Tier PostgreSQL
+	Supabase is unsuitable due to inactivity pausing.9 Fly.io offers a persistent, 3GB free Postgres DB, ideal for an analytics warehouse.10
+	6. Remote Access
+	Tailscale
+	Architecturally superior. Creates a private, secure mesh network.12 Avoids Cloudflare's media streaming ToS violations.13
+	7. Library File Sync
+	Syncthing (Boox Only) + OPDS (iOS)
+	Avoids notoriously unreliable iOS background file sync.14 Uses reliable Android Syncthing for Boox and the robust OPDS protocol for Readest.1
+	
+
+Critical Integration Assessment and Key Warnings
+
+
+1. Critical Warning: statistics.sqlite3 File vs. Database Sync. The statistics.sqlite3 file must not be synchronized using a file-level tool like Syncthing or Dropbox. This file is a live database, and attempting to sync it while it is being written to is a well-documented path to catastrophic data corruption.16 The only reliable method for multi-device progress is an application-aware database sync. This architecture mandates using the KOSync protocol, which is application-aware.
+2. Critical Warning: Calibre-Web-Automated Hardcover.app Integration. The native Hardcover.app integration present in Calibre-Web-Automated (CWA) is exclusively for Kobo devices.2 This feature will not work for the user's Boox Palma/KOReader setup. The Hardcover.app requirement is met only for audiobooks via the shelfbridge component. The central aggregation point for all reading statistics (ebook + audiobook) will be the self-hosted Fly.io database, not Hardcover.
+3. Critical Warning: Supabase Free Tier Unsuitability. The Supabase free tier is a technical trap for this specific use case. Its policy of pausing projects after 1 week of inactivity 9 makes it unusable for a persistent background database. A nightly ETL job would not register as "activity," leading to the database being constantly paused.22 Furthermore, its 500MB storage limit is insufficient for long-term analytics.23 This architecture definitively rejects Supabase in favor of Fly.io.
+________________
+
+
+1. KOReader Statistics Backup Strategy
+
+
+
+
+Current State Analysis: The statistics.sqlite3 File
+
+
+The core of KOReader's persistent data is the statistics.sqlite3 file, located in the koreader/settings/ directory. An analysis of this database's schema reveals its critical nature: it contains tables such as book, which stores metadata, total read time, and page counts, and page_stat, which logs granular, timestamped data for every page read.24
+This file is a live SQLite database. KOReader performs frequent write operations to this file during a reading session (e.g., on page turns, highlights, or when closing a book). This high-frequency write access is the central challenge in designing a reliable backup and synchronization strategy.
+
+
+Evaluation of Backup vs. Synchronization
+
+
+The user query employs the term "backup," but the context of a multi-device (Boox and iOS) system implies a need for "synchronization." These two goals are distinct and require different technical solutions.
+1. Backup (Disaster Recovery): This involves creating a periodic, cold copy of the statistics.sqlite3 file to restore from in case of device failure or data corruption. This is a one-way-push operation.
+2. Synchronization (Multi-Device Progress): This involves safely merging reading progress between two or more active devices (Boox Palma and iOS). This requires a two-way, application-aware solution that can intelligently handle database transactions without conflict.
+
+
+Comparative Evaluation of Sync Strategies
+
+
+
+
+Strategy 1: Direct File Sync (e.g., Syncthing, Google Drive) - REJECTED
+
+
+This is the most intuitive but technically unsound approach. Attempting to use a generic, file-level synchronization tool (like Syncthing, Resilio Sync, or Dropbox) to sync a live SQLite database file is extremely dangerous.24
+SQLite databases are not designed to be synchronized at the file level while in use. If a sync operation begins while KOReader is in the middle of a write transaction, the sync tool may copy a file that is in an inconsistent, partially-written state. This results in a "malformed" database image 18 and the total loss of all reading history. The risk of concurrent writes from two devices or a sync conflict during a write operation makes this method architecturally invalid.16
+Conclusion: Direct file sync of statistics.sqlite3 is non-viable.
+
+
+Strategy 2: Native KOReader Cloud Sync (WebDAV)
+
+
+KOReader's built-in "Progress sync" plugin is an application-aware solution. It supports several protocols, including WebDAV.25 This method is safe because KOReader itself manages the database connection, ensuring it only syncs a stable snapshot of the data.
+This can be implemented for $0 by using a free-tier cloud provider with WebDAV support. The best-in-class candidate is Koofr, which provides a 10GB free-tier account 4 and first-class, reliable WebDAV support.27
+* Pros: Simple, free, and database-safe.
+* Cons: This is merely a cloud backup of the file. It does not provide true multi-device progress merging. It is a 1-to-1 sync that overwrites the cloud file with the most recent local copy.
+
+
+Strategy 3: Self-Hosted KOSync Server
+
+
+The most robust solution is KOReader's support for a "custom sync server".30 This utilizes the kosync protocol, which is designed specifically for two-way progress synchronization. Several lightweight, open-source server implementations exist, such as koreader-sync-server 32 and the more modern, FastAPI-based koreader-sync.33
+This approach is architecturally correct. However, it requires deploying and maintaining another service. A deeper analysis of the primary candidate for the library server (Research Area 3) reveals a superior, consolidated solution.
+The community-led fork Calibre-Web-Automated (CWA) (v3.1.0 and newer), has integrated a full-featured, modern KOSync server directly into the main application.2
+
+
+Specific Recommendation: CWA Integrated KOSync Server (v3.1.0+)
+
+
+This is the definitive recommendation. By selecting Calibre-Web-Automated as the Ebook Library Server (see Section 3), the system simultaneously gains a modern, secure, and integrated KOSync server without any additional configuration or containers.
+* Rationale: This decision consolidates the architecture, reducing the maintenance burden. It provides the single, correct solution for both the ebook library and the multi-device progress sync. The CWA implementation uses secure RFC 7617 header-based authentication (an improvement over older MD5-based servers) and stores sync data in a readable format, which is ideal for the analytics database (Section 5).2
+* Integration:
+   1. The Boox Palma (KOReader) will be configured in the "Progress sync" plugin to use the "custom sync server."
+   2. The iOS device (Readest), which is specifically designed by a KOReader developer, has native support for KOReader's sync protocol.1
+   3. Both devices will be pointed to the CWA KOSync endpoint (e.g., http://<CWA_Tailscale_IP>:8083/kosync) and will authenticate using the CWA user's credentials.19
+* Known Issues: Users have reported some crashes related to database migrations in older KOReader versions.34 It is imperative to use a current, stable KOReader release (v2024.01 or newer) when initiating the sync.
+* Confidence Level: High. This is a recent (2024-2025) and actively developed feature that directly solves the most complex integration challenge in this brief: synchronizing progress between KOReader and an iOS client.
+________________
+
+
+2. Library File Cloud Backup (Separate from Statistics)
+
+
+
+
+Objective Analysis
+
+
+This research area concerns a cold disaster recovery backup for the actual library media files (epubs, m4bs) and the application configuration databases (CWA's metadata.db and ABS's absdatabase.sqlite). This is separate from the "hot" KOSync progress sync and must be designed for automated, reliable, one-way-push operation.
+
+
+Recommended Tooling: Rclone
+
+
+The definitive tool for this task is rclone.3 It is an open-source, command-line utility designed for synchronizing file systems with cloud storage. Its power lies in its vast provider support and its suitability for automation via a cron job on the host server.
+
+
+Comparative Evaluation of Free-Tier Cloud Storage
+
+
+
+
+Provider
+	Free Tier Storage
+	rclone Support
+	Key Considerations
+	Google Drive
+	15 GB 4
+	Excellent 3
+	Most generous free storage.36
+	Koofr
+	10 GB 4
+	Excellent 37
+	EU-based (privacy) 4, superior WebDAV.27
+	iCloud
+	5 GB
+	Limited/Complex
+	Not designed for server-side rclone automation.3 Rejected.
+	Dropbox
+	2 GB
+	Excellent 3
+	Storage is too small. Rejected.
+	TeraBox
+	1 TB
+	No
+	Advertises large storage but lacks rclone support.38 Rejected.
+	
+
+Architectural Constraint: The Audiobook Library
+
+
+A foundational constraint of the $0 cost requirement is that a complete cloud backup of the media library is not possible. Audiobooks are large; a single file can be 50MB to 1GB. A modest library will quickly exceed the 10GB or 15GB free tiers. Any viable backup strategy must therefore be tiered.
+
+
+Specific Recommendation: Rclone with Koofr Free Tier (10GB)
+
+
+The recommended solution is Rclone configured to sync to a Koofr 10GB free-tier account. Koofr is chosen over Google Drive for its strong privacy focus and its first-class WebDAV and rclone support, which make it a more flexible tool for the open-source ecosystem.37
+This solution must be implemented as a tiered strategy:
+* Tier 1: Critical Data (Automated Cloud Backup): This includes all data that is irreplaceable and small enough to fit within the 10GB limit.
+   * CWA configuration: ~/docker/cwa-config/ (includes metadata.db).
+   * ABS configuration: ~/docker/abs-config/ (includes absdatabase.sqlite).40
+   * ABS metadata: ~/docker/abs-metadata/ (includes covers, etc.).40
+   * The entire ebook library: ~/library/ebooks/. A large epub/PDF library is unlikely to exceed 5-8GB.
+* Tier 2: Non-Critical/Bulky Data (Manual Local Backup):
+   * The audiobook media library: ~/library/audiobooks/.
+   * These files are considered "non-critical" in the sense that they can be re-acquired. The metadata and listening progress (Tier 1) are the unique, irreplaceable data. The user must back up this media folder to a local external hard drive manually.
+
+
+Setup and Integration Approach
+
+
+1. Install rclone on the host server.
+2. Run rclone config to create a new remote for koofr:. This will require generating an application-specific password from the Koofr web UI.37
+3. Create a shell script (/opt/scripts/backup.sh) with the following commands:
+Bash
+#!/bin/bash
+# Sync CWA config and ebook library
+rclone sync /path/to/cwa-config koofr:Backups/cwa-config
+rclone sync /path/to/library/ebooks koofr:Backups/ebooks
+
+# Sync ABS config and metadata
+rclone sync /path/to/abs-config koofr:Backups/abs-config
+rclone sync /path/to/abs-metadata koofr:Backups/abs-metadata
+
+4. Schedule this script to run nightly using cron.
+   * Confidence Level: High. This is a standard, robust, and reliable disaster recovery strategy that respects the $0 cost constraint by tiering the data.
+________________
+
+
+3. Self-Hosted Library Management Server
+
+
+
+
+Objective Analysis
+
+
+This component is the heart of the library, responsible for metadata management, serving files via OPDS (Open Publication Distribution System) for KOReader and Readest, and managing audiobooks.
+
+
+Comparative Evaluation of Library Servers
+
+
+A deep evaluation of the leading candidates reveals that no single server can optimally satisfy all the user's requirements.
+   * The primary KOReader/Readest sync requirement (KOSync) is a niche feature.
+   * The primary audiobook requirement (ABS) is a specialized function.
+   * The primary Hardcover.app sync requirement (Hardcover API) is a third, separate integration.
+
+
+Candidate 1: Calibre-Web-Automated (CWA) (v3.1.0+)
+
+
+   * Pros:
+   * KOSync Server: As established in Section 1, CWA (v3.1.0+) is the only major library server that includes a built-in KOSync server.2 This is a critical, non-negotiable feature for the Boox/iOS progress sync.
+   * OPDS Support: Excellent, mature OPDS v1.2 support, which is compatible with KOReader and Readest.30
+   * Metadata: Based on Calibre, it has robust metadata editing. It also supports Hardcover.app as a metadata provider.5
+   * Development: Actively developed in 2024-2025.5
+   * Cons:
+   * No Audiobook Support: It is exclusively for ebooks.
+   * Hacky Ingest: A former contributor to CWA has described its inotifywait-based auto-ingest system as a "hack" built on Calibre's destructive import process, which can be unstable at scale.43 (For a single user, this risk is deemed acceptable).
+   * Hardcover Progress Sync: The CWA Hardcover progress sync is Kobo-only and will not work for this architecture.2
+
+
+Candidate 2: Audiobookshelf (ABS) (v2.8.0+)
+
+
+   * Pros:
+   * Audiobook Support: The definitive, best-in-class, open-source solution for audiobooks. No other tool comes close.6
+   * Ebook Support: It has also added good support for ebooks (epub, pdf), with an integrated web reader and OPDS feed.6
+   * Cons:
+   * No KOSync: It does not, and likely never will, support the KOReader-specific kosync protocol.
+   * Conclusion: If ABS is chosen as the sole server, the user loses the primary KOReader/Readest progress sync capability. This is an unacceptable compromise.
+
+
+Candidate 3: Kavita and Komga
+
+
+   * Pros:
+   * Modern Architecture: Purpose-built from the ground up as web servers, unlike CWA.43
+   * OPDS Support: Both have excellent OPDS support. Komga's v1.2 OPDS feed is explicitly tested with KOReader.51
+   * Cons:
+   * Manga-Focused: Their primary design is for comics and manga.52 Ebook support is a secondary feature.
+   * No KOSync: They do not support the kosync protocol.
+   * No Hardcover Integration: They lack any integration with Hardcover.app.
+
+
+Architectural Decision: The Hybrid-Server Model
+
+
+Attempting to force one server to do both jobs fails.
+   * Using only CWA sacrifices all audiobook functionality.
+   * Using only ABS sacrifices the critical KOReader/Readest progress sync.
+The most robust, integrated, and feature-complete architecture is a bifurcated, two-server deployment. This is a common pattern in the self-hosting community, where users run CWA for ebooks alongside ABS for audiobooks.55
+
+
+Specific Recommendation: Hybrid CWA + ABS Deployment
+
+
+This architecture deploys two separate containers, CWA and ABS, which are managed in a single docker-compose.yml file.2
+   * Ebook Server: Calibre-Web-Automated (CWA)
+   * Role: Manages the ~/library/ebooks/ directory and its metadata.db.
+   * Integration 1 (OPDS): Provides the OPDS feed (e.g., http://<Tailscale_IP>:8083/opds) for both KOReader and Readest.30
+   * Integration 2 (KOSync): Provides the critical KOSync server (e.g., http://<Tailscale_IP>:8083/kosync) for progress sync between KOReader and Readest.2
+   * Audiobook Server: Audiobookshelf (ABS)
+   * Role: Manages the ~/library/audiobooks/ directory and its absdatabase.sqlite.40
+   * Integration (Client): Provides the server backend for the official Audiobookshelf iOS app.
+
+
+Comparison Matrix: Library Server Candidates
+
+
+
+
+Feature
+	Calibre-Web-Automated (v3.1.0+)
+	Audiobookshelf (v2.8.0+)
+	Komga / Kavita
+	Primary Use
+	Ebooks
+	Audiobooks
+	Comics/Manga
+	Ebook Support
+	Excellent
+	Good 6
+	Good
+	Audiobook Support
+	None
+	Excellent 6
+	None
+	OPDS Feed
+	Excellent 30
+	Yes 40
+	Excellent 51
+	KOReader KOSync
+	Yes (Built-in) 2
+	No
+	No
+	Hardcover Metadata
+	Yes 19
+	Yes (3rd-party) 58
+	No
+	Hardcover Progress Sync
+	Kobo-Only 2
+	Yes (via shelfbridge) 7
+	No
+	Recommendation
+	For Ebooks
+	For Audiobooks
+	Not Recommended
+	   * Confidence Level: High. The hybrid model is the only architecture that satisfies all functional and integration requirements.
+________________
+
+
+4. Audiobook Player & Hardcover.app Integration
+
+
+
+
+Objective Analysis
+
+
+This section requires an iOS audiobook player that integrates with the self-hosted server (Audiobookshelf, from Section 3) and reliably syncs listening statistics to Hardcover.app.
+
+
+Analysis of Candidates
+
+
+
+
+Candidate 1: BookPlayer (User's Current App)
+
+
+   * Pros: Open-source 59 and has native, built-in Hardcover.app sync support.59
+   * Cons: It is a local file player. It supports importing files via AirDrop or the Files app.59 It has no client support for Audiobookshelf.
+   * Conclusion: This is a non-starter. Using BookPlayer would require a fragile, manual file-sync solution (see Section 7) and would be completely disconnected from the central Audiobookshelf server. It breaks the "integrated" requirement.
+
+
+Candidate 2: Official Audiobookshelf iOS App
+
+
+   * Pros: This is the official, purpose-built client for the Audiobookshelf server.40 It provides seamless, native synchronization of all progress, metadata, and playback states with the server.
+   * Cons: It is technically in beta, though widely used.61 It does not have native, built-in support for Hardcover.app sync.
+
+
+Candidate 3: shelfbridge (Server-Side Integration)
+
+
+This component is the key to solving this requirement. shelfbridge is not a player, but a lightweight, open-source Go service that runs in a Docker container alongside Audiobookshelf.7
+   * Function: shelfbridge runs on a schedule (e.g., via cron) and performs the following:
+   1. It directly reads the Audiobookshelf database (absdatabase.sqlite).
+   2. It intelligently matches books in the ABS library to entries in Hardcover.app using ASIN and ISBN identifiers.7
+   3. It detects changes in reading progress (e.g., completion flag, progress percentage).
+   4. It automatically pushes these status updates to the Hardcover.app API.7
+   * Key Features: It correctly maps progress to Hardcover statuses: 0% -> "Want to Read," 1-98% -> "Currently Reading," and $\ge$99% -> "Read".8 It also supports re-reading detection and regression protection.7
+
+
+Architectural Decision: Server-Side Sync
+
+
+The integration must happen on the server, not the client. This decouples the client app from the analytics-sync task.
+   1. The user must stop using BookPlayer, as it cannot integrate with the server.
+   2. The user will use the Official Audiobookshelf iOS App for a best-in-class listening experience synced to the server.
+   3. The shelfbridge container will be deployed on the server to monitor the ABS database.
+   4. This shelfbridge service will be responsible for all Hardcover.app synchronization.
+
+
+Specific Recommendation: Audiobookshelf (Server + App) + shelfbridge
+
+
+   * Rationale: This is the only architecture that provides both a world-class self-hosted audiobook experience (ABS) and automatic Hardcover.app progress syncing (shelfbridge). The sync is server-side, meaning it is automatic and persistent, regardless of what the iOS client is doing.
+   * Setup: shelfbridge is added to the main docker-compose.yml file. It is configured via environment variables, requiring the Hardcover.app API token and the path to the ABS database file (e.g., /config/absdatabase.sqlite).7
+   * Statistics Export: For the Hardcover.app integration, shelfbridge exports the status_id and progress percentage.8 For the unified database (Section 5), a separate script will pull far more granular data (e.g., listening sessions) directly from the ABS API 63 or database.41
+   * Confidence Level: Medium-to-High. The solution relies on a third-party community project (shelfbridge).7 While it is purpose-built and actively discussed 7, it introduces an integration point that is not part of the core ABS project.
+________________
+
+
+5. Unified Database Platform
+
+
+
+
+Objective Analysis: An Analytics Data Warehouse
+
+
+The objective is a central database to unify ebook statistics (from CWA/KOSync) and audiobook statistics (from ABS) for analytics.
+This database will not be used by the primary applications. CWA and ABS will continue to use their own, separate SQLite databases.19 This component's role is a read-only analytics data warehouse. Its only function is to receive data from a periodic ETL script. This requirement is thus simplified: a reliable, persistent, $0-cost hosted PostgreSQL instance.
+
+
+Comparative Evaluation of Free-Tier PostgreSQL Hosting
+
+
+
+
+Provider
+	Free Tier Model
+	DB Storage
+	Pausing/Shutdown Policy
+	Maintenance
+	Supabase
+	Always Free
+	500 MB 23
+	PAUSES after 1 week inactivity 9
+	Low (Managed)
+	Railway
+	$5 One-Time Credit
+	0.5 GB 64
+	SHUTS DOWN when credit is used 65
+	Low (Managed)
+	Fly.io
+	Always Free Allowance
+	~3 GB 11
+	No inactivity pause
+	Low (Managed)
+	Oracle Cloud
+	Always Free
+	(User-defined on VM)
+	No inactivity pause
+	High (User-Managed)
+	
+
+Candidate 1: Supabase Free Tier - REJECTED
+
+
+Supabase provides a Postgres database 66, but its free tier is a "loss leader" 68 unsuitable for this use case.
+   1. Inactivity Pausing: The free tier automatically pauses projects after 1 week of inactivity.9 A database that only receives a nightly ETL write will be flagged as "inactive" and will be constantly shut down.22 While workarounds exist (e.g., GitHub Actions to ping the DB) 21, they are hacks to fight the platform's intent.
+   2. Storage Limit: The 500 MB limit is too small for long-term, granular statistics.23
+
+
+Candidate 2: Railway.app - REJECTED
+
+
+Railway's "free tier" is not an always-free plan. It is a one-time $5 usage credit.64 Once this credit is depleted (which it will be), the services are shut down. This does not meet the $0 ongoing cost constraint.
+
+
+Candidate 3: Oracle Cloud Free Tier - Viable, Not Recommended
+
+
+Oracle's "Always Free" tier is extremely generous, providing VMs that could be used to self-host PostgreSQL.72 However, this would require the user to install, configure, secure, update, and back up the Postgres instance and the underlying operating system. This is a high maintenance burden that violates the "ease of maintenance" principle.
+
+
+Candidate 4: Fly.io - RECOMMENDED
+
+
+Fly.io explicitly offers a free-tier managed Postgres for hobby projects.10 Their "free allowance" includes enough resources to run a small cluster and, critically, 3 GB of persistent volume storage.11 This is 6x larger than Supabase's offering and, most importantly, has no inactivity-pausing policy.
+
+
+Specific Recommendation: Fly.io Free-Tier Managed PostgreSQL
+
+
+   * Rationale: Fly.io provides the best balance of cost ($0), features (fully managed Postgres), and resource limits (3GB storage).10 It is the perfect persistent target for a nightly analytics script.
+   * API Layer: The user query asks about PostgREST. An API layer like PostgREST 76 is unnecessary. The ETL script will run on the host server, which can connect directly to the Fly.io database using the provided Postgres connection string and a standard Python library like psycopg2.79
+   * Schema and Ingestion (The "Glue Code"):
+   * Schema: A simple star schema is recommended.
+   * dim_book (book_id, title, author, source_id, source_type ['ebook'|'audiobook'])
+   * fact_ebook_session (session_id, book_id, start_time, end_time, pages_read, duration_s)
+   * fact_audio_session (session_id, book_id, start_time, end_time, duration_listened_s)
+   * ETL Script: A Python script will be scheduled as a nightly cron job on the host server. This script will:
+   1. Open a read-only sqlite3 connection to the KOSync database (from CWA) 81 and the absdatabase.sqlite (from ABS).83
+   2. Query the page_stat table (from KOReader) 24 and the listeningSessions table (from ABS).63
+   3. Transform this raw data into the unified schema (e.g., aggregate page_stat rows into sessions).
+   4. Open a psycopg2 connection to the Fly.io Postgres connection string.79
+   5. UPSERT the new sessions into the fact_ tables. This script is the primary piece of custom "glue code" required for this architecture.
+   * Confidence Level: High. Fly.io is the correct $0-cost choice for this use case.
+________________
+
+
+6. Secure Remote Access Solution
+
+
+
+
+Objective Analysis
+
+
+The system requires a secure method for the iOS and Boox Palma 2 devices to access the self-hosted services (CWA, ABS) when operating outside the local network. This solution must be $0-cost, reliable, and compatible with all devices.
+
+
+Comparative Evaluation of Remote Access Solutions
+
+
+
+
+Feature
+	Tailscale (Mesh VPN)
+	Cloudflare Tunnel (Proxy)
+	Primary Goal
+	Connect trusted devices privately
+	Expose services publicly
+	Security Model
+	Zero-Trust Private Network (Default Deny)
+	Public Endpoint + Auth Layer (Default Allow)
+	Setup Complexity
+	Very Low: Install app on all devices.86
+	Medium: Configure tunnel per-service, manage public DNS.87
+	Media Streaming (ToS)
+	Permitted. (It's private P2P traffic)
+	Prohibited 13
+	Recommendation
+	DEFINITIVE WINNER
+	UNSUITABLE
+	
+
+Candidate 1: Cloudflare Tunnel - REJECTED
+
+
+Cloudflare Tunnels provide a secure way to expose a local server to the internet without opening firewall ports.87 However, it is architecturally and legally the wrong choice for this system.
+   1. Terms of Service Violation: Cloudflare's Self-Serve Subscription Agreement (Section 2.8) explicitly forbids serving a "disproportionate amount of non-HTML content," which is widely understood to include video and media streaming.88 An audiobook server (Audiobookshelf) streaming hours of audio falls squarely into this prohibited category.13
+   2. Incorrect Security Model: A tunnel is designed to make a service public (albeit secured with an auth layer).92 This is the wrong model for a personal server. It increases attack surface and complexity.
+
+
+Candidate 2: Tailscale (Mesh VPN) - RECOMMENDED
+
+
+Tailscale is a zero-configuration mesh VPN built on WireGuard. It does not expose any services to the public internet. Instead, it creates a secure, private, peer-to-peer overlay network that connects only the user's authenticated devices.12
+   * Pros:
+   * Perfect Security Model: This is the ideal model for a personal, single-user system. The CWA and ABS servers remain completely invisible to the public internet.
+   * Simplicity: Setup is trivial. Install the Tailscale client on the host server (Linux), the Boox Palma (Android), and the iPhone (iOS).86 Once all three devices are logged into the same Tailscale account, they can communicate as if they were on the same local network.
+   * No ToS Violation: Because all traffic is P2P (or routed via a personal DERP relay) and never passes through a public-facing proxy, there are no ToS violations related to media streaming.
+   * Performance: Connections are direct, low-latency WireGuard tunnels whenever possible.12
+
+
+Specific Recommendation: Tailscale
+
+
+   * Rationale: Tailscale is architecturally superior, more secure, simpler to manage, and has no ToS conflicts for this use case. It is the definitive modern solution for personal remote access.
+   * Setup:
+   1. Install Tailscale on the Docker host server.
+   2. Install Tailscale from the Google Play Store on the Boox Palma 2.86
+   3. Install Tailscale from the Apple App Store on the iOS device.86
+   4. Authorize all three devices in the Tailscale admin dashboard.
+   5. Note the server's stable Tailscale IP (e.g., 100.101.102.103).
+   6. All client applications (Readest, KOReader, ABS App) will be configured to use this 100.x.x.x IP address to connect to their respective servers.
+   * Confidence Level: High. This is the community-standard best practice for this exact scenario.93
+________________
+
+
+7. Syncthing Configuration for Multi-Device Library
+
+
+
+
+Objective Analysis
+
+
+This research area requests a configuration for Syncthing to synchronize the media library files (epubs, m4bs). This is distinct from the statistics.sqlite3 file (Section 1).
+
+
+Re-evaluating the "Sync" Requirement by Device
+
+
+A critical analysis of the full architecture reveals that a three-way, multi-device file sync is neither necessary nor desirable.
+   * Audiobooks (All Devices): This is a solved problem. The Audiobookshelf server (ABS) and its iOS client (ABS App) handle this natively. The app will stream or locally cache audiobooks from the server.40 No separate file sync (Syncthing) is needed for audiobooks.
+   * Ebooks (Boox Palma 2): The Palma is an Android device. The official Syncthing Android client is mature, stable, and works reliably, even on Boox devices.94 A one-way sync from the server to the device is a simple and robust solution.
+   * Ebooks (iOS): This is the high-risk component. Syncthing on iOS is notoriously unreliable. Due to Apple's strict background execution limits, iOS aggressively freezes the app, making background synchronization impossible.14
+   * The only viable third-party client, Möbius Sync 97, requires a complex setup process to "Pick External Folder" to sync with the Files app.98
+   * Even when configured, it is unreliable and often requires the user to manually open the app to trigger a sync.15
+   * This creates a high-friction, high-maintenance system that violates the "ease of maintenance" principle.
+
+
+Architectural Decision: Abandon iOS File Sync in Favor of OPDS
+
+
+The superior workflow for iOS is to avoid file-level sync entirely. The user's specified iOS reader, Readest, has first-class support for OPDS.1
+The Calibre-Web-Automated server (Section 3) provides an excellent OPDS feed.30 The user will connect Readest to the CWA server (via Tailscale) and browse/download books on-demand. This is a clean, reliable, client-server model that works every time and avoids the intractable problem of iOS background sync.
+
+
+Specific Recommendation: Syncthing (Boox Only) + OPDS (iOS)
+
+
+This hybrid approach uses the best and most reliable tool for each platform.
+   * Syncthing Configuration (Server <-> Boox Palma):
+   1. Install Syncthing on the host server (in Docker) and on the Boox Palma 2.95
+   2. On the server, share the Calibre library folder (~/library/ebooks/).
+   3. Configure this share as "Send Only" on the server. This prevents accidental file deletions on the device from propagating back to the server.
+   4. On the Boox Palma, accept the share and set the destination folder to its local Books or KOReader/library directory.
+   5. This creates a robust, one-way push of the entire ebook library to the primary e-reader.
+   * OPDS Configuration (Server <-> iOS):
+   1. Ensure the Tailscale client is active on the iOS device.
+   2. In the Readest app, add a new OPDS catalog.
+   3. Enter the Tailscale URL for the CWA server: http://<CWA_Tailscale_IP>:8083/opds.30
+   4. The user can now browse the entire server library and download books directly to Readest as needed.
+   * Confidence Level: High. This architecture is far more reliable and lower-maintenance than attempting a three-way file sync with a problematic iOS client.
+________________
+
+
+8. Integration & Compatibility Analysis (CRITICAL)
+
+
+This section provides a narrative "walkthrough" of the entire integrated system, verifying that all recommended components communicate and function as a cohesive whole.
+
+
+System-Wide Data Flow Narrative
+
+
+
+
+Ebook Workflow: Adding, Syncing, and Reading
+
+
+   1. Ingest: The user places a new file, Book.epub, into the ~/library/ingest/ folder on the host server.
+   2. Processing: The Calibre-Web-Automated (CWA) container detects the new file. It automatically imports the book, adds it to the metadata.db, and moves the file to the ~/library/ebooks/ directory. During this process, it queries the Hardcover.app API to fetch and apply correct metadata.19
+   3. File Distribution (Boox): The Syncthing container detects a change in the ~/library/ebooks/ folder and pushes the new Book.epub file to the Boox Palma 2's local storage via its "Send-Only" share.95
+   4. File Distribution (iOS): The book is now available in the CWA OPDS catalog. The user, from their iOS device, opens Readest. With Tailscale active, Readest connects to the OPDS feed (http://<CWA_Tailscale_IP>:8083/opds) and downloads Book.epub on-demand.1
+   5. Reading & Progress Sync (The "Magic"):
+   * The user reads 50 pages on the Boox (KOReader). Upon closing the book, KOReader (via Tailscale) syncs this progress to the CWA KOSync server (http://<CWA_Tailscale_IP>:8083/kosync).2
+   * Later, the user opens Readest (iOS). Readest (via Tailscale) contacts the same CWA KOSync server, pulling down the latest progress. The book is automatically opened to page 50.1 This provides seamless, two-way progress sync between the two specified devices.
+
+
+Audiobook Workflow: Adding, Listening, and Syncing
+
+
+   1. Ingest: The user places a new file, Audiobook.m4b, into the ~/library/audiobooks/ folder on the host server.
+   2. Processing: The Audiobookshelf (ABS) container's scanner detects the new file, ingests it, and scrapes metadata from Audnexus and other sources.6
+   3. Listening: The user opens the Audiobookshelf App on their iOS device. With Tailscale active, the app connects directly to the ABS server (http://<ABS_Tailscale_IP>:13378).102 The user streams or downloads the book and listens for 30 minutes. All progress is saved directly to the absdatabase.sqlite on the server.40
+   4. Hardcover.app Sync: On the server, the shelfbridge container wakes on its schedule (e.g., every 15 minutes). It reads the absdatabase.sqlite, notes the new 15% progress for Audiobook.m4b, and pushes this "Currently Reading" status update to the Hardcover.app API.7
+
+
+Analytics Workflow: Nightly Aggregation
+
+
+   1. Execute: At 3:00 AM, a cron job on the host server executes the custom Python script (/opt/scripts/etl.py).
+   2. Extract: The script opens read-only sqlite3 connections to the KOSync database (from CWA) 82 and the absdatabase.sqlite (from ABS).83 It queries all new reading sessions from the past 24 hours.
+   3. Transform & Load: The script transforms the ebook and audiobook data into the unified schema. It then opens a psycopg2 connection to the Fly.io PostgreSQL database (via its public connection string) and UPSERTs the new rows into the analytics tables.10
+
+
+Addressing Component Gaps & Custom Code
+
+
+   * Gap: Ebook (KOReader) Progress Sync to Hardcover.app
+   * Status: NOT SOLVED. This is the one requirement from the brief that cannot be met with $0-cost, open-source tools. The CWA Hardcover integration is confirmed to be Kobo-only.2
+   * Mitigation: The user must accept this limitation. Hardcover.app will only reflect their audiobook reading. The true unified database for all statistics (ebooks + audiobooks) will be the self-hosted Fly.io Postgres DB. Writing a custom script to parse the KOSync database and push to the Hardcover GraphQL API is possible, but is a significant custom development project beyond "glue code."
+   * Gap: iOS Library File Sync
+   * Status: SOLVED (by avoidance). The investigation into iOS Syncthing clients 14 reveals this is an unreliable, high-maintenance endeavor. This architecture replaces this fragile requirement with the far superior and more robust OPDS on-demand download workflow 1, which is natively supported by both CWA and Readest.
+
+
+Confirmed Stable Version Compatibility (2024-2025)
+
+
+   * Calibre-Web-Automated (CWA): v3.1.0 or newer is required for the KOSync server.2
+   * Audiobookshelf (ABS): v2.8.0 or newer is recommended for the latest API and ebook support features.84
+   * KOReader: v2024.01 or newer is recommended for stable KOSync and database migration features.1
+   * Readest (iOS): Current App Store versions (2024-2025) support KOReader progress sync.1
+   * shelfbridge: Current latest Docker tag (2024-2025) is confirmed to work with current ABS and Hardcover APIs.7
+   * Syncthing: v2.0.0 or newer is recommended, which includes the new SQLite backend for improved performance.105
+________________
+
+
+9. Implementation Roadmap
+
+
+This roadmap provides a prioritized, phased implementation plan for a solo developer.
+Estimated Total Setup Time: 8-12 hours (assuming proficiency with Docker and command-line interfaces).
+
+
+Phase 1: Foundation (Network, Host, & Database) (Est. 2 hours)
+
+
+   1. Host Server: Provision a host machine (e.g., Raspberry Pi 5, old laptop, or VPS) with a modern Linux distribution (e.g., Debian 12).
+   2. Install Docker & Docker Compose.
+   3. Tailscale Network:
+   * Create a Tailscale account.
+   * Install the Tailscale client on the host server.
+   * Install Tailscale on the Boox Palma 2 (from Play Store).86
+   * Install Tailscale on the iOS device (from App Store).86
+   * Authorize all three devices and verify they can ping each other using their 100.x.x.x IPs. Note the server's Tailscale IP.
+   4. Database:
+   * Create a Fly.io account (this will require a credit card, but the free tier has a $0 cost).
+   * Provision a new free-tier PostgreSQL database cluster.10
+   * Securely save the external PostgreSQL connection string for later use.
+
+
+Phase 2: Core Services & Library Ingest (Est. 3 hours)
+
+
+   1. Directory Structure: On the host server, create the persistent directory structure:
+   * ~/docker/ (for the docker-compose.yml)
+   * ~/docker/cwa-config/
+   * ~/docker/abs-config/
+   * ~/docker/abs-metadata/
+   * ~/library/ebooks/
+   * ~/library/audiobooks/
+   * ~/library/ingest/ (This will be CWA's monitored ingest folder)
+   2. Docker Compose: Create a docker-compose.yml file to deploy the core services. (See setup guides for CWA 2 and ABS 40).
+   3. Initial Configuration (via Local IP):
+   * Access CWA (http://<server-local-IP>:8083). Set up the admin user. Point the Calibre library to the (container-mapped) /library/ebooks/ path. Configure the auto-ingest folder.101
+   * Access ABS (http://<server-local-IP>:13378). Set up the admin user. Create a library pointing to the (container-mapped) /library/audiobooks/ path.40
+   4. Test Ingest: Copy one .epub file to ~/library/ingest/ and one .m4b file to ~/library/audiobooks/. Verify they appear in their respective web UIs.
+
+
+Phase 3: Ebook Integration (KOReader & Readest) (Est. 2 hours)
+
+
+   1. Syncthing (Boox):
+   * Add Syncthing to the docker-compose.yml.
+   * Install Syncthing on the Boox Palma.95
+   * Configure a "Send Only" share on the server for ~/library/ebooks/ and accept it on the Boox, pointing it to a local folder (e.g., Books/Library).
+   2. CWA KOSync: In the CWA admin panel, enable and configure the KOSync server.2
+   3. KOReader (Boox):
+   * Add the CWA OPDS feed using the Tailscale IP: http://<server-tailscale-IP>:8083/opds.30
+   * Configure the "Progress sync" plugin to "custom sync server."
+   * Enter the KOSync URL: http://<server-tailscale-IP>:8083/kosync and your CWA user credentials.30
+   4. Readest (iOS):
+   * Ensure Tailscale is active on the iPhone.
+   * Add the same OPDS feed: http://<server-tailscale-IP>:8083/opds.
+   * Configure the KOReader sync using the same KOSync URL and credentials.1
+   5. Test: Download a book via OPDS on the Boox. Read 10 pages. Close. Open Readest, initiate a sync, and verify the progress appears.
+
+
+Phase 4: Audiobook Integration (ABS & Hardcover) (Est. 2 hours)
+
+
+   1. Client: Install the Audiobookshelf iOS app. Log in using the server's Tailscale IP: http://<server-tailscale-IP>:13378.102
+   2. shelfbridge:
+   * Add the shelfbridge Docker container to your docker-compose.yml.7
+   * Configure its required environment variables: your Hardcover.app API Key and the container path to the ABS database (e.g., /abs-config/absdatabase.sqlite).
+   3. Test: Listen to an audiobook on the iOS app. Wait for the shelfbridge sync interval. Check your Hardcover.app account to verify the "Currently Reading" progress has updated.8
+
+
+Phase 5: Analytics & Maintenance (Est. 3 hours + ongoing)
+
+
+   1. ETL Script: On the host server, create the Python ETL script (/opt/scripts/etl.py).
+   * Install dependencies: pip install psycopg2-binary.
+   * Write the script to read from the two SQLite paths (~/docker/cwa-config/... and ~/docker/abs-config/absdatabase.sqlite).81
+   * Use the Fly.io connection string to connect with psycopg2 and UPSERT the data.79
+   2. Cron Job: crontab -e and add a new line to run the script nightly: 0 3 * * * /usr/bin/python3 /opt/scripts/etl.py.
+   3. Validation: Connect a local SQL client (e.g., DBeaver, pgAdmin) to your Fly.io database and verify that data is being populated.
+
+
+Long-Term Maintenance Expectations
+
+
+   * Low: This architecture is designed for stability and minimal intervention.
+   * Monthly: Run docker compose pull on the host server to update all containers (CWA, ABS, shelfbridge, Syncthing) to their latest versions.
+   * Automated: rclone (Section 2) will handle critical backups automatically. Tailscale (Section 6) "just works." The Fly.io DB (Section 5) is fully managed.
+   * Manual: The user remains responsible for the Tier 2 manual backup of audiobook media files (Section 2).
+   * Primary Risk: The primary maintenance risk is a future schema change in the CWA or ABS databases that breaks the custom ETL script (Section 5). This is a low-probability event for stable, mature projects.
+Works cited
+   1. Newest Version of Readest Syncs Progress w/ KOReader - Reddit, accessed October 24, 2025, https://www.reddit.com/r/koreader/comments/1mofa1q/newest_version_of_readest_syncs_progress_w/
+   2. crocodilestick/Calibre-Web-Automated: Calibre-Web but Automated and with Many New Features! Fully automate and simplify your eBook set up! - GitHub, accessed October 24, 2025, https://github.com/crocodilestick/Calibre-Web-Automated
+   3. Documentation - Rclone, accessed October 24, 2025, https://rclone.org/docs/
+   4. Compare Google Drive vs. Koofr in 2025, accessed October 24, 2025, https://slashdot.org/software/comparison/Google-Drive-vs-Koofr/
+   5. Calibre-Web Automated V3.1.0 Released! - The Community Update Hardcover Integration , Calibre Plugins , Split Library Support , KoReader Sync and much more! : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1metix3/calibreweb_automated_v310_released_the_community/
+   6. advplyr/audiobookshelf: Self-hosted audiobook and podcast server - GitHub, accessed October 24, 2025, https://github.com/advplyr/audiobookshelf
+   7. ShelfBridge - a way to sync your Audiobookshelf Progress to Hardcover - Reddit, accessed October 24, 2025, https://www.reddit.com/r/audiobookshelf/comments/1lyy3si/shelfbridge_a_way_to_sync_your_audiobookshelf/
+   8. audiobookshelf-hardcover-sync - Go Packages, accessed October 24, 2025, https://pkg.go.dev/github.com/drallgood/audiobookshelf-hardcover-sync
+   9. Pricing & Fees | Supabase, accessed October 24, 2025, https://supabase.com/pricing
+   10. Free Postgres Databases · The Fly Blog, accessed October 24, 2025, https://fly.io/blog/free-postgres/
+   11. I want to know about free allowance and pricing plans - Questions / Help - Fly.io Community, accessed October 24, 2025, https://community.fly.io/t/i-want-to-know-about-free-allowance-and-pricing-plans/9318
+   12. An open source, self-hosted implementation of the Tailscale control server - Brian Lovin, accessed October 24, 2025, https://brianlovin.com/hn/43563396
+   13. Self-hosted security - easy option - Tailscale / Cloudflare tunnel / other? : r/selfhosted, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1ig2il2/selfhosted_security_easy_option_tailscale/
+   14. Synctrain (Syncthing on iOS) Background Syncing - Reddit, accessed October 24, 2025, https://www.reddit.com/r/Syncthing/comments/1nfhznz/synctrain_syncthing_on_ios_background_syncing/
+   15. Syncthing - Anyone tried it? : r/ObsidianMD - Reddit, accessed October 24, 2025, https://www.reddit.com/r/ObsidianMD/comments/1iwo08i/syncthing_anyone_tried_it/
+   16. (SQLite) database corruption PSA : r/DataHoarder - Reddit, accessed October 24, 2025, https://www.reddit.com/r/DataHoarder/comments/wt47ud/sqlite_database_corruption_psa/
+   17. SQLite & corruption? : r/sqlite - Reddit, accessed October 24, 2025, https://www.reddit.com/r/sqlite/comments/1es9xih/sqlite_corruption/
+   18. Why my sqlite database is showing corrupt erro - Reddit, accessed October 24, 2025, https://www.reddit.com/r/sqlite/comments/lwupvv/why_my_sqlite_database_is_showing_corrupt_erro/
+   19. Releases · crocodilestick/Calibre-Web-Automated - GitHub, accessed October 24, 2025, https://github.com/crocodilestick/Calibre-Web-Automated/releases
+   20. The new version of Calibre-Web Automated comes with its own KoReader Sync integration. Nice way to have your own self hosted calibre library, opds server and KoReader progress sync all in one - Reddit, accessed October 24, 2025, https://www.reddit.com/r/koreader/comments/1mf1rbr/the_new_version_of_calibreweb_automated_comes/
+   21. How to Prevent Your Supabase Project Database from Being Paused Using GitHub Actions, accessed October 24, 2025, https://dev.to/jps27cse/how-to-prevent-your-supabase-project-database-from-being-paused-using-github-actions-3hel
+   22. Active projects now getting paused : r/Supabase - Reddit, accessed October 24, 2025, https://www.reddit.com/r/Supabase/comments/1n8du48/active_projects_now_getting_paused/
+   23. Supabase Pricing in 2025: Full Breakdown of Plans | UI Bakery Blog, accessed October 24, 2025, https://uibakery.io/blog/supabase-pricing
+   24. Ability to export Reading Statistics data · Issue #6454 - GitHub, accessed October 24, 2025, https://github.com/koreader/koreader/issues/6454
+   25. How to export reading statistics to another device? : r/koreader - Reddit, accessed October 24, 2025, https://www.reddit.com/r/koreader/comments/1hm6cgs/how_to_export_reading_statistics_to_another_device/
+   26. Using webdav to synchronize reading statistics when the database is too large can cause the synchronization to take too long. · Issue #10342 · koreader/koreader - GitHub, accessed October 24, 2025, https://github.com/koreader/koreader/issues/10342
+   27. Product Comparison: Koofr vs. Google Drive, accessed October 24, 2025, https://koofr.eu/blog/posts/product-comparison-koofr-vs-google-drive
+   28. Cloud Storage Options : r/koreader - Reddit, accessed October 24, 2025, https://www.reddit.com/r/koreader/comments/1h4bip3/cloud_storage_options/
+   29. Sync between ereader and phone tutorial : r/koreader - Reddit, accessed October 24, 2025, https://www.reddit.com/r/koreader/comments/1hye2y6/sync_between_ereader_and_phone_tutorial/
+   30. Selfhosted eBook Library - blog.rabu.me, accessed October 24, 2025, https://blog.rabu.me/self-hosted-library-koreader-calibre-sync-highlights-export-readwise/
+   31. How to create personal syncing server : r/koreader - Reddit, accessed October 24, 2025, https://www.reddit.com/r/koreader/comments/1fvt2d5/how_to_create_personal_syncing_server/
+   32. koreader/koreader-sync-server: self hostable synchronization service for koreader devices - GitHub, accessed October 24, 2025, https://github.com/koreader/koreader-sync-server
+   33. b1n4ryj4n/koreader-sync: Simple implementation of the KOReader position sync server for self-hosting at home which has docker support for arm and amd64 - GitHub, accessed October 24, 2025, https://github.com/b1n4ryj4n/koreader-sync
+   34. KOReader crashes · Issue #11354 - GitHub, accessed October 24, 2025, https://github.com/koreader/koreader/issues/11354
+   35. statistics plugin failed to sync · Issue #10507 - GitHub, accessed October 24, 2025, https://github.com/koreader/koreader/issues/10507
+   36. Best cloud storage of 2025: our expert rankings | TechRadar, accessed October 24, 2025, https://www.techradar.com/best/best-cloud-storage
+   37. Koofr - Rclone, accessed October 24, 2025, https://rclone.org/koofr/
+   38. The 11 best cloud storage apps in 2025 - Zapier, accessed October 24, 2025, https://zapier.com/blog/best-cloud-storage-apps/
+   39. Learning the basics of Koofr with rclone, accessed October 24, 2025, https://koofr.eu/blog/posts/learning-the-basics-of-koofr-with-rclone
+   40. Docs - audiobookshelf, accessed October 24, 2025, https://www.audiobookshelf.org/docs/
+   41. Move existing library from one Windows machine to another : r/audiobookshelf - Reddit, accessed October 24, 2025, https://www.reddit.com/r/audiobookshelf/comments/1bjqune/move_existing_library_from_one_windows_machine_to/
+   42. Releases · crocodilestick/Calibre-Web-Automated - GitHub, accessed October 24, 2025, https://github.com/crocodilestick/Calibre-Web-Automated/releases?ref=selfh.st
+   43. For upcoming book library hosters: Don't use calibre-web (or especially calibre-web-automated). There are outright better alternatives for the same functionality : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1npsco9/for_upcoming_book_library_hosters_dont_use/
+   44. Calibre-Web Automated best choice for books? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1ksgp3i/calibreweb_automated_best_choice_for_books/
+   45. Self-hosted... Library? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1g6sr2e/selfhosted_library/
+   46. For those Wanted their own Hosted Service for Audiobooks... - Reddit, accessed October 24, 2025, https://www.reddit.com/r/audiobooks/comments/1b5yhc3/for_those_wanted_their_own_hosted_service_for/
+   47. What are we using for books in 2024 : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1f9qr3n/what_are_we_using_for_books_in_2024/
+   48. Streamlined eBook experience - Readarr, LazyLibrarian, Calibre, Calibre-Web, Kavita and Audio Book Shelf (for audio books and podcasts) : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1btd5xw/streamlined_ebook_experience_readarr/
+   49. Kavita vs Ubooquity vs Calibre : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1hfdxfp/kavita_vs_ubooquity_vs_calibre/
+   50. Current state of self hosted ebook readers? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1ilmi77/current_state_of_self_hosted_ebook_readers/
+   51. Read with any OPDS reader - Komga, accessed October 24, 2025, https://komga.org/docs/guides/opds/
+   52. A list of awesome resources for OPDS users and developers - GitHub, accessed October 24, 2025, https://github.com/opds-community/awesome-opds
+   53. Synology: Best Docker Containers to Manage Books - Marius Hosting, accessed October 24, 2025, https://mariushosting.com/synology-best-docker-containers-to-manage-books/
+   54. Is there an app for comics that works like Plex or audiobookshelf? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1o0urml/is_there_an_app_for_comics_that_works_like_plex/
+   55. Installing Calibre And Calibre-Web Using Portainer : Useful And Easy - Patnotebook, accessed October 24, 2025, https://www.patnotebook.com/installing-calibre-and-calibre-web-using-portainer/
+   56. Audiobookshelf + CalibreWebAutomated together? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1j43uza/audiobookshelf_calibrewebautomated_together/
+   57. How do you manage your (e/audio)books stack? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1l90p72/how_do_you_manage_your_eaudiobooks_stack/
+   58. Custom Metadata Provider for ABS - Hardcover : r/audiobookshelf - Reddit, accessed October 24, 2025, https://www.reddit.com/r/audiobookshelf/comments/1ig6cqo/custom_metadata_provider_for_abs_hardcover/
+   59. BookPlayer on the App Store, accessed October 24, 2025, https://apps.apple.com/cn/app/bookplayer/id1138219998?l=en-GB
+   60. BookPlayer on the App Store, accessed October 24, 2025, https://apps.apple.com/us/app/bookplayer/id1138219998
+   61. App FAQ - audiobookshelf, accessed October 24, 2025, https://www.audiobookshelf.org/faq/app/
+   62. Using alternative apps for playback? : r/audiobookshelf - Reddit, accessed October 24, 2025, https://www.reddit.com/r/audiobookshelf/comments/1c1vspr/using_alternative_apps_for_playback/
+   63. Power Query and Stats in Excel - audiobookshelf, accessed October 24, 2025, https://www.audiobookshelf.org/guides/power-query/
+   64. Railway Pricing and Plans, accessed October 24, 2025, https://railway.com/pricing
+   65. Railway vs Render (2025): Which cloud platform fits your workflow better | Blog - Northflank, accessed October 24, 2025, https://northflank.com/blog/railway-vs-render
+   66. Database | Supabase Docs, accessed October 24, 2025, https://supabase.com/docs/guides/database/overview
+   67. Top PostgreSQL Database Free Tiers in 2025 - Koyeb, accessed October 24, 2025, https://www.koyeb.com/blog/top-postgresql-database-free-tiers-in-2025
+   68. How is Supabase free? - Reddit, accessed October 24, 2025, https://www.reddit.com/r/Supabase/comments/1fab34u/how_is_supabase_free/
+   69. My Supabase Project is not Resuming after Pause #38950 - GitHub, accessed October 24, 2025, https://github.com/orgs/supabase/discussions/38950
+   70. Railway Free Developer plan will be gone, where to deploy Node.js code for free? - Reddit, accessed October 24, 2025, https://www.reddit.com/r/webdev/comments/14pl5et/railway_free_developer_plan_will_be_gone_where_to/
+   71. Railway.app free plan usage advice or any alternatives(as a student). : r/node - Reddit, accessed October 24, 2025, https://www.reddit.com/r/node/comments/1fbpevm/railwayapp_free_plan_usage_advice_or_any/
+   72. Oracle Cloud Free Tier, accessed October 24, 2025, https://www.oracle.com/cloud/free/
+   73. Does Oracle Cloud Free tier have any gotchas or is it legitimately free to use? - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1ma6jbt/does_oracle_cloud_free_tier_have_any_gotchas_or/
+   74. Free Postgres database hosting sites suggestions? with Bit.io shutting down - Reddit, accessed October 24, 2025, https://www.reddit.com/r/webdev/comments/13x0zgc/free_postgres_database_hosting_sites_suggestions/
+   75. Pricing - Fly.io, accessed October 24, 2025, https://fly.io/pricing/
+   76. PostgREST: Your Database IS the API | by Peter Kracik | Oct, 2025 | Medium, accessed October 24, 2025, https://medium.com/@peterkracik/postgrest-your-database-is-the-api-0a39cdd7ec5d
+   77. PostgREST Documentation — PostgREST 13.0 documentation, accessed October 24, 2025, https://postgrest.org/
+   78. PostgREST/postgrest: REST API for any Postgres database - GitHub, accessed October 24, 2025, https://github.com/PostgREST/postgrest
+   79. Connect to a PostgreSQL database using psycopg2 and export data | by jewelski - Medium, accessed October 24, 2025, https://medium.com/@jewelski/connect-to-a-postgresql-database-using-psycopg2-and-export-data-474f0f3a3f70
+   80. Extracting and loading data into a Postgres database using a Python script, accessed October 24, 2025, https://help.lever.co/hc/en-us/articles/20087329415581-Extracting-and-loading-data-into-a-Postgres-database-using-a-Python-script
+   81. How to fetch data from sqlite using python? - Stack Overflow, accessed October 24, 2025, https://stackoverflow.com/questions/52815376/how-to-fetch-data-from-sqlite-using-python
+   82. KoInsight brings your KoReader reading stats to life with a clean, web-based dashboard. - GitHub, accessed October 24, 2025, https://github.com/GeorgeSG/KoInsight
+   83. sqlite3 — DB-API 2.0 interface for SQLite databases — Python 3.14.0 documentation, accessed October 24, 2025, https://docs.python.org/3/library/sqlite3.html
+   84. Migration and Backups - audiobookshelf, accessed October 24, 2025, https://www.audiobookshelf.org/guides/migration-and-backups/
+   85. Python data loading with Supabase, accessed October 24, 2025, https://supabase.com/blog/loading-data-supabase-python
+   86. The best ways to use Tailscale for sharing with friends and family, accessed October 24, 2025, https://tailscale.com/blog/tailscale-sharing-friends-family
+   87. Self-hosting securely with Cloudflare Zero Trust Tunnels | by Sven van Ginkel | Medium, accessed October 24, 2025, https://medium.com/@svenvanginkel/self-hosting-securely-with-cloudflare-zero-trust-tunnels-0a9169378f78
+   88. Is cloudflare tunnel free?, accessed October 24, 2025, https://community.cloudflare.com/t/is-cloudflare-tunnel-free/318224
+   89. I used a Cloudflare Tunnel to self-host Nextcloud, and I wish I'd thought of it sooner, accessed October 24, 2025, https://www.xda-developers.com/used-cloudflare-tunnel-self-host-nextcloud-wish-thought-sooner/
+   90. Another comparison of Tailscale vs Cloudflare tunnel (WARP) : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1ix61th/another_comparison_of_tailscale_vs_cloudflare/
+   91. What's wrong with Cloudflare tunnels? : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1enpwdb/whats_wrong_with_cloudflare_tunnels/
+   92. Seeking opinion: tailscale vs cloudfare tunnel for Home Assistant : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1ntna7k/seeking_opinion_tailscale_vs_cloudfare_tunnel_for/
+   93. Easiest way to get Remote Access working AudioBookShelf : r/unRAID - Reddit, accessed October 24, 2025, https://www.reddit.com/r/unRAID/comments/1g2cdai/easiest_way_to_get_remote_access_working/
+   94. How to configure Syncthing on Android, accessed October 24, 2025, https://forum.syncthing.net/t/how-to-configure-syncthing-on-android/22117
+   95. Has anyone been able to use SyncThing with a Boox? : r/Onyx_Boox - Reddit, accessed October 24, 2025, https://www.reddit.com/r/Onyx_Boox/comments/17lwa3c/has_anyone_been_able_to_use_syncthing_with_a_boox/
+   96. New Onyx Owner What is the Best Way to Sync Air 4C and Palma 2 : r/Onyx_Boox - Reddit, accessed October 24, 2025, https://www.reddit.com/r/Onyx_Boox/comments/1hspw45/new_onyx_owner_what_is_the_best_way_to_sync_air/
+   97. Möbius Sync | Bringing Syncthing to iOS. Sync files between all your devices., accessed October 24, 2025, https://mobiussync.com/
+   98. Syncing files from other apps · MobiusSync MobiusSync · Discussion #102 - GitHub, accessed October 24, 2025, https://github.com/MobiusSync/MobiusSync/discussions/102
+   99. Sync Mac/PC and iOS using Syncthing + Möbius Sync - Obsidian Forum, accessed October 24, 2025, https://forum.obsidian.md/t/sync-mac-pc-and-ios-using-syncthing-mobius-sync/72022
+   100. Möbius Sync on the App Store - Apple, accessed October 24, 2025, https://apps.apple.com/us/app/m%C3%B6bius-sync/id1539203216
+   101. Calling my fellow Calibre-Web users: Introducing Calibre-Web Automator : r/selfhosted - Reddit, accessed October 24, 2025, https://www.reddit.com/r/selfhosted/comments/1dnkpv8/calling_my_fellow_calibreweb_users_introducing/
+   102. Here's a simple guide for anyone interested in using AudioBookShelf on Windows - Reddit, accessed October 24, 2025, https://www.reddit.com/r/audiobookshelf/comments/1gmdyk7/heres_a_simple_guide_for_anyone_interested_in/
+   103. [Feature Request] Sync Progress with KOReader · Issue #319 · crocodilestick/Calibre-Web-Automated - GitHub, accessed October 24, 2025, https://github.com/crocodilestick/Calibre-Web-Automated/issues/319
+   104. Custom Metadata Providers - audiobookshelf, accessed October 24, 2025, https://www.audiobookshelf.org/guides/custom-metadata-providers/
+   105. Syncthing 2.0 released - Reddit, accessed October 24, 2025, https://www.reddit.com/r/Syncthing/comments/1mokwb7/syncthing_20_released/

@@ -1,0 +1,10 @@
+﻿File name,Description
+Audible.CartHistory.csv,"This file contains information about a customer’s shopping cart history, such as the date on which a particular audiobook title was added, whether it was purchased or deleted, and if deleted, the date of deletion."
+Audible.Credits.csv,"This file contains information about a customer’s credits, such as credit issuance and consumption dates, the reason for the credit (for example, trial, return, gift membership or conversion), the current plan a customer is subscribed to, credit amount and credit status (for example, active or inactive)."
+Audible.DevicesActivations.csv,"This file contains information about the device on which the Audible application is activated, such as the date of activation or deactivation, the type of device (for instance, iPhone), Device OS (for example, iOS), etc."
+Audible.Library.csv,"This file contains information about a customer's Library, such as their audiobook titles, purchase types, and whether they were streamed, downloaded, and deleted."
+Listening.csv,"This file contains information about a customer’s listening history, such as the audiobook title, listening times, start and end positions, delivery type (for instance, streaming or download), narration speed, and whether the audiobook is owned by the customer."
+Audible.MembershipBillings.csv,"This file contains information about a customer’s account billing history, such as their billing periods, amount, tax, membership type (for example, Premium or PremiumPlus), and payment plans."
+Audible.MembershipEvent.csv,"This file contains information about a customer’s account membership, such as membership trials, plans, upgrades, cancellations, temporary pauses, and account delinquencies."
+Audible.Promotions.csv,"This file contains information about promotions offered to a customer, such as type of promotion (for example, loyalty or credit rewards), coupon amounts, promotion start/end dates, claim codes, redemption status, and claim dates."
+Audible.PurchaseHistory.csv,"This file contains information about a customer’s purchase history, such as audiobook titles, order IDs, dates, payment methods used, and prices."

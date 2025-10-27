@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/mmm/workflows/4-implementation/story-context/1.1" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Deploy Calibre-Web-Automated on Raspberry Pi 4</title>
+    <status>Draft</status>
+    <generatedAt>2025-10-26</generatedAt>
+    <generator>BMAD Story Context Workflow (Scrum Master)</generator>
+    <sourceStoryPath>docs/stories/1-1-deploy-calibre-web-automated-on-raspberry-pi-4.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a reader</asA>
+    <iWant>a self-hosted library server running on my Raspberry Pi 4</iWant>
+    <soThat>I can manage my ebook library with a web interface and prepare for automated workflows</soThat>
+
+    <tasks>
+      <taskGroup name="Setup and Configuration">
+        <task id="1.1.1">Prepare Raspberry Pi environment</task>
+        <task id="1.1.2">Create Docker Compose stack for CWA</task>
+        <task id="1.1.3">Deploy and verify CWA startup</task>
+      </taskGroup>
+
+      <taskGroup name="Memory and Performance Validation">
+        <task id="1.1.4">Validate idle memory usage</task>
+      </taskGroup>
+
+      <taskGroup name="Library Initialization and Test">
+        <task id="1.1.5">Initialize test library with sample books</task>
+        <task id="1.1.6">Test basic library browsing</task>
+      </taskGroup>
+
+      <taskGroup name="Docker Auto-Restart Validation">
+        <task id="1.1.7">Verify auto-restart policy</task>
+      </taskGroup>
+
+      <taskGroup name="Testing">
+        <task id="1.1.8">Execute acceptance test suite</task>
+      </taskGroup>
+
+      <taskGroup name="Documentation">
+        <task id="1.1.9">Document deployment and configuration</task>
+      </taskGroup>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Docker Compose stack configured for Calibre-Web-Automated v3.1.0+ on Raspberry Pi 4 2GB</criterion>
+    <criterion id="AC2">CWA web UI accessible on local network at http://raspberrypi.local:8083</criterion>
+    <criterion id="AC3">Basic Calibre library initialized with test books and accessible through web interface</criterion>
+    <criterion id="AC4">Idle memory usage validated at &lt;600 MB for CWA container</criterion>
+    <criterion id="AC5">Test library scan with 20+ books completes without crashes or OOM (Out of Memory) errors</criterion>
+    <criterion id="AC6">CWA container configured with Docker restart policy to auto-restart on reboot</criterion>
+    <criterion id="AC7">All services (CWA, Syncthing, metadata management) running successfully in Docker Compose</criterion>
+    <criterion id="AC8">Service health verified: CWA responsive to web requests, container logs show no critical errors</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Services and Modules; Data Models and Contracts; APIs and Interfaces; Workflows and Sequencing (Story 1.1)</section>
+        <snippet>Calibre-Web-Automated Docker container with KOSync server embedded; metadata.db SQLite persistence; sync and backup layer design; critical SQLite corruption safeguards for future Epic 3.</snippet>
+      </doc>
+
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>Section 3.2 (Sync &amp; Backup Layer), Section 3.3 (Library Management Layer), Section 3.4 (Access Layer)</section>
+        <snippet>CWA provides the core library server and KOSync progress sync capability; local network access via mDNS; data layer separation between metadata.db (server) and statistics.sqlite3 (device).</snippet>
+      </doc>
+
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirement FR005; Non-Functional Requirements NFR001-NFR003; User Journey 1 (Adding a New Ebook)</section>
+        <snippet>Auto-ingestion workflow &lt;30 seconds from file drop to library availability; 99%+ uptime target; zero-cost infrastructure using free-tier services; automated metadata enrichment with Hardcover API.</snippet>
+      </doc>
+
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown Document</title>
+        <section>Epic 1 Overview, Story 1.1 Details and Acceptance Criteria</section>
+        <snippet>Deploy CWA on RPi 4 2GB with performance validation; establish foundational infrastructure; prepare for auto-ingestion and cross-device sync; Syncthing and rclone initialization (used in Epic 2 and 3).</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <codeArtifact>
+        <path>docker-compose.yml</path>
+        <kind>Infrastructure Configuration (Docker)</kind>
+        <symbol>services.cwa, services.syncthing</symbol>
+        <reason>Primary deliverable for this story: multi-container orchestration defining Calibre-Web-Automated and Syncthing services with resource limits, restart policies, volume mounts, port mappings.</reason>
+      </codeArtifact>
+
+      <codeArtifact>
+        <path>bmad/bmm/config.yaml</path>
+        <kind>Project Configuration</kind>
+        <symbol>project_name, dev_story_location, tech_docs</symbol>
+        <reason>Provides context for story location (/docs/stories) and tech documentation paths; available to all workflows for consistent project setup.</reason>
+      </codeArtifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="Docker">
+        <package name="Docker Engine" version="20.10+" required="true">Container runtime for RPi ARM architecture</package>
+        <package name="Docker Compose" version="1.29+" required="true">Multi-container orchestration and service management</package>
+      </ecosystem>
+
+      <ecosystem name="Container Images">
+        <package name="calibrewebautomated" version="3.1.0+" required="true">Core library server with metadata management and KOSync support</package>
+        <package name="syncthing" version="1.20+" required="true">File synchronization service (initialized but not fully configured in this story)</package>
+      </ecosystem>
+
+      <ecosystem name="System">
+        <package name="Raspberry Pi OS" version="Bullseye or later" required="true">Base operating system for RPi 4</package>
+        <package name="mDNS (avahi-daemon)" version="system-default" required="true">Local network hostname resolution (raspberrypi.local)</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="C1">
+      <area>Hardware</area>
+      <description>Memory Limitation on RPi 4 2GB</description>
+      <requirement>CWA container memory limit must not exceed 1.5 GB; idle memory target &lt;600 MB. Larger libraries or concurrent metadata lookups may require RPi 5 upgrade.</requirement>
+      <source>docs/tech-spec-epic-1.md#Performance, docs/architecture.md#Resource-Constraint</source>
+    </constraint>
+
+    <constraint id="C2">
+      <area>Data Safety</area>
+      <description>SQLite Metadata Database Persistence</description>
+      <requirement>metadata.db must be persisted in Docker volume across container restarts. Never use file-level sync tools (Syncthing) for live database synchronization—this causes corruption. Syncthing is ONE-WAY ONLY for backup purposes in future epics.</requirement>
+      <source>docs/architecture.md#CRITICAL-WARNING-SQLite-Corruption-Risk, docs/tech-spec-epic-1.md#Risks-and-Mitigations</source>
+    </constraint>
+
+    <constraint id="C3">
+      <area>Network</area>
+      <description>Local Network mDNS Resolution</description>
+      <requirement>CWA web UI must be accessible on local network using mDNS hostname (raspberrypi.local). If mDNS unavailable, fall back to direct IP address lookup.</requirement>
+      <source>docs/tech-spec-epic-1.md#Known-Risks-and-Mitigations</source>
+    </constraint>
+
+    <constraint id="C4">
+      <area>Configuration</area>
+      <description>Docker Compose Version Pinning</description>
+      <requirement>Pin CWA version to v3.1.0+ in docker-compose.yml to avoid breaking changes. Document version upgrade procedure for future maintenance.</requirement>
+      <source>docs/tech-spec-epic-1.md#Known-Risks-and-Mitigations</source>
+    </constraint>
+
+    <constraint id="C5">
+      <area>Operations</area>
+      <description>Service Restart Policy</description>
+      <requirement>All services in Docker Compose must have restart_policy: always to ensure auto-recovery from crashes and reboots. Test auto-restart behavior explicitly in Story 1.1 Task 7.</requirement>
+      <source>docs/epics.md#Story-1.1, docs/tech-spec-epic-1.md#Workflows-and-Sequencing</source>
+    </constraint>
+
+    <constraint id="C6">
+      <area>Testing</area>
+      <description>Test Library Size</description>
+      <requirement>Use minimum 20+ test books for library initialization and scanning. Test books should be representative sizes to trigger realistic metadata operations.</requirement>
+      <source>docs/tech-spec-epic-1.md#Acceptance-Criteria, docs/epics.md#Story-1.1</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Calibre-Web-Automated HTTP API</name>
+      <kind>REST Web Service</kind>
+      <signature>GET http://raspberrypi.local:8083/ (web UI root); GET http://raspberrypi.local:8083/api/books (library browsing); POST http://raspberrypi.local:8083/api/metadata/enrich (future metadata enrichment)</signature>
+      <port>8083</port>
+      <protocol>HTTP</protocol>
+      <authentication>Basic auth (admin username/password)</authentication>
+      <path>CWA container internal; accessible via Docker port mapping</path>
+      <reason>Primary interface for library management; web UI provides book browsing, metadata editing, and admin functions.</reason>
+    </interface>
+
+    <interface>
+      <name>KOSync Server</name>
+      <kind>Application-Aware Progress Sync Protocol</kind>
+      <signature>Port 8083/kosync (embedded in CWA); transaction-safe progress synchronization for KOReader and Readest</signature>
+      <port>8083</port>
+      <protocol>Custom binary protocol (KOSync)</protocol>
+      <authentication>Device-specific authentication (username/device ID)</authentication>
+      <path>Embedded in CWA container; configured during Epic 2</path>
+      <reason>Provides safe, application-aware progress synchronization across devices (Boox, iOS); prevents SQLite corruption through transaction-aware protocol vs. file-level sync.</reason>
+    </interface>
+
+    <interface>
+      <name>Syncthing File Sync Service</name>
+      <kind>Bi-directional File Synchronization</kind>
+      <signature>Port 8384 (Syncthing UI); configured for ONE-WAY ONLY in this story (library distribution to devices in Epic 2; statistics backup from devices in Epic 3)</signature>
+      <port>8384</port>
+      <protocol>Syncthing binary protocol with TLS</protocol>
+      <authentication>Device ID exchange and verification</authentication>
+      <path>Syncthing container; initialized in Docker Compose but not paired in Story 1.1</path>
+      <reason>Initialized in Story 1.1 for future use; enables file distribution to Boox (Epic 2) and disaster recovery backup from devices (Epic 3). CRITICAL: must be ONE-WAY to prevent SQLite corruption.</reason>
+    </interface>
+
+    <interface>
+      <name>Docker Compose CLI</name>
+      <kind>Command-Line Interface</kind>
+      <signature>docker-compose up -d, docker-compose ps, docker-compose stop, docker-compose logs, docker stats</signature>
+      <protocol>Docker daemon socket</protocol>
+      <authentication>User must be in docker group (no sudo required)</authentication>
+      <path>RPi system; Docker socket at /var/run/docker.sock</path>
+      <reason>Primary operational interface for starting/stopping services, checking status, monitoring resource usage, reviewing logs.</reason>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing for Story 1.1 combines Docker container verification, HTTP endpoint testing, and integration validation. No custom code testing required—testing focuses on configuration correctness, resource constraints, and acceptance criteria verification. Test frameworks: Docker inspect/stats for container health; curl for HTTP endpoint testing; container log analysis for error detection. All tests must be documented in a test report with timestamps, resource measurements, and pass/fail status per AC.
+    </standards>
+
+    <locations>
+      Test artifacts and logs should be stored in project root or docs/test-results/ directory. Docker Compose logs available via: docker-compose logs cwa, docker-compose logs syncthing. Resource monitoring output should be captured to file during Story 1.1 Task 4. Manual test steps documented in narrative form in story completion notes.
+    </locations>
+
+    <ideas>
+      <testIdea acId="AC1">Docker Compose Validation: Run docker-compose config to validate YAML syntax and required fields (services, volumes, restart policies). Verify CWA and Syncthing service definitions include all necessary configurations.</testIdea>
+
+      <testIdea acId="AC2">HTTP Endpoint Health: Use curl to test CWA web UI accessibility. GET http://raspberrypi.local:8083 should return 200 OK. Verify login page loads and version string is visible (v3.1.0+). Test from local network client (not directly on RPi).</testIdea>
+
+      <testIdea acId="AC3">Library Initialization: Import 20+ test EPUB/PDF files via Docker volume mount or CWA upload interface. Verify all books indexed in metadata.db. Test library search and browsing functionality. Validate cover art display and metadata completeness.</testIdea>
+
+      <testIdea acId="AC4">Memory Profiling: Use docker stats to capture memory usage after CWA initialization. Record readings at: 1 min, 2 min, 5 min post-startup. Target idle &lt;600 MB. If exceeded, investigate configuration (cache settings, plugin load) or image bloat. Document findings in test report.</testIdea>
+
+      <testIdea acId="AC5">Load Test - Library Scan: Start docker stats in background to monitor CPU/memory. Trigger library scan on 20+ book collection. Monitor scan progress in CWA logs. Verify completion without crashes, timeouts, or OOM errors. Record scan duration and peak memory usage.</testIdea>
+
+      <testIdea acId="AC6">Restart Policy Test: Stop CWA container (docker-compose stop cwa). Wait 5 seconds. Verify auto-restart via docker-compose ps. Simulate full system reboot (if feasible). Verify services auto-start post-reboot and web UI is accessible. Document restart behavior in logs.</testIdea>
+
+      <testIdea acId="AC7">Multi-Service Health: Run docker-compose ps to verify all services (cwa, syncthing) show status: Up. Check docker-compose logs for critical errors. Verify no service crashloops. Confirm port mappings (8083 for CWA, 8384 for Syncthing) are correct.</testIdea>
+
+      <testIdea acId="AC8">Log Analysis: Review docker-compose logs cwa output for errors, warnings, or anomalies. Verify CWA startup sequence completes normally. Check for initialization messages (metadata.db created, services ready). Confirm no persistent error patterns. Generate summary of log health check.</testIdea>
+    </ideas>
+  </tests>
+
+</story-context>

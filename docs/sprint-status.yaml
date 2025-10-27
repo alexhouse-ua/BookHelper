@@ -1,0 +1,79 @@
+# generated: 2025-10-26
+# project: BookHelper
+# project_key: BookHelper
+# tracking_system: file-system
+# story_location: {project-root}/docs/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via review-story workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-10-26
+project: BookHelper
+project_key: BookHelper
+tracking_system: file-system
+story_location: {project-root}/docs/stories
+
+development_status:
+  # ========== EPIC 1: Core Library Server & Database Foundation ==========
+  epic-1: contexted
+  1-1-deploy-calibre-web-automated-on-raspberry-pi-4: ready-for-dev
+  1-2-configure-hardware-performance-validation-checkpoint: backlog
+  1-3-configure-auto-ingestion-workflow-with-hardcover-metadata: backlog
+  1-4-design-and-implement-unified-database-schema: backlog
+  1-5-implement-library-backup-to-separate-storage: backlog
+  1-6-document-calibre-cli-fallback-procedures: backlog
+  epic-1-retrospective: optional
+
+  # ========== EPIC 2: Device Sync & Remote Access ==========
+  epic-2: backlog
+  2-1-configure-syncthing-for-one-way-library-sync-to-boox-palma-2: backlog
+  2-2-configure-opds-catalog-for-ios-readest-access: backlog
+  2-3-configure-tailscale-for-remote-library-access: backlog
+  2-4-enable-kosync-progress-sync-across-devices: backlog
+  epic-2-retrospective: optional
+
+  # ========== EPIC 3: Ebook Statistics Backup & Analytics ==========
+  epic-3: backlog
+  3-1-configure-one-way-statistics-backup-from-boox-to-rpi: backlog
+  3-2-build-etl-pipeline-for-statistics-extraction: backlog
+  3-3-set-up-sql-query-interface-and-validate-analytics: backlog
+  3-4-implement-monitoring-and-alerting-system: backlog
+  epic-3-retrospective: optional
+
+  # ========== EPIC 4: Audiobook Integration ==========
+  epic-4: backlog
+  4-1-set-up-bookplayer-and-configure-hardcover-sync: backlog
+  4-2-extract-audiobook-statistics-from-hardcover-api: backlog
+  4-3-integrate-audiobook-data-into-unified-database: backlog
+  epic-4-retrospective: optional
+
+  # ========== EPIC 5: Historical Data Migration & Timeline Consolidation ==========
+  epic-5: backlog
+  5-1-set-up-sandbox-testing-environment-for-migration: backlog
+  5-2-build-kindle-reading-history-parser-and-import-script: backlog
+  5-3-build-audible-listening-history-parser-and-import-script: backlog
+  5-4-implement-data-validation-and-rollback-mechanism: backlog
+  5-5-execute-hardcover-reconciliation-and-create-unified-timeline: backlog
+  epic-5-retrospective: optional

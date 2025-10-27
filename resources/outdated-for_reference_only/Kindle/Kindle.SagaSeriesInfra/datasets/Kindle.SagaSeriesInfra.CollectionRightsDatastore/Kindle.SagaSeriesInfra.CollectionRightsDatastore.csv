@@ -1,0 +1,75 @@
+﻿record-type,series-asin,customer-owned-item-count-in-series,item-asin,item-position-in-series,record-created-by,record-updated-by,time-of-latest-acquisition-of-series-in-utc
+Series,B0771RYXR1,2,,,Internal Process,Internal Process,2024-04-08T14:09:00.591Z
+Series,B07BHYNDJN,4,,,Internal Process,Internal Process,2024-04-15T05:20:54.965Z
+Series,B07DBGB5PK,1,,,Internal Process,Internal Process,2024-03-29T21:25:11.753Z
+Series,B07FK9VBD7,2,,,Internal Process,Internal Process,2018-02-13T20:10:53.191Z
+Series,B07SKCM1D8,1,,,Internal Process,Internal Process,2018-07-30T00:14:38.880Z
+Series,B07VWR6FML,1,,,Internal Process,Internal Process,2022-04-30T15:58:24.078Z
+Series,B07ZZ6R4RS,2,,,Internal Process,Internal Process,2024-03-26T11:03:40.666Z
+Series,B082HX3SXW,3,,,Internal Process,Internal Process,2024-04-06T19:59:31.749Z
+Series,B0836GG3GW,1,,,Internal Process,Internal Process,2024-04-11T20:29:28.740Z
+Series,B08CDHVGH9,1,,,Internal Process,Internal Process,2024-03-30T00:10:12.446Z
+Series,B08GSJNP7S,1,,,Internal Process,Internal Process,2013-02-09T23:24:35Z
+Series,B08PP2MT7D,1,,,Internal Process,Internal Process,Not Applicable
+Series,B08RCKTJS4,1,,,Internal Process,Internal Process,2017-07-24T19:05:19.882Z
+Series,B08Y7CKGY9,1,,,Internal Process,Internal Process,2024-03-08T17:24:36.075Z
+Series,B08YK94D5S,1,,,Internal Process,Internal Process,Not Applicable
+Series,B09C2H6V3K,1,,,Internal Process,Internal Process,2015-01-02T17:32:35.672Z
+Series,B09M4HG6PS,1,,,Internal Process,Internal Process,Not Applicable
+Series,B09N7NVYPZ,1,,,Internal Process,Internal Process,2024-03-25T00:43:39.058Z
+Series,B09PL7CHTN,1,,,Internal Process,Internal Process,Not Applicable
+Series,B09PL8B1CW,5,,,Internal Process,Internal Process,2024-03-18T04:00:05.265Z
+Series,B0B3CRZ5BZ,1,,,Internal Process,Internal Process,2024-03-03T07:01:42.153Z
+Series,B0BFQJR6WT,1,,,Internal Process,Internal Process,Not Applicable
+Series,B0BHF4KZ8N,1,,,Internal Process,Internal Process,2024-03-08T17:29:42.211Z
+Series,B0BJBTPN1F,1,,,Internal Process,Internal Process,2024-03-27T03:02:02.079Z
+Series,B0BJW8M3WC,1,,,Internal Process,Internal Process,2024-03-11T07:04:22.783Z
+Series,B0BS6T45H7,1,,,Internal Process,Internal Process,Not Applicable
+Series,B0C35WRT92,1,,,Internal Process,Internal Process,2024-03-08T18:36:57.728Z
+Series,B0C7RCJ837,1,,,Internal Process,Internal Process,2024-03-08T18:48:51.312Z
+Series,B0CTHT1ZQ4,1,,,Internal Process,Internal Process,2024-03-23T02:38:03.086Z
+Series,B0CV7QRVSS,1,,,Internal Process,Internal Process,Not Applicable
+Series,B0CXZ3PGY9,1,,,Internal Process,Internal Process,2014-11-29T05:03:52.796Z
+Item,B0771RYXR1,,B00N6PD7L0,0,Customer Ownership,Internal Process,2024-04-07T17:29:39.157Z
+Item,B0771RYXR1,,B00O6V45CS,1,Customer Ownership,Internal Process,2024-04-08T14:09:00.591Z
+Item,B07BHYNDJN,,B008WOTQGU,0,Customer Ownership,Internal Process,2024-04-04T19:32:10.548Z
+Item,B07BHYNDJN,,B00AXIZ5MC,1,Customer Ownership,Internal Process,2024-04-05T13:50:32.034Z
+Item,B07BHYNDJN,,B00BKK6E04,2,Customer Ownership,Internal Process,2024-04-06T01:56:48.132Z
+Item,B07BHYNDJN,,B07G5FTPGY,5,Customer Ownership,Internal Process,2024-04-15T05:20:54.965Z
+Item,B07DBGB5PK,,B06XWR6BC3,0,Customer Ownership,Internal Process,2024-03-29T21:25:11.753Z
+Item,B07FK9VBD7,,B00IV3J2A2,0,Internal Process,Internal Process,2018-02-13T20:10:53.191Z
+Item,B07FK9VBD7,,B00V20DQU8,2,Internal Process,Internal Process,2018-02-08T15:10:23.473Z
+Item,B07SKCM1D8,,B003JFJHTS,0,Internal Process,Internal Process,2018-07-30T00:14:38.880Z
+Item,B07VWR6FML,,B00KVRDACW,2,Customer Ownership,Internal Process,2022-04-30T15:58:24.078Z
+Item,B07ZZ6R4RS,,B07QNKVR3N,0,Customer Ownership,Internal Process,2024-03-04T00:25:23.492Z
+Item,B07ZZ6R4RS,,B08X472VK3,2,Customer Ownership,Internal Process,2024-03-26T11:03:40.666Z
+Item,B082HX3SXW,,B00H57X864,0,Customer Ownership,Internal Process,2024-04-06T19:59:31.749Z
+Item,B082HX3SXW,,B01L7Q54NI,1,Customer Ownership,Internal Process,2024-04-06T19:59:31.749Z
+Item,B082HX3SXW,,B081LMVMDP,2,Customer Ownership,Internal Process,2024-04-06T19:59:31.746Z
+Item,B0836GG3GW,,B075HXST4P,0,Customer Ownership,Internal Process,2024-04-11T20:29:28.740Z
+Item,B08CDHVGH9,,B07ZFZZ2GQ,0,Customer Ownership,Internal Process,2024-03-30T00:10:12.446Z
+Item,B08GSJNP7S,,B000JQUHLC,21,Internal Process,Internal Process,2013-02-09T23:24:35Z
+Item,B08PP2MT7D,,urn:collection:1:asin-B07BHYNDJN,,Internal Process,Internal Process,Not Applicable
+Item,B08RCKTJS4,,B00CRWLKS0,26,Internal Process,Internal Process,2017-07-24T19:05:19.882Z
+Item,B08Y7CKGY9,,B08Y758VM1,0,Customer Ownership,Internal Process,2024-03-08T17:24:36.075Z
+Item,B08YK94D5S,,urn:collection:1:asin-B0771RYXR1,,Internal Process,Internal Process,Not Applicable
+Item,B09C2H6V3K,,B00I8VPBQQ,0,Internal Process,Internal Process,2015-01-02T17:32:35.672Z
+Item,B09M4HG6PS,,urn:collection:1:asin-B07VWR6FML,,Internal Process,Internal Process,Not Applicable
+Item,B09N7NVYPZ,,B00V3MY186,3,Customer Ownership,Internal Process,2024-03-25T00:43:39.058Z
+Item,B09PL7CHTN,,urn:collection:1:asin-B09PL8B1CW,,Internal Process,Internal Process,Not Applicable
+Item,B09PL8B1CW,,B00846REIS,0,Customer Ownership,Internal Process,2024-03-18T04:00:05.193Z
+Item,B09PL8B1CW,,B008673ZAQ,1,Customer Ownership,Internal Process,2024-03-18T04:00:05.191Z
+Item,B09PL8B1CW,,B008UCJ7KO,2,Customer Ownership,Internal Process,2024-03-18T04:00:05.209Z
+Item,B09PL8B1CW,,B00NEQRNVG,3,Customer Ownership,Internal Process,2024-03-18T04:00:05.265Z
+Item,B09PL8B1CW,,B0183KJZE0,4,Customer Ownership,Internal Process,2024-03-18T04:00:05.199Z
+Item,B0B3CRZ5BZ,,B076G47245,0,Customer Ownership,Internal Process,2024-03-03T07:01:42.153Z
+Item,B0BFQJR6WT,,urn:collection:1:asin-B07ZZ6R4RS,,Internal Process,Internal Process,Not Applicable
+Item,B0BHF4KZ8N,,B09PNM8FFN,0,Customer Ownership,Internal Process,2024-03-08T17:29:42.211Z
+Item,B0BJBTPN1F,,B0B36FKPS8,0,Customer Ownership,Internal Process,2024-03-27T03:02:02.079Z
+Item,B0BJW8M3WC,,B0BJMZ2FQ3,0,Customer Ownership,Internal Process,2024-03-11T07:04:22.783Z
+Item,B0BS6T45H7,,urn:collection:1:asin-B0CTHT1ZQ4,,Internal Process,Internal Process,Not Applicable
+Item,B0C35WRT92,,B099QTBDB4,0,Customer Ownership,Internal Process,2024-03-08T18:36:57.728Z
+Item,B0C7RCJ837,,B0BCHJ9885,0,Customer Ownership,Internal Process,2024-03-08T18:48:51.312Z
+Item,B0CTHT1ZQ4,,B07C1XR6BK,0,Customer Ownership,Internal Process,2024-03-23T02:38:03.086Z
+Item,B0CV7QRVSS,,urn:collection:1:asin-B07SKCM1D8,,Internal Process,Internal Process,Not Applicable
+Item,B0CXZ3PGY9,,B0084AVKZW,0,Internal Process,Internal Process,2014-11-29T05:03:52.796Z
