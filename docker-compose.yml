@@ -1,40 +1,42 @@
-version: '3.8'
-
 services:
-  cwa:
-    image: calibrewebautomated:v3.1.0
-    container_name: bookhelper_cwa_1
-    restart: always
+  calibre-web-automated:
+    image: ghcr.io/crocodilestick/calibre-web-automated:latest
+    container_name: calibre-web-automated
+    restart: unless-stopped
 
-    # Environment configuration for CWA
     environment:
-      - CALIBRE_LIBRARY_PATH=/library
-      - ADMIN_USER=alex
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme123}
-      - PORT=8083
-      - TZ=UTC
+      # User/Group IDs - change if needed to match your user
+      - PUID=1000
+      - PGID=1000
+      # Timezone - update to match your location
+      # See: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - TZ=America/Chicago
+      # Optional: Hardcover API token for metadata enrichment
+      # Get your token at: https://docs.hardcover.app/api/getting-started/
+       - HARDCOVER_TOKEN=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJIYXJkY292ZXIiLCJ2ZXJzaW9uIjoiOCIsImp0aSI6ImZjYTRkMmUyLWRiOTEtNGEwMS04MDNhLWUzMGQ1ZDZlZTI4OSIsImFwcGxpY2F0aW9uSWQiOjIsInN1YiI6IjUwMzEwIiwiYXVkIjoiMSIsImlkIjoiNTAzMTAiLCJsb2dnZWRJbiI6dHJ1ZSwiaWF0IjoxNzYxNTM2NDgyLCJleHAiOjE3OTMwNzI0ODIsImh0dHBzOi8vaGFzdXJhLmlvL2p3dC9jbGFpbXMiOnsieC1oYXN1cmEtYWxsb3dlZC1yb2xlcyI6WyJ1c2VyIl0sIngtaGFzdXJhLWRlZmF1bHQtcm9sZSI6InVzZXIiLCJ4LWhhc3VyYS1yb2xlIjoidXNlciIsIlgtaGFzdXJhLXVzZXItaWQiOiI1MDMxMCJ9LCJ1c2VyIjp7ImlkIjo1MDMxMH19.LLEDcRer6dkJdLQ_h5sxtsFGnXq5t3bHmcnLKxoSp3U
+      # Optional: Enable for network shares (NFS/SMB) to prevent DB locking issues
+      # - NETWORK_SHARE_MODE=false
 
-    # Port mappings for web UI and KOSync
-    ports:
-      - "8083:8083"  # CWA web UI and KOSync server
-
-    # Volume mounts for data persistence
     volumes:
-      - /library:/library                    # Main ebook library
-      - cwa_config:/config                   # CWA configuration and cache
-      - cwa_metadata:/metadata               # CWA metadata database
+      # CWA configuration directory (named volume for persistence)
+      - cwa_config:/config
+      # Ingest directory - files placed here are automatically added to library
+      # WARNING: Files are REMOVED after processing
+      - /library/ingest:/cwa-book-ingest
+      # Calibre library directory - will be auto-created if doesn't exist
+      - /library:/calibre-library
 
-    # Resource constraints (critical for RPi 4 2GB)
-    # Max 1.5GB to prevent system OOM
-    # Reservation 400MB to ensure availability
+    ports:
+      # Web UI and KOSync server (change left number to change access port)
+      - "8083:8083"
+
     deploy:
       resources:
         limits:
-          memory: 1500M
+          memory: 1500M  # Critical for RPi 4 2GB - prevents OOM
         reservations:
           memory: 400M
 
-    # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/"]
       interval: 30s
@@ -42,39 +44,29 @@ services:
       retries: 3
       start_period: 60s
 
-    # Logging configuration
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-    # Stop grace period to allow clean shutdown
-    stop_grace_period: 30s
-
   syncthing:
-    image: syncthing:latest
-    container_name: bookhelper_syncthing_1
-    restart: always
+    image: syncthing/syncthing:latest
+    container_name: syncthing
+    restart: unless-stopped
 
-    # Syncthing configuration
+    # Use host network for proper local discovery
+    # This is recommended by Syncthing for optimal functionality
+    network_mode: host
+
     environment:
-      - STENV_PUID=1000
-      - STENV_PGID=1000
-      - TZ=UTC
+      # User/Group IDs - should match CWA settings
+      - PUID=1000
+      - PGID=1000
+      # GUI address - leave unset for localhost-only (secure default)
+      # Set to empty string to bind to all interfaces
+      - STGUIADDRESS=
 
-    # Port mappings for Syncthing UI and discovery
-    ports:
-      - "8384:8384"  # Syncthing web UI
-      - "22000:22000/tcp"  # Syncthing protocol
-      - "22000:22000/udp"  # Syncthing protocol discovery
-
-    # Volume mounts for configuration and sync
     volumes:
-      - syncthing_config:/var/syncthing        # Syncthing configuration
-      - /library:/library                      # Mount library for future sync (ONE-WAY ONLY)
+      # Syncthing configuration and database
+      - syncthing_config:/var/syncthing
+      # Library access for sync (configured as ONE-WAY in future epics)
+      - /library:/library
 
-    # Resource constraints for Syncthing
     deploy:
       resources:
         limits:
@@ -82,36 +74,16 @@ services:
         reservations:
           memory: 128M
 
-    # Health check
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8384/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-    # Logging configuration
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-# Named volumes for data persistence
+# Named volumes for data persistence across container restarts
 volumes:
   cwa_config:
-    driver: local
-  cwa_metadata:
     driver: local
   syncthing_config:
     driver: local
 
-# Network configuration
-networks:
-  default:
-    name: bookhelper_network
-    driver: bridge
-
-# Project name for docker-compose commands
-# Default: directory name (bookhelper)
-# This ensures consistent container naming across environments
+# Notes:
+# - Default credentials for CWA: admin/admin123 (change on first login!)
+# - CWA Web UI: http://raspberrypi.local:8083
+# - Syncthing Web UI: http://raspberrypi.local:8384
+# - /library directory must exist on host before deployment
+# - Syncthing uses host networking for proper device discovery
