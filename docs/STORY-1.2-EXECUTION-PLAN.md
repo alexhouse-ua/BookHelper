@@ -112,6 +112,10 @@ docker stats --no-stream calibre-web-automated
 # Note this baseline value (~200-300 MB is expected)
 ```
 
+> Baseline: 
+> CONTAINER ID   NAME                    CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O         PIDS
+86d3e1acf0aa   calibre-web-automated   0.01%     0B / 0B             0.00%     85.8MB / 55.9MB   1.69GB / 30.2MB   34
+
 #### Step 2.4: Daily Observations (Days 1-7)
 
 **Each day, record in a manual log or notes:**

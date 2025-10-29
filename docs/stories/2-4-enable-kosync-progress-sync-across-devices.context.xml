@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>2.4</story-id>
+    <epic-id>2</epic-id>
+    <story-title>Enable KOSync progress sync across devices</story-title>
+    <story-status>ContextReady</story-status>
+    <generated-date>2025-10-29</generated-date>
+    <project>BookHelper</project>
+    <blocking-note>Story 2.2 (OPDS + Readest) is currently blocked due to technical issues with iOS Readest OPDS integration. This story proceeds independently since it depends on Story 2.1 (Syncthing file sync) and Story 2.2 completion prerequisites are unblocked (both Syncthing and Tailscale working). KOSync setup can proceed in parallel with troubleshooting Story 2.2.</blocking-note>
+  </metadata>
+
+  <story-statement>
+    <as-a>reader</as-a>
+    <i-want>my reading progress synced between Boox and iOS</i-want>
+    <so-that>I can switch devices and continue reading from where I left off</so-that>
+  </story-statement>
+
+  <acceptance-criteria count="8">
+    <ac id="1">CWA KOSync server enabled and accessible</ac>
+    <ac id="2">KOReader on Boox Palma configured with KOSync plugin pointing to CWA server</ac>
+    <ac id="3">Readest on iOS configured with KOSync server URL and credentials</ac>
+    <ac id="4">Test: Read several pages on Boox, verify progress syncs to CWA server</ac>
+    <ac id="5">Test: Open same book on Readest iOS, book opens at correct page from Boox session</ac>
+    <ac id="6">Test: Read on iOS, verify progress syncs back and visible on Boox</ac>
+    <ac id="7">KOSync authentication configured (username/password or device ID)</ac>
+    <ac id="8">Progress sync occurs within 2 minutes of closing book</ac>
+  </acceptance-criteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper Epic Breakdown</title>
+        <section>Epic 2 § Story 2.4: Enable KOSync progress sync across devices</section>
+        <snippet>As a reader, I want my reading progress synced between Boox and iOS, So that I can switch devices and continue reading from where I left off. Acceptance criteria: CWA KOSync server enabled, KOReader configured on Boox, Readest configured on iOS, progress syncs within 2 minutes, authentication configured.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>§ Functional Requirements § FR010</section>
+        <snippet>System shall sync reading progress across devices (Boox and iOS) via KOSync. Progress must sync within 2 minutes of closing a book. Depends on FR008 (Syncthing file sync) and FR009 (OPDS catalog).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>§ User Journeys § Journey 2: Cross-Device Reading § "Progress Sync"</section>
+        <snippet>User reads on Boox, closes book after 10 pages. KOReader syncs progress to KOSync server on RPi. User opens same book on Readest iOS. Readest retrieves progress from KOSync, opens book at page 10. User reads 5 more pages on iOS, progress syncs back to RPi. Next time Boox is opened, book shows page 15.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>§ 3.5. Progress Sync Layer</section>
+        <snippet>KOSync server deployed on RPi (integrated into CWA or standalone). KOReader on Boox and Readest on iOS both configured to point to KOSync server. Progress syncs via HTTPS/REST API. Separate from file sync (Syncthing) to avoid database conflicts.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>§ 4. Critical Warnings - SQLite Corruption Prevention</section>
+        <snippet>KOSync is the ONLY mechanism for progress sync across devices. File-level sync (Syncthing) used ONLY for ebook files. Statistics backup (Story 3.1) is one-way only. This separation prevents metadata and progress database corruption.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>calibre-web service</symbol>
+        <reason>CWA service must have KOSync plugin enabled or standalone KOSync service needs to be defined; CWA may include KOSync as built-in feature</reason>
+      </artifact>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>CWA_SYNC_COOLDOWN or KOSYNC config</symbol>
+        <reason>Environment variables or configuration for KOSync server enable/disable and port configuration</reason>
+      </artifact>
+    </code>
+
+    <interfaces>
+      <interface>
+        <name>KOSync REST API</name>
+        <kind>REST API</kind>
+        <signature>POST /api/progress - Submit reading progress; GET /api/progress/:book_id - Retrieve progress; DELETE /api/progress/:book_id - Clear progress</signature>
+        <path>Exposed on CWA server (http://raspberrypi.local:8083/kosync or similar)</path>
+      </interface>
+      <interface>
+        <name>KOReader KOSync Plugin</name>
+        <kind>Plugin Interface</kind>
+        <signature>KOReader connects to KOSync server on startup, submits progress after reading session ends</signature>
+        <path>KOReader built-in plugin; configured via UI or config file</path>
+      </interface>
+      <interface>
+        <name>Readest KOSync Integration</name>
+        <kind>App Feature</kind>
+        <signature>Readest retrieves progress from KOSync server on book open, submits progress on reading session end</signature>
+        <path>Readest iOS app; configured in app settings</path>
+      </interface>
+      <interface>
+        <name>Authentication</name>
+        <kind>HTTP Auth</kind>
+        <signature>API Key or Basic Auth (username/password) passed with KOSync requests</signature>
+        <path>KOSync server configuration; clients configured with credentials</path>
+      </interface>
+    </interfaces>
+
+    <constraints>
+      <constraint>
+        <name>KOSync server availability</name>
+        <source>Story 2.4 AC1</source>
+        <detail>CWA KOSync server must be running and accessible from both Boox (local LAN) and iOS (via Tailscale from Story 2.3 or local LAN). Requires Story 2.3 completion for iOS remote access.</detail>
+      </constraint>
+      <constraint>
+        <name>Independent from OPDS</name>
+        <source>Story 2.4 Design Notes</source>
+        <detail>KOSync progress sync is independent of OPDS catalog (Story 2.2). File sync (Syncthing, Story 2.1) is REQUIRED. OPDS (Story 2.2) is NOT a prerequisite for KOSync functionality, only for iOS catalog browsing. KOSync works with manual file transfer to iOS as fallback.</detail>
+      </constraint>
+      <constraint>
+        <name>Progress sync latency</name>
+        <source>Story 2.4 AC8</source>
+        <detail>Progress must sync within 2 minutes of book close. Typical LAN API call: <1 second. Remote (Tailscale): <5 seconds. Retry logic for network failures.</detail>
+      </constraint>
+      <constraint>
+        <name>Authentication required</name>
+        <source>Story 2.4 AC7</source>
+        <detail>KOSync server requires authentication (API key, username/password, or device ID). Both KOReader and Readest must be configured with same credentials.</detail>
+      </constraint>
+      <constraint>
+        <name>Book identification</name>
+        <source>Story 2.4 Design Notes</source>
+        <detail>KOSync uses ISBN or file path to identify books uniquely across devices. Both Boox (via synced files) and iOS (via downloaded files) must have same book content for progress to match correctly.</detail>
+      </constraint>
+      <constraint>
+        <name>Boox/iOS file independence</name>
+        <source>Story 2.4 Design Notes</source>
+        <detail>Boox receives files via Syncthing (Story 2.1). iOS receives files via OPDS (Story 2.2) or manual transfer. Progress syncs via KOSync (this story), not file sync. Different file instances are OK as long as content matches (same book).</detail>
+      </constraint>
+    </constraints>
+
+    <dependencies>
+      <infrastructure>
+        <package name="CWA KOSync server" version="built-in to CWA v3.1.0+" purpose="Progress sync backend on RPi" />
+        <package name="KOReader" version="latest" purpose="Pre-installed on Boox; includes KOSync plugin" />
+        <package name="Readest" version="latest" purpose="iOS app; includes KOSync integration" />
+      </infrastructure>
+      <external-services>
+        <service name="KOSync Protocol" type="REST API" purpose="Communication protocol between clients (KOReader, Readest) and server (CWA)" />
+      </external-services>
+      <prerequisite>
+        <story>2.1</story>
+        <reason>Boox must have synced ebook files before reading sessions can occur and be synced via KOSync</reason>
+      </prerequisite>
+      <dependency-note>Story 2.2 (OPDS) is NOT a hard prerequisite for KOSync functionality. Books can be transferred to iOS manually or via other means for testing KOSync. However, for full user experience (OPDS + KOSync), Story 2.2 should work. Current blocking on Story 2.2 does not block this story's implementation.</dependency-note>
+    </dependencies>
+  </artifacts>
+
+  <testing>
+    <standards>
+      <paragraph>Integration testing on real devices (Boox Palma 2 + iPhone). Test metrics: KOSync server accessible from both devices, authentication successful, progress submission succeeds, progress retrieval accurate, sync latency <2 minutes, cross-device progress matching. All tests conducted with real reading sessions on actual books.</paragraph>
+    </standards>
+
+    <locations>
+      <location type="server">CWA KOSync API: http://raspberrypi.local:8083/kosync or equivalent (local LAN); via Tailscale IP from remote</location>
+      <location type="device">KOReader on Boox Palma 2: Settings > Cloud Sync > KOSync</location>
+      <location type="device">Readest iOS: Settings > Sync > KOSync</location>
+      <location type="logs">CWA/KOSync logs: docker logs calibre-web (if using docker)</location>
+    </locations>
+
+    <ideas>
+      <idea ac-id="1">CWA KOSync enable: SSH into RPi, verify CWA environment variables include KOSYNC_ENABLED or equivalent; check CWA UI for sync settings; verify KOSync port accessible (curl test from development machine)</idea>
+      <idea ac-id="2">KOReader config: On Boox, open KOReader settings, navigate to "Cloud Sync" section, configure KOSync server URL (http://raspberrypi.local:8083/kosync) and credentials (API key or username/password)</idea>
+      <idea ac-id="3">Readest config: On iOS, open Readest app, go to Settings > Sync, select KOSync, enter server URL and credentials</idea>
+      <idea ac-id="4">Boox→RPi sync test: On Boox, open book in KOReader, read 10 pages, close book; check CWA logs for progress submission; verify progress recorded in KOSync database</idea>
+      <idea ac-id="5">iOS retrieval test: On iOS, open same book in Readest; verify Readest displays page 10 (retrieved from KOSync); read 5 more pages, close book</idea>
+      <idea ac-id="6">Boox retrieval test: On Boox, open same book in KOReader again; verify KOReader displays page 15 (synced from iOS session via KOSync); confirm progress bar updated</idea>
+      <idea ac-id="7">Auth verification: Intentionally enter wrong API key in both KOReader and Readest; verify sync fails with auth error; correct credentials and verify sync succeeds</idea>
+      <idea ac-id="8">Sync latency measurement: Open book on Boox, read, close book, note time; check CWA logs for progress receipt timestamp; measure elapsed time (should be <2 minutes typically <30 seconds on LAN)</idea>
+    </ideas>
+  </testing>
+
+  <implementation-notes>
+    <note type="blocking-context">Story 2.2 (OPDS) is currently blocked due to iOS Readest integration issues. However, this story can proceed independently because: (1) File sync (Story 2.1) is complete and working; (2) KOSync progress sync is a separate concern from OPDS catalog browsing; (3) Books can be transferred to iOS by manual means for testing KOSync; (4) Story 2.2 blocking does not affect KOSync server setup.</note>
+    <note type="prerequisite-status">Story 2.1 (Syncthing) is COMPLETE. Story 2.2 (OPDS) is BLOCKED but not required for core KOSync functionality. Proceed with Story 2.4 to unblock forward progress on device sync capabilities.</note>
+    <note type="execution-pattern">Setup sequence: (1) Enable KOSync on CWA server; (2) Configure KOReader on Boox with KOSync credentials; (3) Configure Readest on iOS with KOSync credentials; (4) Test progress sync with real reading sessions.</note>
+    <note type="architecture-alignment">Completes Epic 2 goal of "seamless cross-device reading" by enabling reading progress sync. Decoupled from file sync (Syncthing) and catalog browse (OPDS) to avoid database conflicts. KOSync is the single source of truth for reading progress.</note>
+    <note type="risk-mitigation">Progress sync latency is critical for user experience. If sync exceeds 2 minutes, users may lose track of which page they're on across devices. Implement retry logic for network failures.</note>
+    <note type="ios-readiness">iOS Readest is ready for KOSync configuration. Manual file transfer (AirDrop or Files app) can be used to populate books on iOS while Story 2.2 (OPDS) remains blocked. This enables full Story 2.4 testing without waiting for Story 2.2 fix.</note>
+  </implementation-notes>
+
+  <references>
+    <reference>docs/epics.md § Epic 2 § Story 2.4</reference>
+    <reference>docs/PRD.md § Functional Requirements § FR010</reference>
+    <reference>docs/PRD.md § User Journeys § Journey 2: Cross-Device Reading</reference>
+    <reference>docs/architecture.md § 3.5. Progress Sync Layer</reference>
+    <reference>docs/architecture.md § 4. Critical Warnings - SQLite Corruption Prevention</reference>
+  </references>
+
+</story-context>

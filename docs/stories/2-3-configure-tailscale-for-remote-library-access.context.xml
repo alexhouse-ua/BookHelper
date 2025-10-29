@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="story-2-3" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>Configure Tailscale for Remote Library Access</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-10-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-3-configure-tailscale-for-remote-library-access.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>access my library server from anywhere (off home network)</iWant>
+    <soThat>I can download books or manage my library while traveling</soThat>
+    <tasks>
+      <task n="1">Install and Configure Tailscale on Raspberry Pi</task>
+      <task n="2">Install and Configure Tailscale on iOS Device</task>
+      <task n="3">Install and Configure Tailscale on Boox Palma 2</task>
+      <task n="4">Verify Mesh Network Connectivity</task>
+      <task n="5">Test Remote CWA Web UI Access</task>
+      <task n="6">Test Remote OPDS Catalog Access via Readest</task>
+      <task n="7">Configure Firewall Rules and Security</task>
+      <task n="8">Verify Auto-Start on All Devices</task>
+      <task n="9">Testing &amp; Validation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Tailscale installed and configured on Raspberry Pi</criterion>
+    <criterion id="2">Tailscale installed and configured on iOS device</criterion>
+    <criterion id="3">Tailscale installed and configured on Boox Palma 2</criterion>
+    <criterion id="4">All devices connected to same Tailscale mesh network (100.x.x.x addresses)</criterion>
+    <criterion id="5">CWA web UI accessible from iOS using Tailscale IP while on cellular network (not home WiFi)</criterion>
+    <criterion id="6">OPDS catalog accessible via Tailscale IP from Readest on iOS when remote</criterion>
+    <criterion id="7">Tailscale auto-starts on all devices (RPi on boot, iOS on device startup, Boox on system startup)</criterion>
+    <criterion id="8">Firewall rules configured to allow Tailscale traffic on all devices</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-2.md</path>
+        <title>Technical Specification: Device Sync &amp; Remote Access</title>
+        <section>Story 2.3: Remote Access via Tailscale</section>
+        <snippet>Story 2.3 implements remote access using Tailscale mesh VPN. Tailscale provides peer-to-peer VPN without exposing RPi to public internet. All devices get 100.x.x.x private IPs. OPDS catalog and CWA web UI become accessible via Tailscale IPs instead of local hostnames. WireGuard encryption handles all traffic; basic auth provides additional security layer.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.2 Sync &amp; Backup Layer - Remote Access Layer</section>
+        <snippet>Tailscale provides secure mesh VPN without exposing RPi to public internet. Remote access is secured through private mesh VPN (Tailscale), avoiding public exposure of any services. Mesh VPN enables all three devices (RPi, iOS, Boox) to communicate over encrypted WireGuard tunnels using private 100.x.x.x IP addresses.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper - Epic Breakdown</title>
+        <section>Epic 2: Device Sync &amp; Remote Access - Story 2.3</section>
+        <snippet>Story 2.3 enables off-network library access. Acceptance criteria covers Tailscale installation on all three devices, mesh network verification, remote CWA web UI access, remote OPDS catalog access via Readest, auto-start configuration, and firewall rules. Prerequisites: Story 2.2 complete (OPDS working on local network).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>Functional Requirements - Integration Layer: FR007</section>
+        <snippet>System shall provide remote library access via Tailscale mesh VPN with OPDS protocol support for iOS. This requirement enables reading from anywhere without manual configuration, supporting the traveling reader use case.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>No changes for Story 2.3</symbol>
+        <reason>Tailscale is installed as Linux daemon on RPi host, not in Docker. Reference docker-compose.yml for CWA configuration (unchanged from Story 2.2). Tailscale runs as system service alongside Docker.</reason>
+        <details>
+          <note>Story 2.3 is configuration-only: No Docker changes, no code changes, no new services in docker-compose.yml</note>
+          <reference>CWA OPDS endpoint (Story 2.2) remains unchanged; accessed via Tailscale IP instead of local hostname</reference>
+        </details>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <dependency>
+        <name>Tailscale</name>
+        <version>v1.52+ (RPi Linux), v1.x (iOS)</version>
+        <kind>VPN service - external</kind>
+        <source>https://tailscale.com/</source>
+        <purpose>Mesh VPN for remote access; encrypts all traffic between devices using WireGuard</purpose>
+        <platform>Multi-platform: Linux (RPi), iOS, Android (Boox)</platform>
+      </dependency>
+      <dependency>
+        <name>Calibre-Web-Automated (from Story 2.2)</name>
+        <version>v3.1.0+ (already deployed)</version>
+        <kind>Docker service</kind>
+        <source>ghcr.io/crocodilestick/calibre-web-automated:dev</source>
+        <purpose>OPDS endpoint and web UI accessible via Tailscale IP</purpose>
+      </dependency>
+      <dependency>
+        <name>Readest iOS App (from Story 2.2)</name>
+        <version>v1.5+</version>
+        <kind>iOS app</kind>
+        <source>App Store</source>
+        <purpose>OPDS client; configured to use Tailscale IP instead of local hostname for remote access</purpose>
+      </dependency>
+      <dependency>
+        <name>WireGuard</name>
+        <version>v1.0.20220627+</version>
+        <kind>VPN protocol - included with Tailscale</kind>
+        <purpose>Encryption layer for all Tailscale traffic; transparent to user, handled by Tailscale daemon</purpose>
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <kind>standard</kind>
+      <description>Tailscale Mesh VPN: All three devices must be on same Tailscale account and network for peer connectivity</description>
+      <source>docs/tech-spec-epic-2.md#Dependencies-&amp;-Versions</source>
+    </constraint>
+    <constraint>
+      <kind>architectural</kind>
+      <description>Configuration-only: Story 2.3 requires no custom code. Tailscale is external service; configuration happens on device apps and Tailscale admin console.</description>
+      <source>docs/stories/2-3-configure-tailscale-for-remote-library-access.md#Dev-Notes</source>
+    </constraint>
+    <constraint>
+      <kind>network</kind>
+      <description>Private Mesh Network: All Tailscale IPs are private (100.x.x.x range). RPi never exposed to public internet; mesh VPN provides encryption.</description>
+      <source>docs/architecture.md#3.2-Sync-&amp;-Backup-Layer</source>
+    </constraint>
+    <constraint>
+      <kind>platform</kind>
+      <description>Multi-platform requirement: Must support Tailscale on Linux (RPi), iOS (iPhone), and Android (Boox Palma 2). Boox may require alternative VPN if native Tailscale unavailable.</description>
+      <source>docs/stories/2-3-configure-tailscale-for-remote-library-access.md#Task-3</source>
+    </constraint>
+    <constraint>
+      <kind>security</kind>
+      <description>Defense in Depth: Tailscale provides mesh authentication + WireGuard encryption. CWA basic auth provides additional login security layer for web UI access.</description>
+      <source>docs/tech-spec-epic-2.md#Security-Model</source>
+    </constraint>
+    <constraint>
+      <kind>performance</kind>
+      <description>Connection Latency Target: Tailscale connection time &lt;5 seconds; OPDS response &lt;2 seconds (inherited from Story 2.2); CWA web UI load &lt;3 seconds on cellular</description>
+      <source>docs/tech-spec-epic-2.md#Performance-&amp;-Resource-Targets</source>
+    </constraint>
+    <constraint>
+      <kind>dependency</kind>
+      <description>Prerequisite: Story 2.2 must be complete before Story 2.3 can be tested. This story extends Story 2.2's OPDS endpoint for remote access.</description>
+      <source>docs/epics.md#Story-2.3</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>CWA Web UI via Tailscale</name>
+      <kind>HTTP endpoint</kind>
+      <method>GET/POST</method>
+      <url>http://100.x.x.x:8083/</url>
+      <description>CWA admin panel and library management interface accessible via Tailscale IP</description>
+      <authentication>CWA basic auth (ADMIN_USERNAME=alexhouse, password)</authentication>
+      <protocol>HTTP over Tailscale encrypted tunnel (transparent WireGuard encryption)</protocol>
+      <performance_target>Web UI load time &lt;3 seconds on cellular network</performance_target>
+    </interface>
+
+    <interface>
+      <name>OPDS Catalog via Tailscale</name>
+      <kind>REST HTTP endpoint</kind>
+      <method>GET</method>
+      <url>http://100.x.x.x:8083/opds</url>
+      <description>Root OPDS 1.2 catalog feed (Atom XML) accessible via Tailscale IP</description>
+      <authentication>Basic auth (if CWA login enabled)</authentication>
+      <response_format>OPDS 1.2 Atom XML (same as Story 2.2 local endpoint)</response_format>
+      <performance_target>Response time &lt;2 seconds</performance_target>
+      <note>Same endpoint as Story 2.2, but accessed via Tailscale IP (100.x.x.x) instead of local hostname (raspberrypi.local)</note>
+    </interface>
+
+    <interface>
+      <name>Tailscale Device Registration</name>
+      <kind>VPN admin interface</kind>
+      <url>https://login.tailscale.com/admin/machines</url>
+      <description>Tailscale admin console for managing device registrations and IPs</description>
+      <authentication>Tailscale account login</authentication>
+      <steps>
+        <step>Navigate to Tailscale admin console</step>
+        <step>View registered machines in network</step>
+        <step>Confirm all three devices (RPi, iOS, Boox) appear in machines list</step>
+        <step>Verify each device has assigned 100.x.x.x IP address</step>
+        <step>Test connectivity between devices using IPs</step>
+      </steps>
+    </interface>
+
+    <interface>
+      <name>Tailscale iOS App</name>
+      <kind>Native iOS app UI</kind>
+      <description>Tailscale VPN client for iOS device</description>
+      <steps>
+        <step>Install from App Store</step>
+        <step>Authenticate with Tailscale account</step>
+        <step>Enable "Always-on VPN" setting for automatic connection</step>
+        <step>Verify device IP in app status screen</step>
+        <step>Confirm mesh connectivity to other devices</step>
+      </steps>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Story 2.3 testing is entirely manual and integration-focused because Tailscale is external service with no custom code. Test coverage includes device connectivity (mesh network), remote service accessibility (CWA web UI, OPDS catalog), network variation testing (cellular vs WiFi switching), and auto-start verification. Key test areas: (1) All three devices can reach each other via Tailscale IPs, (2) CWA web UI and OPDS catalog respond correctly when accessed via Tailscale IP on cellular network, (3) OPDS catalog accessible from Readest on iOS when remote, (4) Tailscale auto-connects on app launch/device reboot, (5) Performance meets targets even on lower-bandwidth cellular connections, (6) Firewall rules allow Tailscale VPN traffic.
+    </standards>
+
+    <locations>
+      <location>Manual testing checklist documented in Story file: docs/stories/2-3-configure-tailscale-for-remote-library-access.md#Tasks-/-Subtasks</location>
+      <location>Tailscale admin console: https://login.tailscale.com/admin/machines (verify device registrations and IPs)</location>
+      <location>Tailscale CLI: `tailscale status` on RPi (verify daemon running and connectivity)</location>
+      <location>CWA web UI via Tailscale IP (manual testing of admin panel response)</location>
+      <location>Readest app on iOS (manual testing of OPDS catalog access via Tailscale IP)</location>
+    </locations>
+
+    <ideas>
+      <test_idea ac="1">Tailscale RPi Installation: Install Tailscale via package manager on RPi; verify systemd service is running; document assigned Tailscale IP</test_idea>
+      <test_idea ac="1">Tailscale RPi Service: Reboot RPi; verify tailscaled auto-starts; confirm systemctl status shows service running</test_idea>
+      <test_idea ac="2">Tailscale iOS Installation: Install Tailscale from App Store; authenticate with Tailscale account; enable Always-on VPN</test_idea>
+      <test_idea ac="2">Tailscale iOS Auto-Start: Force-quit Tailscale app; reboot iOS device; verify VPN icon appears in status bar (auto-connect working)</test_idea>
+      <test_idea ac="3">Tailscale Boox Installation: Determine if native Tailscale available for Android; if yes, install and configure; if no, document alternative VPN</test_idea>
+      <test_idea ac="3">Tailscale Boox Auto-Start: Reboot Boox device; verify VPN/Tailscale service is active</test_idea>
+      <test_idea ac="4">Mesh Network Connectivity: From iOS, ping RPi Tailscale IP (100.x.x.x) - should respond; ping Boox Tailscale IP - should respond</test_idea>
+      <test_idea ac="4">Mesh Network Verification: From RPi, run `tailscale status` - should show all three devices online and connected</test_idea>
+      <test_idea ac="5">Remote CWA Web UI: On iOS with cellular network only (WiFi disabled), navigate to http://100.x.x.x:8083 in browser; verify CWA login page loads</test_idea>
+      <test_idea ac="5">Remote CWA Login: Log in to CWA via Tailscale IP on cellular; verify web UI is fully functional (navigation, book list, metadata)</test_idea>
+      <test_idea ac="5">Remote CWA Performance: Measure load time from iOS on cellular (target &lt;3 seconds); document any latency vs local WiFi</test_idea>
+      <test_idea ac="6">Remote OPDS Catalog: On iOS with Tailscale (cellular), update Readest OPDS catalog URL to use Tailscale IP: http://100.x.x.x:8083/opds</test_idea>
+      <test_idea ac="6">Remote OPDS Browse: In Readest, browse library catalog via Tailscale IP on cellular; verify &gt;20 books appear with metadata</test_idea>
+      <test_idea ac="6">Remote OPDS Download: Download test book from Readest via Tailscale OPDS on cellular; monitor download progress; verify completion</test_idea>
+      <test_idea ac="6">Remote OPDS Performance: Measure OPDS response time via Tailscale on cellular (target &lt;2 seconds); compare to local WiFi</test_idea>
+      <test_idea ac="7">RPi Auto-Start: Reboot RPi, wait 2 minutes, verify Tailscale service running; test connectivity from iOS to RPi</test_idea>
+      <test_idea ac="7">iOS Auto-Start: Force-quit Tailscale, reboot iOS, verify VPN auto-connects; test connectivity to RPi</test_idea>
+      <test_idea ac="7">Boox Auto-Start: Reboot Boox, verify VPN service active; test connectivity</test_idea>
+      <test_idea ac="8">Firewall Rules: Verify RPi firewall (if active) allows Tailscale traffic; document any firewall configuration changes</test_idea>
+      <test_idea ac="8">Security Verification: Confirm non-Tailscale external IPs cannot reach CWA on port 8083; verify only mesh peers can connect</test_idea>
+      <test_idea general="network">Cellular Network Testing: Test for 30+ minutes on cellular network; verify no disconnections or IP changes during session</test_idea>
+      <test_idea general="network">Network Switching: Switch between WiFi and cellular while connected to Tailscale; verify VPN maintains connection and seamlessly transitions</test_idea>
+      <test_idea general="performance">Book Download Speed: Download 2-3 books via OPDS on cellular; measure speed (expected &lt;50 KB/s typical); verify acceptable for practical use</test_idea>
+    </ideas>
+  </tests>
+
+  <implementation_guidance>
+    <overview>
+      Story 2.3 is a configuration-only story extending Story 2.2 with remote access via Tailscale mesh VPN. Primary activities: (1) Install and configure Tailscale on RPi as Linux daemon with auto-start, (2) Install Tailscale app on iOS and enable Always-on VPN, (3) Install Tailscale (or alternative VPN) on Boox Palma 2, (4) Verify all three devices connect to mesh network with 100.x.x.x IPs, (5) Test remote access to CWA web UI and OPDS catalog using Tailscale IPs instead of local hostnames, (6) Validate auto-start on all devices and firewall rule configuration. No code changes required; success criteria are clear and testable via device connectivity and remote service access.
+    </overview>
+
+    <dev_focus>
+      <focus_area>Tailscale Installation and Configuration</focus_area>
+      <description>Install Tailscale on RPi as Linux system daemon with auto-start on boot. Verify systemd service running and connectivity established.</description>
+      <installation_steps>
+        <step>SSH to RPi</step>
+        <step>Download Tailscale for Linux ARM: `curl -fsSL https://tailscale.com/install.sh | sh`</step>
+        <step>Authenticate: `sudo tailscale up`</step>
+        <step>Verify service: `sudo systemctl status tailscaled`</step>
+        <step>Document assigned Tailscale IP from: `tailscale status`</step>
+      </installation_steps>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>iOS Tailscale Setup and Always-on VPN</focus_area>
+      <description>Install Tailscale app on iOS, authenticate with same account as RPi, enable Always-on VPN for seamless connection on app launch.</description>
+      <ios_steps>
+        <step>Install Tailscale from App Store</step>
+        <step>Open app and authenticate with Tailscale account</step>
+        <step>Enable "Always-on VPN" in Settings</step>
+        <step>Document assigned Tailscale IP</step>
+        <step>Test connectivity: Disable WiFi, verify VPN stays connected on cellular</step>
+      </ios_steps>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>Boox Palma 2 VPN Configuration</focus_area>
+      <description>Determine Tailscale availability for Android; if native app available, follow iOS setup. If not, document alternative VPN approach (OpenVPN/WireGuard) and configure accordingly.</description>
+      <decision_tree>
+        <check>Is native Tailscale available for Android?</check>
+        <yes>Follow iOS setup process; document Boox Tailscale IP</yes>
+        <no>Research alternative VPN (OpenVPN/WireGuard); configure and document; ensure same mesh IP range (100.x.x.x if possible)</no>
+      </decision_tree>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>Remote Access Testing via Cellular Network</focus_area>
+      <description>On iOS device, disable WiFi (cellular-only), navigate to CWA web UI and OPDS catalog using Tailscale IPs. Test for 30+ minutes to confirm stable connection and acceptable performance.</description>
+      <test_procedure>
+        <step>On iOS, disable WiFi; verify on cellular network only</step>
+        <step>Open Safari, navigate to http://100.x.x.x:8083 (CWA web UI)</step>
+        <step>Measure page load time (target &lt;3 seconds on cellular)</step>
+        <step>Log in and verify admin panel responsive</step>
+        <step>In Readest, browse OPDS catalog via http://100.x.x.x:8083/opds</step>
+        <step>Measure OPDS response time (target &lt;2 seconds)</step>
+        <step>Download test book; monitor download speed</step>
+        <step>Maintain connection for 30+ minutes; check for drops or IP changes</step>
+      </test_procedure>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>Firewall Configuration and Security Verification</focus_area>
+      <description>On RPi, check firewall status and ensure Tailscale traffic is allowed. On iOS and Boox, verify no local firewall restrictions. Test that external (non-Tailscale) IPs cannot reach CWA.</description>
+      <firewall_steps>
+        <step>On RPi: `sudo ufw status` - check if firewall active</step>
+        <step>If active, add rule for Tailscale if needed (usually not required)</step>
+        <step>Verify port 8083 accessible from Tailscale IPs only</step>
+        <step>From non-Tailscale device, attempt to reach http://raspberrypi.local:8083 - should fail on cellular network</step>
+        <step>Document firewall configuration</step>
+      </firewall_steps>
+    </dev_focus>
+
+    <known_issues>
+      <issue>
+        <title>Tailscale Account Not Active or Expired</title>
+        <likelihood>Low</likelihood>
+        <mitigation>Ensure Tailscale subscription active (free tier available). Test account login before proceeding with device setup.</mitigation>
+      </issue>
+      <issue>
+        <title>Boox Palma 2 Tailscale Availability</title>
+        <likelihood>Medium</likelihood>
+        <mitigation>Check Tailscale Android app availability at play.google.com or via F-Droid. If unavailable, research OpenVPN or WireGuard alternatives and document setup.</mitigation>
+      </issue>
+      <issue>
+        <title>Firewall Blocks Tailscale Traffic</title>
+        <likelihood>Low</likelihood>
+        <mitigation>Tailscale uses UDP port 41641. If home network firewall blocks this, update ISP router rules or add firewall exception on RPi.</mitigation>
+      </issue>
+      <issue>
+        <title>Slow Cellular Performance</title>
+        <likelihood>Medium</likelihood>
+        <mitigation>Expected behavior on cellular vs home WiFi. Test book download speeds to confirm acceptable (>50 KB/s typical). If too slow, may indicate network degradation; test on different carriers/locations.</mitigation>
+      </issue>
+      <issue>
+        <title>Tailscale IP Changes Between Sessions</title>
+        <likelihood>Very Low</likelihood>
+        <mitigation>Tailscale IPs are stable for authenticated devices. If changes occur, likely indicates device re-authentication. Document IPs and update Readest OPDS catalog URL if needed.</mitigation>
+      </issue>
+    </known_issues>
+
+    <success_criteria>
+      <criterion>✓ Tailscale installed and running on RPi with systemd auto-start verified</criterion>
+      <criterion>✓ Tailscale installed on iOS with Always-on VPN enabled</criterion>
+      <criterion>✓ Tailscale (or alternative VPN) installed on Boox with auto-start configured</criterion>
+      <criterion>✓ All three devices visible in Tailscale admin console with assigned 100.x.x.x IPs</criterion>
+      <criterion>✓ Mesh network connectivity verified: ping between all device pairs successful</criterion>
+      <criterion>✓ CWA web UI accessible from iOS on cellular network via Tailscale IP in &lt;3 seconds</criterion>
+      <criterion>✓ OPDS catalog accessible from Readest on iOS via Tailscale IP on cellular in &lt;2 seconds</criterion>
+      <criterion>✓ Book download from OPDS via Tailscale on cellular completes successfully (&gt;50 KB/s typical)</criterion>
+      <criterion>✓ Tailscale auto-connects on iOS app launch and RPi systemd auto-start verified post-reboot</criterion>
+      <criterion>✓ Firewall rules allow Tailscale traffic; external non-Tailscale IPs cannot reach CWA</criterion>
+      <criterion>✓ 30+ minute stability test on cellular network with no disconnections or IP changes</criterion>
+      <criterion>✓ All 8 acceptance criteria verified and documented</criterion>
+    </success_criteria>
+  </implementation_guidance>
+
+</story-context>

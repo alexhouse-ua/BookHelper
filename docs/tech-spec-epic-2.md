@@ -101,6 +101,208 @@ This epic implements the **Device Synchronization Layer** and **Remote Access La
 
 ---
 
+## Data Models & Schemas
+
+### Entities
+
+**Book (inherited from Calibre)**
+- source: Calibre metadata.db
+- Fields: title (string), author (string), series (string), cover_art (image), formats (array), language (string), pub_date (date)
+- Relationships: 1 Book → N Formats (EPUB, MOBI, KEPUB, etc.)
+
+**ReadingProgress (KOSync)**
+- source: KOSync server
+- Fields: book_id (UUID), device_id (UUID), progress_percent (0-100), timestamp (datetime), reading_position (object)
+- Relationships: N ReadingProgress → 1 Book; N ReadingProgress → 1 Device
+- Storage: KOSync metadata table in CWA database
+
+**Device**
+- source: KOSync registration + Tailscale peer list
+- Fields: device_id (UUID), device_name (string), device_type (enum: ios, android, ereader), tailscale_ip (string), last_sync (datetime)
+- Relationships: N Devices → N Books (via ReadingProgress)
+
+---
+
+## API Specification
+
+### OPDS Catalog Endpoints
+
+**GET /opds**
+- Description: Root OPDS 1.2 catalog feed (XML)
+- Response Format: OPDS 1.2 Atom XML
+- Authentication: None (if CWA login disabled) OR Basic Auth (if enabled)
+- Status Codes:
+  - 200: Valid OPDS feed returned
+  - 401: Unauthorized (if auth required and credentials invalid)
+  - 500: Server error
+- Response Body Example:
+  ```xml
+  <?xml version="1.0" encoding="utf-8"?>
+  <feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+    <title>BookHelper Library</title>
+    <id>urn:uuid:bookhelper-root</id>
+    <updated>2025-10-29T12:00:00Z</updated>
+    <link rel="start" href="/opds" type="application/atom+xml;profile=opds-catalog;kind=navigation" />
+    <entry>
+      <title>Fiction</title>
+      <link rel="subsection" href="/opds/categories/fiction" type="application/atom+xml;profile=opds-catalog;kind=navigation" />
+    </entry>
+  </feed>
+  ```
+
+**GET /opds/categories/{category}**
+- Description: Browse books in a specific category
+- Parameters: category (string: fiction, nonfiction, science, etc.)
+- Authentication: Same as /opds
+- Status Codes: 200, 401, 404, 500
+- Response: OPDS Atom feed with book entries and cover art links
+
+**GET /opds/books/{book_id}**
+- Description: Retrieve specific book metadata and download link
+- Parameters: book_id (integer or UUID)
+- Authentication: Same as /opds
+- Response: OPDS Atom entry with title, author, cover, formats, download links
+- Download Link: `/opds/books/{book_id}/download/{format}` (e.g., `/opds/books/42/download/epub`)
+
+### KOSync Server Endpoints
+
+**POST /api/kosync/registerdevice**
+- Description: Register a new device for progress sync
+- Request Body:
+  ```json
+  {
+    "device_id": "uuid",
+    "device_name": "iPhone 14 Pro",
+    "device_type": "ios"
+  }
+  ```
+- Response (201 Created):
+  ```json
+  {
+    "device_id": "uuid",
+    "server_id": "kosync-server-uuid",
+    "registered_at": "2025-10-29T12:00:00Z"
+  }
+  ```
+- Status Codes: 201, 400 (bad request), 500
+
+**POST /api/kosync/bookmark**
+- Description: Sync reading progress for a book
+- Request Body:
+  ```json
+  {
+    "device_id": "uuid",
+    "book_id": "uuid",
+    "progress_percent": 45,
+    "bookmark_data": { "page": 120, "chapter": "5" },
+    "timestamp": "2025-10-29T14:30:00Z"
+  }
+  ```
+- Response (200 OK):
+  ```json
+  {
+    "synced": true,
+    "server_timestamp": "2025-10-29T14:30:01Z",
+    "conflict": false
+  }
+  ```
+- Status Codes: 200, 400, 409 (conflict), 500
+
+**GET /api/kosync/bookmark/{device_id}/{book_id}**
+- Description: Retrieve latest reading progress for a book on a device
+- Response (200 OK):
+  ```json
+  {
+    "device_id": "uuid",
+    "book_id": "uuid",
+    "progress_percent": 45,
+    "bookmark_data": { "page": 120, "chapter": "5" },
+    "timestamp": "2025-10-29T14:30:00Z"
+  }
+  ```
+- Status Codes: 200, 404 (no progress yet), 500
+
+### Tailscale Integration
+
+**VPN Configuration (not a traditional API)**
+- Device Registration: Manual via Tailscale auth flow on RPi and iOS
+- Access Method: All services (OPDS, KOSync) accessible via Tailscale IP (e.g., `100.x.x.x`)
+- Authentication: WireGuard VPN layer (encrypted by default)
+- Commands:
+  - Enable on RPi: `tailscale up` (one-time setup)
+  - Enable on iOS: Install Tailscale app, scan QR code or authenticate via web UI
+
+---
+
+## Non-Functional Requirements
+
+### Security
+
+- **OPDS Over Tailscale:** All remote OPDS traffic encrypted via WireGuard (VPN-level encryption)
+- **Authentication:** Basic Auth for CWA admin panel (if enabled); supports OAuth 2.0 via CWA config
+- **Device Registration:** KOSync device IDs registered server-side; devices must register before sync access
+- **Token/Credential Rotation:** Basic auth credentials can be changed in CWA admin; KOSync device IDs persist until unregistered
+- **Rate Limiting:** No explicit rate limiting in CWA 3.1.0; recommend 100 requests/min per IP in reverse proxy (if deployed)
+- **TLS:** Not required for LAN access; if accessing over untrusted networks, configure TLS reverse proxy in front of CWA
+
+### Reliability
+
+- **Uptime Target:** 99% (allows ~7 hours/month downtime)
+- **OPDS Availability:** Must respond within 2 seconds; if >3 seconds, log warning and investigate CWA load
+- **Syncthing Sync Recovery:** Auto-resumes on network restore; no manual intervention needed
+- **KOSync Conflict Resolution:** Last-write-wins; conflicting progress syncs keep server version and notify client
+- **Failover Strategy:** None (single RPi deployment); for HA, consider database replication (out of scope for Epic 2)
+
+### Observability
+
+**Logging:**
+- OPDS catalog requests: Log client IP, book accessed, response status, response time
+- KOSync device registrations: Log device_id, device_name, registration time
+- KOSync bookmark syncs: Log device_id, book_id, progress change, conflict status
+- Log Level: INFO for normal operations; DEBUG for troubleshooting
+- Log Location: `/var/log/calibre-web/app.log` (configurable in CWA)
+
+**Metrics (Prometheus format if monitoring enabled):**
+- `opds_requests_total` (counter): Total OPDS requests by endpoint
+- `opds_response_time_seconds` (histogram): OPDS response latency
+- `kosync_device_registrations_total` (counter): Total device registrations
+- `kosync_bookmark_syncs_total` (counter): Total bookmark sync operations
+- `kosync_conflicts_total` (counter): Total sync conflicts detected
+
+**Alerting:**
+- Alert if OPDS endpoint unreachable >1 minute (check via HTTP GET /opds every 30s)
+- Alert if KOSync server down >5 minutes (check connectivity every 60s)
+- Alert if Syncthing stalled >15 minutes (no files synced in interval)
+- Alert if CWA logs show error rate >1% in rolling 5-min window
+
+---
+
+## Dependencies & Versions
+
+### Required Components
+
+| Component | Version | Rationale | Notes |
+|-----------|---------|-----------|-------|
+| Calibre-Web-Automated | v3.1.0+ | OPDS support, KOSync plugin | Must support OPDS 1.2 standard |
+| Readest iOS App | v1.5+ | OPDS 1.2 client | Requires iOS 13+; check App Store for latest |
+| iOS | 13+ | Readest minimum requirement | Supports iPhone/iPad |
+| RPi OS | Bullseye (recommended) | Stable Docker support | Buster still supported but deprecated |
+| Syncthing | v1.23+ | One-way mode, file watching | Critical for Story 2.1 context |
+| Tailscale | v1.52+ (RPi), v1.x (iOS) | Stable mesh networking | Latest recommended; backward compatible |
+| KOReader | v2024.10+ | KOSync plugin integration | Boox Palma 2 uses KOReader as default reader |
+| KOSync (CWA plugin) | Built-in (v3.1.0+) | Progress sync server | No separate installation needed |
+| WireGuard | v1.0.20220627+ | Tailscale VPN layer | Included with Tailscale; no manual install |
+
+### Optional Components
+
+| Component | Purpose | Version |
+|-----------|---------|---------|
+| Nginx/Caddy | Reverse proxy + TLS termination | Latest stable | For HTTPS on untrusted networks |
+| Prometheus | Metrics collection (if observability enabled) | v2.x | For production monitoring |
+| Loki | Log aggregation (if observability enabled) | v2.x | Lightweight log storage |
+
+---
+
 ## Story Sequencing
 
 **Epic 2 Story Order:**

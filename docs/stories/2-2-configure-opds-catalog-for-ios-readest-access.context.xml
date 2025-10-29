@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="story-2-2" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.2</storyId>
+    <title>Configure OPDS Catalog for iOS Readest Access</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-10-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-2-configure-opds-catalog-for-ios-readest-access.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>browse and download books to my iPhone using the Readest app via OPDS catalog access</iWant>
+    <soThat>I can read on iOS without managing files manually</soThat>
+    <tasks>
+      <task n="1">Verify CWA OPDS Support and Enable Endpoint</task>
+      <task n="2">Install and Configure Readest on iOS</task>
+      <task n="3">Validate Catalog Browsing and Metadata Display</task>
+      <task n="4">Test Book Download and Reading</task>
+      <task n="5">Test Persistence After CWA Restart</task>
+      <task n="6">Testing & Validation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">CWA OPDS catalog endpoint responds at http://raspberrypi.local:8083/opds (OPDS 1.2 XML format)</criterion>
+    <criterion id="2">Readest app installed on iOS device</criterion>
+    <criterion id="3">OPDS catalog successfully added to Readest with URL http://raspberrypi.local:8083/opds</criterion>
+    <criterion id="4">Book metadata (title, author, cover art) displays correctly in Readest catalog</criterion>
+    <criterion id="5">Book download from OPDS catalog works without errors (EPUB format)</criterion>
+    <criterion id="6">Downloaded book opens and reads correctly in Readest</criterion>
+    <criterion id="7">OPDS catalog remains functional after CWA container restart</criterion>
+    <criterion id="8">Authentication configured if CWA requires login (basic auth or API key)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-2.md</path>
+        <title>Technical Specification: Device Sync & Remote Access</title>
+        <section>Story 2.2: OPDS Catalog Configuration</section>
+        <snippet>Goal: Enable iOS users to browse and download books from the library using the Readest app without manual file management. Includes API specification (GET /opds, GET /opds/categories/{category}, GET /opds/books/{book_id}), authentication requirements, and performance targets (&lt;2 seconds response time).</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper - Epic Breakdown</title>
+        <section>Epic 2: Device Sync & Remote Access - Story 2.2</section>
+        <snippet>As a reader, I want to browse and download books to my iPhone using Readest, so that I can read on iOS without managing files manually. Acceptance criteria covers endpoint availability, catalog access, metadata display, download functionality, and authentication.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.2 Sync & Backup Layer - File Sync (for Ebook Library Distribution)</section>
+        <snippet>Server → iOS: There is no background file sync to iOS. The Readest app on iOS uses the OPDS protocol to download ebooks on-demand from the Calibre-Web-Automated server. OPDS is a standardized protocol for ebook discovery and download.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>User Journey 1: Adding a New Ebook and Reading Across Devices - Step 3: Sync to Devices</section>
+        <snippet>iOS: User opens Readest app, browses OPDS catalog, book appears instantly. System supports on-demand ebook download via OPDS protocol without background file sync.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>calibre-web-automated</symbol>
+        <reason>CWA service configuration - defines image version (dev), port mapping (8083), environment variables for authentication, volume mounts for library and plugins. OPDS endpoint runs on port 8083 at root URL.</reason>
+        <details>
+          <image>ghcr.io/crocodilestick/calibre-web-automated:dev</image>
+          <port>8083</port>
+          <env_key>ADMIN_USERNAME</env_key>
+          <env_key>ADMIN_PASSWORD</env_key>
+          <env_key>HARDCOVER_TOKEN</env_key>
+          <volume_library>/calibre-library</volume_library>
+          <volume_plugins>/config/.config/calibre/plugins</volume_plugins>
+        </details>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <dependency>
+        <name>Calibre-Web-Automated</name>
+        <version>dev (v3.1.0+ required)</version>
+        <kind>Docker image</kind>
+        <repository>ghcr.io/crocodilestick/calibre-web-automated</repository>
+        <purpose>OPDS catalog endpoint and ebook library management</purpose>
+      </dependency>
+      <dependency>
+        <name>Readest</name>
+        <version>v1.5+</version>
+        <kind>iOS app</kind>
+        <platform>iOS 13+</platform>
+        <source>App Store</source>
+        <purpose>OPDS client for browsing and downloading ebooks</purpose>
+      </dependency>
+      <dependency>
+        <name>Calibre Database</name>
+        <version>N/A</version>
+        <kind>SQLite</kind>
+        <path>/calibre-library/metadata.db</path>
+        <purpose>Source of book metadata (title, author, cover art) for OPDS catalog</purpose>
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <kind>standard</kind>
+      <description>OPDS 1.2 Standard - OPDS catalog must conform to OPDS 1.2 specification for compatibility with Readest and other iOS ebook readers</description>
+      <source>docs/tech-spec-epic-2.md#API-Specification</source>
+    </constraint>
+    <constraint>
+      <kind>architectural</kind>
+      <description>CWA Built-in Support - OPDS is embedded in Calibre-Web-Automated v3.1.0+; no additional services or code required. Configuration is entirely admin-panel driven.</description>
+      <source>docker-compose.yml - CWA image includes OPDS module</source>
+    </constraint>
+    <constraint>
+      <kind>network</kind>
+      <description>Local Network Only (MVP) - OPDS endpoint accessible on http://raspberrypi.local:8083/opds only on home WiFi. Remote access via Tailscale VPN will be implemented in Story 2.3.</description>
+      <source>docs/architecture.md#3.2-Sync-&-Backup-Layer</source>
+    </constraint>
+    <constraint>
+      <kind>performance</kind>
+      <description>Response Time Target: OPDS catalog must respond in &lt;2 seconds (measured from GET /opds)</description>
+      <source>docs/tech-spec-epic-2.md#Performance-&-Resource-Targets</source>
+    </constraint>
+    <constraint>
+      <kind>authentication</kind>
+      <description>Basic Auth Optional - If CWA admin panel login is enabled, OPDS endpoint requires basic auth credentials. Readest supports basic auth in catalog settings.</description>
+      <source>docs/tech-spec-epic-2.md#API-Specification</source>
+    </constraint>
+    <constraint>
+      <kind>metadata</kind>
+      <description>No New Schema Required - OPDS reads directly from existing Calibre metadata.db; no new database tables or transformations needed</description>
+      <source>docs/tech-spec-epic-2.md#Implementation-Notes</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>OPDS Catalog Root</name>
+      <kind>REST HTTP endpoint</kind>
+      <method>GET</method>
+      <path>/opds</path>
+      <url>http://raspberrypi.local:8083/opds</url>
+      <description>Root OPDS 1.2 catalog feed (Atom XML)</description>
+      <authentication>None (if CWA login disabled) OR Basic Auth (if enabled)</authentication>
+      <response_format>OPDS 1.2 Atom XML</response_format>
+      <status_codes>
+        <code>200 - Valid OPDS feed returned</code>
+        <code>401 - Unauthorized (if auth required and credentials invalid)</code>
+        <code>500 - Server error</code>
+      </status_codes>
+      <performance_target>Response time &lt;2 seconds</performance_target>
+    </interface>
+
+    <interface>
+      <name>OPDS Categories Browse</name>
+      <kind>REST HTTP endpoint</kind>
+      <method>GET</method>
+      <path>/opds/categories/{category}</path>
+      <description>Browse books in a specific category (fiction, nonfiction, science, etc.)</description>
+      <parameters>
+        <param name="category">string - category name</param>
+      </parameters>
+      <response_format>OPDS Atom feed with book entries and cover art links</response_format>
+      <status_codes>
+        <code>200 - Category feed returned</code>
+        <code>401 - Unauthorized</code>
+        <code>404 - Category not found</code>
+        <code>500 - Server error</code>
+      </status_codes>
+    </interface>
+
+    <interface>
+      <name>OPDS Book Download</name>
+      <kind>REST HTTP endpoint</kind>
+      <method>GET</method>
+      <path>/opds/books/{book_id}/download/{format}</path>
+      <description>Retrieve specific book for download (EPUB, MOBI, KEPUB, etc.)</description>
+      <parameters>
+        <param name="book_id">integer or UUID - book identifier</param>
+        <param name="format">string - file format (epub, mobi, kepub, pdf)</param>
+      </parameters>
+      <response_format>Binary file (ebook format)</response_format>
+      <example>GET /opds/books/42/download/epub</example>
+      <status_codes>
+        <code>200 - File returned</code>
+        <code>401 - Unauthorized</code>
+        <code>404 - Book or format not found</code>
+        <code>500 - Server error</code>
+      </status_codes>
+    </interface>
+
+    <interface>
+      <name>CWA Admin Panel OPDS Settings</name>
+      <kind>Web UI configuration</kind>
+      <url>http://raspberrypi.local:8083/admin</url>
+      <description>CWA admin panel where OPDS can be enabled/disabled (if not enabled by default in v3.1.0+)</description>
+      <authentication>Required - use ADMIN_USERNAME and ADMIN_PASSWORD from docker-compose.yml</authentication>
+      <steps>
+        <step>Navigate to http://raspberrypi.local:8083/admin</step>
+        <step>Login with credentials from docker-compose.yml environment variables</step>
+        <step>Locate "OPDS Catalog" or "Feed" settings section</step>
+        <step>Verify OPDS 1.2 is enabled</step>
+        <step>Test endpoint: curl http://raspberrypi.local:8083/opds</step>
+      </steps>
+    </interface>
+
+    <interface>
+      <name>Readest iOS App - Add Catalog</name>
+      <kind>iOS app UI</kind>
+      <description>Readest OPDS catalog configuration interface</description>
+      <steps>
+        <step>Launch Readest app on iOS device</step>
+        <step>Navigate to Settings → Catalogs → Add New</step>
+        <step>Enter Catalog URL: http://raspberrypi.local:8083/opds</step>
+        <step>If CWA requires login: Enter basic auth credentials</step>
+        <step>Save catalog</step>
+        <step>Browse library in Readest - books should appear instantly</step>
+      </steps>
+      <note>Readest must support OPDS 1.2 protocol (confirmed in v1.5+)</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing for Story 2.2 is primarily manual and integration-focused because OPDS is a built-in CWA feature (no custom code to unit test). Focus on endpoint availability, metadata display quality, and cross-device functionality. Key test areas: (1) Endpoint responds with valid OPDS 1.2 XML and appropriate status codes, (2) Catalog displays all books with correct metadata (title, author, cover art), (3) Download functionality works for multiple formats (EPUB primary), (4) Readest can parse and render downloaded ebooks, (5) Persistence after CWA container restart, (6) Performance meets &lt;2 second target.
+    </standards>
+
+    <locations>
+      <location>Manual testing checklist documented in Story file: docs/stories/2-2-configure-opds-catalog-for-ios-readest-access.md#Tasks-/-Subtasks</location>
+      <location>CWA healthcheck: docker-compose.yml includes health check (curl -f http://localhost:8083/)</location>
+      <location>CWA logs: docker logs calibre-web-automated (monitor for startup messages and OPDS endpoint initialization)</location>
+    </locations>
+
+    <ideas>
+      <test_idea ac="1">HTTP Endpoint Validation: curl -i http://raspberrypi.local:8083/opds - verify 200 status and valid OPDS 1.2 XML structure</test_idea>
+      <test_idea ac="1">Response Time Test: measure time from request to response completion, should be &lt;2 seconds under normal load</test_idea>
+      <test_idea ac="2,3">Readest Catalog Add: Install Readest v1.5+, add catalog URL, verify Readest recognizes and lists books</test_idea>
+      <test_idea ac="4">Metadata Validation: Compare book titles, authors, and cover art in Readest against CWA library source</test_idea>
+      <test_idea ac="4">Cover Art Display: Verify cover images load and display correctly (not broken/missing)</test_idea>
+      <test_idea ac="5">Download Test: Download 2-3 ebooks in different formats (EPUB, MOBI) from Readest, verify file integrity</test_idea>
+      <test_idea ac="6">Reading Test: Open downloaded EPUB in Readest, navigate pages, verify text and images render correctly</test_idea>
+      <test_idea ac="6">Reader Features: Test highlighting, bookmarking, font sizing in Readest with downloaded book</test_idea>
+      <test_idea ac="7">Container Restart: docker restart calibre-web-automated, verify OPDS endpoint remains accessible after startup</test_idea>
+      <test_idea ac="7">Catalog Persistence: Verify books still appear in Readest after CWA restart (no metadata loss)</test_idea>
+      <test_idea ac="8">Auth Configuration: If ADMIN_PASSWORD is set, verify OPDS requires basic auth and Readest can authenticate</test_idea>
+      <test_idea ac="8">Auth Failure: Attempt OPDS access with wrong credentials, verify 401 response</test_idea>
+      <test_idea general="network">Network Stability: Test from different WiFi locations in home, verify consistent access</test_idea>
+      <test_idea general="future">Remote Access (Story 2.3): Note current limitation - OPDS only accessible on local WiFi. Tailscale will enable remote access via VPN IP (100.x.x.x)</test_idea>
+    </ideas>
+  </tests>
+
+  <implementation_guidance>
+    <overview>
+      Story 2.2 requires minimal development effort because OPDS is a built-in CWA feature. Primary activities are: (1) verify CWA version supports OPDS 1.2, (2) enable OPDS in admin panel if not enabled by default, (3) test end-to-end with Readest on iOS, (4) validate all acceptance criteria. No code changes expected; work is configuration and validation focused.
+    </overview>
+
+    <dev_focus>
+      <focus_area>Configuration Verification</focus_area>
+      <description>Confirm CWA v3.1.0+ is running and OPDS module is available. Check docker-compose.yml shows correct CWA image and port (8083).</description>
+      <docker_check>docker ps - should show calibre-web-automated container running</docker_check>
+      <endpoint_check>curl -i http://raspberrypi.local:8083/opds - should return 200 and OPDS XML</endpoint_check>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>iOS Readest Integration</focus_area>
+      <description>Install Readest, add CWA OPDS catalog, verify books appear with correct metadata. Test download and reading functionality.</description>
+      <manual_steps>
+        <step>Install Readest v1.5+ from App Store</step>
+        <step>Add catalog: http://raspberrypi.local:8083/opds</step>
+        <step>Verify &gt;20 books appear in Readest catalog view</step>
+        <step>Download test book (EPUB format)</step>
+        <step>Open book in Readest and verify readability</step>
+      </manual_steps>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>Metadata Quality Assurance</focus_area>
+      <description>Verify book metadata displays correctly: titles, authors, cover art. Check for missing or corrupted data.</description>
+      <validation>
+        <check>Compare 5 random books from Readest catalog against CWA library web UI</check>
+        <check>Verify cover art URLs resolve and images display</check>
+        <check>Spot-check author names and descriptions match source</check>
+      </validation>
+    </dev_focus>
+
+    <dev_focus>
+      <focus_area>Persistence & Reliability</focus_area>
+      <description>Test CWA restart behavior - OPDS endpoint should remain available after container restart with no data loss.</description>
+      <test_procedure>
+        <step>Record OPDS response before restart: curl http://raspberrypi.local:8083/opds | wc -l (line count)</step>
+        <step>Restart CWA: docker restart calibre-web-automated</step>
+        <step>Wait for container to start (check logs: docker logs calibre-web-automated)</step>
+        <step>Verify OPDS endpoint: curl -i http://raspberrypi.local:8083/opds</step>
+        <step>Verify response line count matches (no data loss)</step>
+        <step>In Readest: Refresh catalog, verify books still appear</step>
+      </test_procedure>
+    </dev_focus>
+
+    <known_issues>
+      <issue>
+        <title>OPDS Endpoint Disabled by Default?</title>
+        <likelihood>Low</likelihood>
+        <mitigation>Check CWA admin panel at http://raspberrypi.local:8083/admin. If OPDS is disabled, enable it and restart CWA. Verify with curl.</mitigation>
+      </issue>
+      <issue>
+        <title>Readest Authentication Failure</title>
+        <likelihood>Medium</likelihood>
+        <mitigation>If CWA has ADMIN_PASSWORD set (from docker-compose.yml), add basic auth to Readest catalog settings. Use ADMIN_USERNAME:ADMIN_PASSWORD in Readest.</mitigation>
+      </issue>
+      <issue>
+        <title>Cover Art Missing or Slow Loading</title>
+        <likelihood>Low</likelihood>
+        <mitigation>Monitor CWA logs for errors. If persistent, may indicate Calibre library metadata incomplete (missing cover files). Verify covers exist in /calibre-library/</mitigation>
+      </issue>
+    </known_issues>
+
+    <success_criteria>
+      <criterion>✓ OPDS endpoint responds at http://raspberrypi.local:8083/opds with HTTP 200 and valid OPDS 1.2 XML</criterion>
+      <criterion>✓ Readest can add catalog and display &gt;20 books with correct metadata</criterion>
+      <criterion>✓ Book download from OPDS works; EPUB opens in Readest without errors</criterion>
+      <criterion>✓ All 8 acceptance criteria verified and documented</criterion>
+      <criterion>✓ OPDS endpoint persists after CWA container restart</criterion>
+      <criterion>✓ Response time &lt;2 seconds (performance target met)</criterion>
+    </success_criteria>
+  </implementation_guidance>
+
+</story-context>
