@@ -49,7 +49,7 @@ development_status:
   # ========== EPIC 2: Device Sync & Remote Access ==========
   epic-2: contexted
   2-1-configure-syncthing-for-one-way-library-sync-to-boox-palma-2: done
-  2-2-configure-opds-catalog-for-ios-readest-access: backlog
+  2-2-configure-opds-catalog-for-ios-readest-access: ready-for-dev
   2-3-configure-tailscale-for-remote-library-access: backlog
   2-4-enable-kosync-progress-sync-across-devices: backlog
   epic-2-retrospective: optional
