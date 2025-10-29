@@ -9,8 +9,7 @@
 *.swo
 
 # Project Directories
-/bmad
-/BMAD-METHOD
+/.BMAD-METHOD
 
 # Environment and Secrets
 .env
@@ -43,7 +42,8 @@ env/
 *.swp
 *~
 
-# Docker Compose Overrides (local development)
+# Docker Compose (environment-specific)
+docker-compose.yml
 docker-compose.override.yml
 
 # Test Artifacts (local runs, not part of repo)
