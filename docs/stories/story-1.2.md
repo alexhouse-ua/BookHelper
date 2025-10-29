@@ -1,6 +1,6 @@
 # Story 1.2: Auto-Ingestion + Metadata Enrichment
 
-Status: AWAITING MANUAL EXECUTION - Task 1 Complete, Tasks 2-5 Ready for Deployment (2025-10-27)
+Status: IN PROGRESS - Task 1 Complete, Task 2 Monitoring Started (2025-10-29)
 
 ## Story
 
@@ -36,14 +36,14 @@ So that library ingestion is zero-touch and hardware performance is confirmed fo
   - [x] Test with single EPUB: verify import <30 seconds with enriched metadata - Real-world testing completed 2025-10-27 (2 EPUBs imported, IDs 29-30)
   - [x] Authenticate Hardcover API (if required) - JWT token configured and validated (expires 2027)
 
-- [ ] Execute 1-week realistic ingestion validation (AC: 8-12)
-  - [ ] Start monitoring script to capture CPU/memory metrics every 5 minutes
-  - [ ] Drop 1-2 test ebooks into ingest folder (simulating typical weekly usage)
-  - [ ] Record baseline metrics: idle memory, CPU during typical operations
-  - [ ] Monitor CWA web UI performance during metadata enrichment
-  - [ ] Verify no crashes, database errors, or OOM conditions
-  - [ ] After 1 week: collect peak memory usage, metadata enrichment times, scan performance
-  - [ ] Document findings in spreadsheet (timestamp, operation, memory, CPU, duration)
+- [x] Execute 1-week realistic ingestion validation (AC: 8-12) - STARTED 2025-10-29
+  - [x] Start monitoring script to capture CPU/memory metrics every 5 minutes - Running in tmux session
+  - [ ] Drop 1-2 test ebooks into ingest folder (simulating typical weekly usage) - Scheduled Days 1, 3, 5, 7
+  - [ ] Record baseline metrics: idle memory, CPU during typical operations - Baseline: ~245MB idle
+  - [ ] Monitor CWA web UI performance during metadata enrichment - Daily checks scheduled
+  - [ ] Verify no crashes, database errors, or OOM conditions - Daily dmesg checks in progress
+  - [ ] After 1 week: collect peak memory usage, metadata enrichment times, scan performance - Week ends 2025-11-05
+  - [ ] Document findings in spreadsheet (timestamp, operation, memory, CPU, duration) - CSV file: /tmp/cwa-metrics-1.2.csv
 
 - [ ] Validate realistic performance targets (AC: 9-11)
   - [ ] Confirm idle memory <600MB
