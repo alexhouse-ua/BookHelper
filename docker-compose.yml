@@ -1,6 +1,6 @@
 services:
   calibre-web-automated:
-    image: ghcr.io/crocodilestick/calibre-web-automated:latest
+    image: ghcr.io/crocodilestick/calibre-web-automated:dev
     container_name: calibre-web-automated
     restart: always
 
@@ -44,7 +44,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - STGUIADDRESS=
+      - STGUIADDRESS=0.0.0.0:8384
 
     volumes:
       - syncthing_config:/var/syncthing

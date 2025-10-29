@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>2.1</story-id>
+    <epic-id>2</epic-id>
+    <story-title>Configure Syncthing for one-way library sync to Boox Palma 2</story-title>
+    <story-status>ContextReadyDraft</story-status>
+    <generated-date>2025-10-27</generated-date>
+    <project>BookHelper</project>
+  </metadata>
+
+  <story-statement>
+    <as-a>reader</as-a>
+    <i-want>my ebook library automatically synced to my Boox Palma 2</i-want>
+    <so-that>new books appear on my device without manual file transfers</so-that>
+  </story-statement>
+
+  <acceptance-criteria count="7">
+    <ac id="1">Syncthing installed and running on Raspberry Pi (via Docker or native)</ac>
+    <ac id="2">Syncthing installed and configured on Boox Palma 2 (Android app)</ac>
+    <ac id="3">Library folder shared from RPi with "Send Only" mode configured (one-way sync)</ac>
+    <ac id="4">Boox Palma receives library folder with "Receive Only" mode configured</ac>
+    <ac id="5">Test: New book added to CWA library appears on Boox within 5 minutes</ac>
+    <ac id="6">KOReader on Boox can open synced books successfully</ac>
+    <ac id="7">Syncthing runs automatically on boot for both devices</ac>
+  </acceptance-criteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper Epic Breakdown</title>
+        <section>Epic 2 § Story 2.1: Configure Syncthing for one-way library sync to Boox Palma 2</section>
+        <snippet>As a reader, I want my ebook library automatically synced to my Boox Palma 2, So that new books appear on my device without manual file transfers. Acceptance criteria: Syncthing installed on RPi and Boox, configured one-way sync (RPi Send Only, Boox Receive Only), new books appear within 5 minutes, KOReader can open synced books, auto-start on both devices.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>§ Functional Requirements § FR008</section>
+        <snippet>System shall sync library files to Boox Palma 2 via Syncthing (one-way: server → device). Depends on FR005 (auto-ingest operational).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>§ User Journeys § Journey 1: Adding a New Ebook § Section 3: "Sync to Devices"</section>
+        <snippet>Boox Palma 2: Syncthing automatically syncs library folder (one-way from server). User opens book in KOReader. Reads several chapters, KOReader tracks progress in statistics.sqlite3.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>§ 3.4. Device Sync Layer</section>
+        <snippet>Syncthing deployed on RPi and Boox Palma 2; configured for one-way file sync (RPi Send Only, Boox Receive Only). Prevents metadata corruption by ensuring single point of write authority.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>§ 4. Critical Warnings - SQLite Corruption Prevention</section>
+        <snippet>NEVER use file-level sync (Syncthing) for live metadata.db. Use KOSync only for progress sync. Statistics backup is one-way only (Story 3.1 enforces this). Library folder sync with Syncthing is safe because metadata.db and statistics.sqlite3 are NOT synced, only ebook files.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>syncthing service</symbol>
+        <reason>Syncthing service already defined in compose file for Story 1.1; will be configured in this story with library folder share</reason>
+      </artifact>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>syncthing volumes</symbol>
+        <lines>50-51</lines>
+        <reason>Syncthing config volume and library volume already mounted; confirm paths during setup</reason>
+      </artifact>
+    </code>
+
+    <interfaces>
+      <interface>
+        <name>Syncthing HTTP API</name>
+        <kind>REST API</kind>
+        <signature>GET /rest/config - Retrieve device configuration; PUT /rest/config - Update configuration</signature>
+        <path>Exposed on http://raspberrypi.local:8384 (RPi) and Boox Syncthing UI</path>
+      </interface>
+      <interface>
+        <name>Syncthing Device Discovery</name>
+        <kind>Protocol</kind>
+        <signature>Device pairing via device ID (40-character hash); automatic peer discovery on LAN</signature>
+        <path>Syncthing protocol (BEP: Syncthing Block Exchange Protocol)</path>
+      </interface>
+      <interface>
+        <name>File Sync Events</name>
+        <kind>File System Event</kind>
+        <signature>Syncthing monitors shared folders on both RPi and Boox; triggers sync on file changes</signature>
+        <path>RPi: /library (CWA library); Boox: /sdcard/Books or /storage/emulated/0/Books</path>
+      </interface>
+      <interface>
+        <name>KOReader File Access</name>
+        <kind>File System</kind>
+        <signature>KOReader scans /sdcard/Books and /storage/emulated/0/Books for ebook files</signature>
+        <path>Boox Palma 2 file system; ebook files must be in this location for KOReader to discover</path>
+      </interface>
+    </interfaces>
+
+    <constraints>
+      <constraint>
+        <name>One-way sync design (Send Only / Receive Only)</name>
+        <source>docs/architecture.md § 4. Critical Warnings - SQLite Corruption Prevention</source>
+        <detail>RPi must be "Send Only" (authoritative source of library files). Boox must be "Receive Only" (read-only consumer). This prevents metadata corruption if Boox attempts to write changes back.</detail>
+      </constraint>
+      <constraint>
+        <name>File sync scope</name>
+        <source>Story 2.1 Design Notes</source>
+        <detail>Sync ONLY ebook files in /library (CWA managed files). DO NOT sync metadata.db or statistics.sqlite3 via Syncthing. These databases are managed separately: metadata.db is RPi-local, statistics.sqlite3 is synced via Syncthing Story 3.1 (separate one-way sync, Boox Send Only).</detail>
+      </constraint>
+      <constraint>
+        <name>Syncthing auto-start</name>
+        <source>Story 2.1 AC7</source>
+        <detail>Syncthing must auto-start on both RPi (docker-compose restart: always or systemd timer) and Boox (Android system setting).</detail>
+      </constraint>
+      <constraint>
+        <name>Sync latency target</name>
+        <source>Story 2.1 AC5</source>
+        <detail>New book added to RPi library must appear on Boox within 5 minutes. Typical LAN sync: 2-4 minutes.</detail>
+      </constraint>
+      <constraint>
+        <name>Network topology</name>
+        <source>Story 2.1 prerequisite</source>
+        <detail>Both devices on same local network initially (home WiFi). Story 2.3 (Tailscale) adds remote access; Story 2.1 assumes local LAN connectivity.</detail>
+      </constraint>
+      <constraint>
+        <name>Android compatibility</name>
+        <source>Story 2.1 AC2</source>
+        <detail>Boox Palma 2 runs Android-based OS; Syncthing app from F-Droid or Google Play required. Confirm app version supports device.</detail>
+      </constraint>
+    </constraints>
+
+    <dependencies>
+      <docker>
+        <package name="syncthing" version="latest" purpose="Peer-to-peer file sync daemon on RPi (already in docker-compose.yml)" />
+      </docker>
+      <infrastructure>
+        <package name="syncthing-android" version="latest" purpose="Syncthing app for Boox Palma 2; install from F-Droid or Google Play" />
+        <package name="koreader" version="latest" purpose="Pre-installed on Boox; reads synced ebook files" />
+      </infrastructure>
+      <external-services>
+        <service name="Syncthing Discovery Server (optional)" type="DNS discovery" purpose="Peer discovery if LAN is not reliable; typically not needed for home network" />
+      </external-services>
+    </dependencies>
+  </artifacts>
+
+  <testing>
+    <standards>
+      <paragraph>Integration testing on real hardware (RPi + Boox Palma 2). Test metrics: device pairing success, folder share modes set correctly, file sync within 5 minutes, file checksums match (no corruption), KOReader can open synced files, service restarts after reboot. All tests run on actual devices with actual network connectivity (home WiFi).</paragraph>
+    </standards>
+
+    <locations>
+      <location type="configuration">docker-compose.yml - Syncthing service configuration (RPi)</location>
+      <location type="manual-testing">Boox Palma 2 Syncthing UI: http://localhost:8384</location>
+      <location type="manual-testing">RPi Syncthing UI: http://raspberrypi.local:8384 or http://localhost:8384 (SSH tunnel)</location>
+      <location type="file-system">RPi library: /library (source of truth)</location>
+      <location type="file-system">Boox library: /sdcard/Books or /storage/emulated/0/Books (read-only copy)</location>
+    </locations>
+
+    <ideas>
+      <idea ac-id="1">Syncthing on RPi: Install via docker-compose (already present Story 1.1), verify service running, access web UI at port 8384, configure device name</idea>
+      <idea ac-id="2">Syncthing on Boox: Install app from F-Droid or Google Play, start service, note device ID (40-character hash shown in UI)</idea>
+      <idea ac-id="3">RPi folder share: Create share definition in Syncthing UI pointing to /library, set mode to "Send Only", generate share key or device ID for pairing</idea>
+      <idea ac-id="4">Boox folder receive: In Boox Syncthing UI, add RPi as remote device (by device ID), accept library folder share, set mode to "Receive Only", confirm sync path (/sdcard/Books or /storage/emulated/0/Books)</idea>
+      <idea ac-id="5">Sync performance test: Add test ebook file to /library on RPi, monitor Syncthing UI on both devices, verify file appears on Boox within 5 minutes, check file size matches (no truncation)</idea>
+      <idea ac-id="6">KOReader integration: On Boox, open KOReader, verify it scans library folder, open synced ebook file, verify formatting renders correctly, test page turning and chapter navigation</idea>
+      <idea ac-id="7">Auto-start verification: Reboot both devices, verify Syncthing running after boot (docker ps on RPi, Syncthing app open on Boox), verify folder sync resumes automatically</idea>
+    </ideas>
+  </testing>
+
+  <implementation-notes>
+    <note type="prerequisite">Story 1.3 should be complete: CWA library has content to sync. Story 1.1 already deployed docker-compose with Syncthing service.</note>
+    <note type="execution-pattern">Setup follows standard Syncthing pairing: RPi device ID → Boox device ID → folder share creation → mode configuration → sync initiation.</note>
+    <note type="architecture-alignment">Aligns with Epic 2 goal of "seamless cross-device reading" and enables Story 2.2 (OPDS/iOS) and Story 2.4 (KOSync progress sync). File sync decoupled from progress sync (different protocols, different folders).</note>
+    <note type="risk-mitigation">One-way sync prevents metadata corruption (critical safety constraint from architecture.md). KOSync (Story 2.4) handles progress sync independently; Syncthing does NOT touch progress database.</note>
+    <note type="network-dependency">Assumes home WiFi network initially. Story 2.3 (Tailscale) adds VPN for remote access; this story focuses on local LAN sync.</note>
+  </implementation-notes>
+
+  <references>
+    <reference>docs/epics.md § Epic 2 § Story 2.1</reference>
+    <reference>docs/PRD.md § Functional Requirements § FR008</reference>
+    <reference>docs/PRD.md § User Journeys § Journey 1</reference>
+    <reference>docs/architecture.md § 3.4. Device Sync Layer</reference>
+    <reference>docs/architecture.md § 4. Critical Warnings - SQLite Corruption Prevention</reference>
+  </references>
+
+</story-context>
