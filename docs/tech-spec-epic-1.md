@@ -66,42 +66,156 @@ SQLite database containing:
 
 #### Neon.tech PostgreSQL Schema (Analytics Foundation)
 
-**Books Dimension Table:**
+**Authors Dimension Table (NEW):**
+```sql
+CREATE TABLE authors (
+  author_id SERIAL PRIMARY KEY,
+  author_name VARCHAR(255) NOT NULL,
+  alternate_names TEXT[] DEFAULT '{}',
+  author_slug VARCHAR(255),
+  author_hardcover_id VARCHAR(100) UNIQUE,
+  books_count INT,
+  born_year INT,
+  is_bipoc BOOLEAN DEFAULT FALSE,
+  is_lgbtq BOOLEAN DEFAULT FALSE,
+  identifiers JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Publishers Dimension Table (UPDATED):**
+```sql
+CREATE TABLE publishers (
+  publisher_id SERIAL PRIMARY KEY,
+  publisher_name VARCHAR(255) NOT NULL,  -- Renamed from canonical_name
+  publisher_hardcover_id VARCHAR(100) UNIQUE,  -- Renamed from hardcover_publisher_id
+  alternate_names TEXT[] DEFAULT '{}',
+  parent_publisher_id INT REFERENCES publishers(publisher_id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Books Dimension Table (REORGANIZED):**
 ```sql
 CREATE TABLE books (
   book_id SERIAL PRIMARY KEY,
+  -- Core Identification
   title VARCHAR(255) NOT NULL,
   author VARCHAR(255),
-  isbn VARCHAR(20),
-  asin VARCHAR(20),  -- For Audible linking
-  source VARCHAR(50),  -- 'calibre', 'kindle', 'hardcover', 'audible'
-  media_type VARCHAR(20),  -- 'ebook' or 'audiobook'
-  cover_url TEXT,
+  author_id INT REFERENCES authors(author_id),
+  -- ISBN/ASIN/Identifiers
+  isbn_13 VARCHAR(20),
+  isbn_10 VARCHAR(20),
+  asin VARCHAR(20),
+  hardcover_book_id VARCHAR(100),
+  -- Publisher & Series
+  publisher_id INT REFERENCES publishers(publisher_id),
+  publisher_name VARCHAR(255),
+  series_name VARCHAR(255),
+  series_number NUMERIC(5,2),
+  -- Book Demographics & Metadata
   page_count INT,
-  duration_minutes INT,  -- For audiobooks
+  audio_seconds INT,
+  language VARCHAR(10),
   published_date DATE,
+  description TEXT,
+  -- Ratings & Reviews
+  hardcover_rating DECIMAL(3,2),
+  hardcover_rating_count INT,
+  user_rating DECIMAL(3,2),
+  user_rating_date TIMESTAMP,
+  -- Author Metrics
+  author_hardcover_id VARCHAR(100),
+  is_bipoc BOOLEAN DEFAULT FALSE,
+  is_lgbtq BOOLEAN DEFAULT FALSE,
+  author_birth_year INT,
+  author_books_count INT,
+  -- Genre & Content
+  cached_tags JSONB DEFAULT '{}',
+  users_read_count INT,
+  users_count INT,
+  -- KOReader & Source Data
+  file_hash VARCHAR(64),
+  notes TEXT,
+  highlights JSONB DEFAULT '{}',
+  source VARCHAR(50),
+  device_stats_source VARCHAR(255),
+  -- Cover & Display
+  cover_url TEXT,
+  -- Multi-Format Ownership
+  media_types_owned TEXT[] DEFAULT '{}',
+  owned_physical_formats TEXT[] DEFAULT '{}',
+  owned_special_editions TEXT[] DEFAULT '{}',
+  -- Read Tracking
+  read_count INT DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Book Editions Table (NEW):**
+```sql
+CREATE TABLE book_editions (
+  edition_id SERIAL PRIMARY KEY,
+  book_id INT NOT NULL REFERENCES books(book_id) ON DELETE CASCADE,
+  edition_format VARCHAR(50),
+  edition_name VARCHAR(255),
+  publication_year INT,
+  publisher_specific VARCHAR(255),
+  isbn_specific VARCHAR(20),
+  condition VARCHAR(50),
+  notes TEXT,
+  date_acquired DATE,
+  display_location VARCHAR(100),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-**Reading Sessions Fact Table:**
+**Reading Sessions Fact Table (ENHANCED):**
 ```sql
 CREATE TABLE reading_sessions (
   session_id SERIAL PRIMARY KEY,
-  book_id INT NOT NULL REFERENCES books(book_id),
+  book_id INT NOT NULL REFERENCES books(book_id) ON DELETE CASCADE,
   start_time TIMESTAMP NOT NULL,
   end_time TIMESTAMP,
-  pages_read INT,  -- Nullable for audiobooks
-  duration_minutes INT,  -- Nullable for ebooks
-  device VARCHAR(50),  -- 'boox', 'ios', 'pc'
-  media_type VARCHAR(20),  -- 'ebook' or 'audiobook'
-  device_stats_source VARCHAR(100),  -- Path to source file (e.g., statistics.sqlite3)
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  duration_minutes INT,
+  -- Reading Format Details
+  media_type VARCHAR(20),
+  pages_read INT,
+  -- Tandem Reading Support
+  read_instance_id UUID,
+  is_parallel_read BOOLEAN DEFAULT FALSE,
+  -- Session Tracking
+  read_number INT,
+  device VARCHAR(50),
+  -- Data Provenance
+  data_source VARCHAR(50),
+  device_stats_source VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CHECK (duration_minutes > 0)
 );
 
-CREATE INDEX idx_reading_sessions_book ON reading_sessions(book_id);
-CREATE INDEX idx_reading_sessions_time ON reading_sessions(start_time);
+CREATE INDEX idx_publishers_hardcover_id ON publishers(publisher_hardcover_id);
+CREATE INDEX idx_books_isbn_13 ON books(isbn_13);
+CREATE INDEX idx_books_asin ON books(asin);
+CREATE INDEX idx_books_author_id ON books(author_id);
+CREATE INDEX idx_books_cached_tags ON books USING GIN(cached_tags);
+CREATE INDEX idx_book_editions_book_id ON book_editions(book_id);
+CREATE INDEX idx_book_editions_format ON book_editions(edition_format);
+CREATE INDEX idx_reading_sessions_book_id ON reading_sessions(book_id);
+CREATE INDEX idx_reading_sessions_start_time ON reading_sessions(start_time);
+CREATE INDEX idx_reading_sessions_read_instance ON reading_sessions(read_instance_id);
+CREATE INDEX idx_reading_sessions_device ON reading_sessions(device);
 ```
+
+**Computed Views:**
+- `book_stats`: Aggregates reading sessions with reading speed metrics
+- `reading_timeline`: Enhanced with series, author, and publisher data
+- `publisher_analytics`: Publisher-level aggregations with user ratings
+- `author_analytics`: Author-level analytics with diversity metrics (NEW)
+- `tandem_reading_sessions`: Analyzes overlapping reads with overlap-aware duration (NEW)
 
 #### Backup Manifest (Koofr)
 
@@ -334,24 +448,36 @@ All criteria from epics.md Stories 1.1–1.6, synthesized here:
 17. ✓ **Story 1.3:** EPUB optimization (epub-fixer) enabled
 18. ✓ **Story 1.3:** Hardcover API authentication configured/validated (if required)
 19. ✓ **Story 1.4:** Neon.tech free-tier PostgreSQL created and accessible
-20. ✓ **Story 1.4:** Books dimension table designed with fields: book_id, title, author, isbn, source, media_type
-21. ✓ **Story 1.4:** Reading_sessions fact table designed with: session_id, book_id, start_time, end_time, pages_read, media_type, device
-22. ✓ **Story 1.4:** Schema supports ebook + audiobook data (media_type differentiates)
-23. ✓ **Story 1.4:** Database connection tested from development environment
-24. ✓ **Story 1.4:** Tables created with proper indexes on common query fields
-25. ✓ **Story 1.4:** Schema documentation created (ERD + field definitions)
-26. ✓ **Story 1.5:** Koofr WebDAV storage configured as backup destination
-27. ✓ **Story 1.5:** rclone installed with encrypted remote (AES-256)
-28. ✓ **Story 1.5:** Backup script syncs library (CWA → Koofr, one-way)
-29. ✓ **Story 1.5:** Backup excludes temp files; includes library ebooks + metadata.db
-30. ✓ **Story 1.5:** Initial backup completed successfully; files verified in Koofr
-31. ✓ **Story 1.5:** Cron/systemd timer configured for nightly backups
-32. ✓ **Story 1.5:** Backup logs created (success/failure status)
-33. ✓ **Story 1.6:** Calibre CLI documentation created (calibredb add, fetch-ebook-metadata, list)
-34. ✓ **Story 1.6:** Bulk import script provided for multiple files
-35. ✓ **Story 1.6:** CWA rescan trigger instructions documented
-36. ✓ **Story 1.6:** Troubleshooting guide for common CWA ingest failures
-37. ✓ **Story 1.6:** metadata.db backup/restore procedure documented
+20. ✓ **Story 1.4:** Authors dimension table created (separate author dimension with diversity metrics)
+21. ✓ **Story 1.4:** Publishers dimension table created (renamed columns: publisher_name, publisher_hardcover_id)
+22. ✓ **Story 1.4:** Books dimension table reorganized by data category (Core ID, ISBN/ASIN, Publisher/Series, Demographics, Ratings, Author Metrics, Genre, KOReader, Cover, Multi-Format, Read Tracking)
+23. ✓ **Story 1.4:** Book Editions table created (tracks specific physical editions owned)
+24. ✓ **Story 1.4:** Reading_sessions fact table enhanced with tandem reading support (read_instance_id UUID, is_parallel_read, read_number)
+25. ✓ **Story 1.4:** Schema supports multi-format reading (ebook + audiobook simultaneously via read_instance_id grouping)
+26. ✓ **Story 1.4:** Series tracking split into series_name (VARCHAR) and series_number (NUMERIC(5,2))
+27. ✓ **Story 1.4:** Rating separation: hardcover_rating (community) vs user_rating (personal) with timestamp
+28. ✓ **Story 1.4:** Physical library ownership tracked: media_types_owned, owned_physical_formats, owned_special_editions arrays
+29. ✓ **Story 1.4:** Audio metadata supported: audio_seconds field for audiobook duration tracking
+30. ✓ **Story 1.4:** Re-read tracking supported: read_count computed from DISTINCT read_instance_id
+31. ✓ **Story 1.4:** Reading speed analytics: avg_reading_speed_pages_per_minute calculated in book_stats view
+32. ✓ **Story 1.4:** Author analytics view created with diversity metrics and reading patterns
+33. ✓ **Story 1.4:** Tandem reading view created with overlap-aware duration calculations
+34. ✓ **Story 1.4:** All columns documented with data source (KOReader, Hardcover API, User, Computed, ETL)
+35. ✓ **Story 1.4:** Database connection tested from development environment
+36. ✓ **Story 1.4:** Tables created with proper indexes (publishers, books, book_editions, reading_sessions)
+37. ✓ **Story 1.4:** Schema documentation created (SCHEMA-DOCUMENTATION.md + field definitions by category)
+38. ✓ **Story 1.5:** Koofr WebDAV storage configured as backup destination
+39. ✓ **Story 1.5:** rclone installed with encrypted remote (AES-256)
+40. ✓ **Story 1.5:** Backup script syncs library (CWA → Koofr, one-way)
+41. ✓ **Story 1.5:** Backup excludes temp files; includes library ebooks + metadata.db
+42. ✓ **Story 1.5:** Initial backup completed successfully; files verified in Koofr
+43. ✓ **Story 1.5:** Cron/systemd timer configured for nightly backups
+44. ✓ **Story 1.5:** Backup logs created (success/failure status)
+45. ✓ **Story 1.6:** Calibre CLI documentation created (calibredb add, fetch-ebook-metadata, list)
+46. ✓ **Story 1.6:** Bulk import script provided for multiple files
+47. ✓ **Story 1.6:** CWA rescan trigger instructions documented
+48. ✓ **Story 1.6:** Troubleshooting guide for common CWA ingest failures
+49. ✓ **Story 1.6:** metadata.db backup/restore procedure documented
 
 ## Traceability Mapping
 
@@ -360,9 +486,9 @@ All criteria from epics.md Stories 1.1–1.6, synthesized here:
 | 1-6 | FR005 | Library Management | CWA | Deploy stack, verify web UI accessibility, monitor memory |
 | 7-11 | FR005 | Performance | Load Test | Stress 100+ books, measure memory/CPU, document limits |
 | 12-18 | FR005 | Auto-Ingestion | Hardcover API | Drop EPUB, verify metadata enrichment <30s |
-| 19-25 | FR013 | Data Layer | Neon.tech Schema | Create tables, test connectivity, run example queries |
-| 26-32 | FR009 | Backup | rclone+Koofr | Configure backup, verify encryption, test restore |
-| 33-37 | FR005 | Fallback | Calibre CLI | Simulate CWA failure, test calibredb fallback |
+| 19-37 | FR013 | Data Layer | Neon.tech Schema | Create 5 tables (authors, publishers, books, book_editions, reading_sessions), create 5 views, test connectivity, verify tandem reading support |
+| 38-44 | FR009 | Backup | rclone+Koofr | Configure backup, verify encryption, test restore |
+| 45-49 | FR005 | Fallback | Calibre CLI | Simulate CWA failure, test calibredb fallback |
 
 ## Risks, Assumptions, Open Questions
 
