@@ -128,27 +128,38 @@ def test_schema_structure(conn, stats):
     print(f"{Color.BOLD}Test Suite 1: Schema Structure Validation{Color.RESET}")
     print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
 
-    # Expected schema structure
+    # Expected schema structure (from canonical create_schema.sql)
     expected_tables = {
-        'authors': ['author_id', 'author_name', 'alternate_names', 'is_bipoc', 'is_lgbtq',
-                   'contributions', 'created_at', 'updated_at'],
-        'publishers': ['publisher_id', 'publisher_name', 'alternate_names', 'country',
-                      'parent_publisher', 'created_at', 'updated_at'],
-        'books': ['book_id', 'title', 'author', 'author_id', 'publisher_id', 'isbn_10',
-                 'isbn_13', 'page_count', 'published_date', 'description', 'language',
-                 'genres', 'moods', 'content_warnings', 'cached_tags', 'alternative_titles',
-                 'user_owns_ebook', 'user_owns_audiobook', 'user_owns_physical',
-                 'user_reading_status', 'user_added_date', 'read_count',
-                 'created_at', 'updated_at'],
-        'book_editions': ['edition_id', 'book_id', 'edition_format', 'publisher_id',
-                         'isbn_10', 'isbn_13', 'page_count', 'published_date',
-                         'created_at', 'updated_at'],
-        'reading_sessions': ['session_id', 'book_id', 'start_time', 'end_time',
-                            'duration_minutes', 'device', 'media_type', 'pages_read',
-                            'start_page', 'end_page', 'start_percent', 'end_percent',
-                            'is_parallel_read', 'read_instance_id', 'created_at'],
-        'sync_status': ['sync_id', 'source', 'last_sync', 'records_processed',
-                       'status', 'error_message', 'created_at', 'updated_at']
+        'authors': ['author_id', 'author_name', 'author_slug', 'author_hardcover_id',
+                   'alternate_names', 'book_count', 'contributions', 'born_year',
+                   'is_bipoc', 'is_lgbtq', 'identifiers', 'created_at', 'updated_at'],
+        'publishers': ['publisher_id', 'publisher_name', 'alternate_names',
+                      'publisher_hardcover_id', 'canonical_hardcover_id', 'parent_id',
+                      'parent_publisher', 'country', 'notes', 'created_at', 'updated_at'],
+        'books': ['book_id', 'title', 'author', 'author_id', 'isbn_13', 'isbn_10', 'asin',
+                 'hardcover_book_id', 'publisher_id', 'publisher_name', 'series_name',
+                 'series_number', 'page_count', 'audio_seconds', 'language', 'published_date',
+                 'description', 'hardcover_rating', 'hardcover_rating_count', 'user_rating',
+                 'user_rating_date', 'author_hardcover_id', 'is_bipoc', 'is_lgbtq',
+                 'author_birth_year', 'author_books_count', 'genres', 'moods',
+                 'content_warnings', 'cached_tags', 'alternative_titles', 'activities_count',
+                 'cover_color', 'users_read_count', 'users_count', 'file_hash', 'notes',
+                 'highlights', 'source', 'device_stats_source', 'cover_url', 'user_owns_ebook',
+                 'user_owns_audiobook', 'user_owns_physical', 'user_reading_status',
+                 'user_added_date', 'media_types_owned', 'owned_physical_formats',
+                 'owned_special_editions', 'read_count', 'created_at', 'updated_at'],
+        'book_editions': ['edition_id', 'book_id', 'edition_format', 'edition_name',
+                         'publication_year', 'publisher_specific', 'isbn_specific',
+                         'language', 'pages', 'audio_seconds', 'release_date', 'condition',
+                         'notes', 'date_acquired', 'display_location', 'created_at'],
+        'reading_sessions': ['session_id', 'book_id', 'start_time', 'duration_minutes',
+                            'device', 'media_type', 'pages_read', 'read_instance_id',
+                            'is_parallel_read', 'read_number', 'end_time', 'data_source',
+                            'device_stats_source', 'created_at'],
+        'sync_status': ['sync_id', 'source_name', 'last_sync_time', 'last_sync_cursor',
+                       'records_synced', 'records_created', 'records_updated', 'sync_status',
+                       'error_message', 'sync_duration_seconds', 'next_scheduled_sync',
+                       'sync_mode', 'created_at', 'updated_at']
     }
 
     with conn.cursor() as cur:
@@ -189,12 +200,13 @@ def test_jsonb_columns(conn, stats):
     jsonb_columns = [
         ('authors', 'alternate_names'),
         ('authors', 'contributions'),
-        ('publishers', 'alternate_names'),
+        ('authors', 'identifiers'),
         ('books', 'genres'),
         ('books', 'moods'),
         ('books', 'content_warnings'),
         ('books', 'cached_tags'),
-        ('books', 'alternative_titles')
+        ('books', 'alternative_titles'),
+        ('books', 'cover_color')
     ]
 
     with conn.cursor() as cur:
@@ -302,13 +314,13 @@ def test_crud_operations(conn, stats):
                 conn.rollback()
                 return
 
-            # 2. Insert publisher with JSONB
+            # 2. Insert publisher with TEXT[] array
             try:
                 cur.execute("""
                     INSERT INTO publishers (publisher_name, alternate_names, country, parent_publisher)
                     VALUES (%s, %s, %s, %s)
                     RETURNING publisher_id
-                """, ('Indie Press LLC', '["Indie Press", "IP Publishing"]', 'USA', 'Mega Corp Publishers'))
+                """, ('Indie Press LLC', ['Indie Press', 'IP Publishing'], 'USA', 'Mega Corp Publishers'))
 
                 publisher_id = cur.fetchone()[0]
                 stats.pass_test(f"INSERT publisher (publisher_id: {publisher_id})")
@@ -350,11 +362,11 @@ def test_crud_operations(conn, stats):
             try:
                 cur.execute("""
                     INSERT INTO book_editions (
-                        book_id, edition_format, publisher_id, isbn_13, page_count, published_date
+                        book_id, edition_format, edition_name, isbn_specific, pages, release_date
                     )
                     VALUES (%s, %s, %s, %s, %s, %s)
                     RETURNING edition_id
-                """, (book_id, 'hardcover', publisher_id, '9789876543210', 450, '2024-01-15'))
+                """, (book_id, 'hardcover', 'First Edition Hardcover', '9789876543210', 450, '2024-01-15'))
 
                 edition_id = cur.fetchone()[0]
                 stats.pass_test(f"INSERT book_edition (edition_id: {edition_id})")
@@ -367,15 +379,14 @@ def test_crud_operations(conn, stats):
             try:
                 cur.execute("""
                     INSERT INTO reading_sessions (
-                        book_id, start_time, end_time, duration_minutes,
-                        device, media_type, pages_read, start_page, end_page,
-                        is_parallel_read
+                        book_id, start_time, duration_minutes,
+                        device, media_type, pages_read, is_parallel_read
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING session_id, read_instance_id
                 """, (
-                    book_id, datetime.now() - timedelta(hours=2), datetime.now() - timedelta(hours=1),
-                    60, 'kindle-paperwhite', 'ebook', 35, 100, 135, False
+                    book_id, datetime.now() - timedelta(hours=2),
+                    60, 'kindle-paperwhite', 'ebook', 35, False
                 ))
 
                 session_id, read_instance_id = cur.fetchone()
@@ -388,7 +399,7 @@ def test_crud_operations(conn, stats):
             # 6. Insert sync_status
             try:
                 cur.execute("""
-                    INSERT INTO sync_status (source, last_sync, records_processed, status)
+                    INSERT INTO sync_status (source_name, last_sync_time, records_synced, sync_status)
                     VALUES (%s, %s, %s, %s)
                     RETURNING sync_id
                 """, ('koreader', datetime.now(), 150, 'success'))
@@ -789,7 +800,7 @@ def test_triggers(conn, stats):
                     """)
                 elif table == 'sync_status':
                     cur.execute("""
-                        INSERT INTO sync_status (source, last_sync, records_processed, status)
+                        INSERT INTO sync_status (source_name, last_sync_time, records_synced, sync_status)
                         VALUES ('test', CURRENT_TIMESTAMP, 0, 'testing')
                         RETURNING sync_id, updated_at
                     """)
@@ -808,7 +819,7 @@ def test_triggers(conn, stats):
                 elif table == 'books':
                     cur.execute(f"UPDATE {table} SET page_count = 100 WHERE book_id = %s", (record_id,))
                 elif table == 'sync_status':
-                    cur.execute(f"UPDATE {table} SET status = 'complete' WHERE sync_id = %s", (record_id,))
+                    cur.execute(f"UPDATE {table} SET sync_status = 'complete' WHERE sync_id = %s", (record_id,))
 
                 # Get new updated_at
                 id_column = f"{table.rstrip('s')}_id" if table != 'sync_status' else 'sync_id'

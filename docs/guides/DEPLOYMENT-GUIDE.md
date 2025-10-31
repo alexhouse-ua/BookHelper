@@ -66,9 +66,11 @@ cd ~/BookHelper
 # Activate venv (if not already active)
 source venv/bin/activate
 
-# Set UTF-8 locale (recommended for RPi)
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+# Set UTF-8 locale (CRITICAL FIX FOR RASPBIAN)
+# Note: Raspbian doesn't include en_US.UTF-8 by default
+# Use C.utf8 instead (POSIX UTF-8, universally available)
+export LANG=C.utf8
+export LC_ALL=C.utf8
 
 # Run schema initialization
 python3 resources/scripts/initialize_schema.py
@@ -193,9 +195,9 @@ Next steps:
 cd ~/BookHelper
 source venv/bin/activate
 
-# Set UTF-8 locale
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+# Set UTF-8 locale (use C.utf8 for Raspbian compatibility)
+export LANG=C.utf8
+export LC_ALL=C.utf8
 
 # Run comprehensive test suite
 python3 resources/scripts/test_schema_operations.py
@@ -368,8 +370,10 @@ Warnings: 0
 ```bash
 cd ~/BookHelper
 source venv/bin/activate
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+
+# Set UTF-8 locale (use C.utf8 for Raspbian compatibility)
+export LANG=C.utf8
+export LC_ALL=C.utf8
 ```
 
 ### Run Schema Initialization
@@ -420,27 +424,45 @@ SELECT trigger_name FROM information_schema.triggers WHERE trigger_schema = 'pub
 
 ## Part 5: Troubleshooting
 
-### UnicodeEncodeError
+### UnicodeEncodeError & Locale Issues (CRITICAL FOR RASPBIAN)
 
 **Problem:**
 ```
+bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8): No such locale installed
 UnicodeEncodeError: 'latin-1' codec can't encode character '\u2713' in position 5: ordinal not in range(256)
 ```
 
-**Cause:** RPi terminal uses latin-1 encoding by default
+**Root Cause:**
+Raspbian base image doesn't include `en_US.UTF-8` locale by default. The default system locale is `C` (ASCII), which can't encode UTF-8 characters like checkmarks (✓).
 
-**Solution:**
+**Quick Solution (Recommended):**
 ```bash
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+# Use C.utf8 (POSIX UTF-8 - universally available on all Linux systems)
+export LANG=C.utf8
+export LC_ALL=C.utf8
 python3 resources/scripts/initialize_schema.py
 ```
 
-**Permanent Solution:** Add to `~/.bashrc`:
+**Permanent Solution:** Add to `~/.bashrc` on RPi:
 ```bash
-echo "export LANG=en_US.UTF-8" >> ~/.bashrc
-echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
+echo "export LANG=C.utf8" >> ~/.bashrc
+echo "export LC_ALL=C.utf8" >> ~/.bashrc
 source ~/.bashrc
+```
+
+**Why C.utf8?**
+- ✓ Available on all Linux systems (no installation needed)
+- ✓ Fully UTF-8 compliant
+- ✓ Works with all international characters
+- ✓ No compatibility issues
+- ✗ Don't use `en_US.UTF-8` on Raspbian (not installed by default)
+
+**Alternative (If you want en_US.UTF-8):**
+```bash
+# Generate the locale on RPi
+sudo locale-gen en_US.UTF-8
+sudo update-locale LANG=en_US.UTF-8
+# Log out and back in
 ```
 
 ---
