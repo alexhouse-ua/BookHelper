@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Comprehensive Schema Operations Test Suite
 Story 1.4: Task 5 - Validate schema implementation
@@ -32,6 +33,10 @@ import psycopg2
 from psycopg2 import sql, Error, errors
 from datetime import datetime, timedelta
 import time
+
+# Ensure UTF-8 output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # Terminal colors
 class Color:

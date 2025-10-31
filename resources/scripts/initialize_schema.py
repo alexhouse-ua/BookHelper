@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Initialize BookHelper Database Schema
 Story 1.4: Tasks 2, 3, 4 - Create tables, views, indexes, and triggers
@@ -31,6 +32,10 @@ import sys
 from pathlib import Path
 import psycopg2
 from psycopg2 import sql, Error
+
+# Ensure UTF-8 output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # Terminal colors
 class Color:
