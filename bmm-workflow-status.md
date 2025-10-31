@@ -12,8 +12,8 @@ WORKFLOW_PATH: greenfield-level-2.yaml
 ## Current State
 
 CURRENT_PHASE: 4-Implementation
-CURRENT_WORKFLOW: Story 3.1 complete and ready for review; Epic 3 (1/2 stories) in progress
-CURRENT_AGENT: dev
+CURRENT_WORKFLOW: Story 3.2 complete; Epic 3 (2/2 stories) complete - ready for retrospective
+CURRENT_AGENT: sm
 PHASE_1_COMPLETE: true
 PHASE_2_COMPLETE: true
 PHASE_3_COMPLETE: true
@@ -27,9 +27,9 @@ STORY_1_2_STATUS: In progress (monitoring 7-day performance validation, resumes 
 
 ## Next Action
 
-NEXT_ACTION: Story 3.1 implementation complete and ready for code review. Options: (1) Run code-review workflow, or (2) Proceed to Story 3.2 (ETL Pipeline).
-NEXT_COMMAND: code-review OR create-story (Story 3.2)
-NEXT_AGENT: sm (for review/approval) OR dev (for Story 3.2 implementation)
+NEXT_ACTION: Epic 3 complete. Options: (1) Run epic-retrospective workflow, (2) Run code-review for Story 3.1, or (3) Proceed to Epic 4 (Audiobook Integration).
+NEXT_COMMAND: epic-retrospective OR code-review OR create-story (Story 4.1)
+NEXT_AGENT: sm (for retrospective) OR dev (for next story)
 
 ## Story Backlog (REVISED - Course Correction Applied)
 
@@ -96,11 +96,20 @@ NEXT_AGENT: sm (for review/approval) OR dev (for Story 3.2 implementation)
 - Story status: `review` (ready for peer review or code review)
 - Docker Compose updated with volume mapping for backups
 
-**Epic 3 Status:** 1 of 2 stories complete; Story 3.2 ready for development
+✅ **Story 3.2: Build ETL pipeline for statistics extraction** (Completed 2025-10-31)
+- All 8 acceptance criteria implemented and tested (27-test suite, 100% passing)
+- Python ETL script: `resources/scripts/extract_koreader_stats.py` (850+ lines, full implementation)
+- Session aggregation: 30-minute gap threshold implemented
+- Data transformation: Neon.tech schema mapping complete (books + reading_sessions tables)
+- Systemd integration: `bookhelper-etl.service` and `bookhelper-etl.timer` for nightly execution (2 AM UTC)
+- Comprehensive documentation: `docs/ETL-PIPELINE-SETUP.md` (250+ lines)
+- Story status: `done`
+
+**Epic 3 Status:** ✅ 2 of 2 stories complete - ready for retrospective
 
 ---
 
-_Last Updated: 2025-10-30_
+_Last Updated: 2025-10-31_
 
 **Phase 1 Completed Workflows:**
 - research (deep research prompt generated)

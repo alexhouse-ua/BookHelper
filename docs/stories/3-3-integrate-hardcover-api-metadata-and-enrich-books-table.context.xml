@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>Integrate Hardcover API metadata and enrich books table</title>
+    <status>drafted</status>
+    <generatedAt>2025-10-31</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-3-integrate-hardcover-api-metadata-and-enrich-books-table.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>to enrich the books dimension table with Hardcover API metadata</iWant>
+    <soThat>reading analytics include complete book information (author, publisher, cover, rating)</soThat>
+    <tasks>
+      <task n="1">Set up Hardcover API authentication and connection (AC 1)
+        - Hardcover.app account and API credentials obtained
+        - API endpoint(s) documented (GraphQL, REST, or library export)
+        - Connection test: Query personal library successfully
+        - Error handling: Connection timeouts, auth failures logged
+      </task>
+      <task n="2">Develop Hardcover data extraction script (AC 2)
+        - Query Hardcover API for complete personal library
+        - Extract metadata fields: ISBN, title, author(s), publisher, rating, cover_url, publication_date
+        - Handle pagination if API returns paginated results
+        - Structured logging: API calls, records extracted, errors
+      </task>
+      <task n="3">Transform Hardcover data to Neon.tech schema (AC 3)
+        - Map Hardcover fields to books table columns
+        - Handle author/publisher dimension matching (use existing IDs if match, insert new if needed)
+        - Transform data types: URLs stay as VARCHAR, dates to DATE, ratings to DECIMAL
+      </task>
+      <task n="4">Implement ISBN-based book matching (AC 4)
+        - Query existing books table for ISBN matches
+        - Update matched books with Hardcover metadata
+        - Handle ISBN variations (ISBN-10 vs ISBN-13, hyphens, etc.)
+        - Log match statistics: matched count, unmatched count
+      </task>
+      <task n="5">Implement fallback title+author matching (AC 6)
+        - For books without ISBN in Hardcover: attempt fuzzy matching on title+author
+        - Use database query or similarity algorithm (e.g., Levenshtein distance)
+        - Confidence threshold: only match if similarity >85%
+        - Log fallback matches: matched, unmatched, low-confidence skipped
+      </task>
+      <task n="6">Implement data source tracking (AC 7)
+        - Add or populate `data_source` column in books table (values: 'koreader', 'hardcover', 'calibre')
+        - Track enrichment source: 'koreader' for books from ETL, 'hardcover' for new Hardcover books
+        - Add enrichment timestamp for audit trail
+      </task>
+      <task n="7">Implement dry-run mode and validation (AC 8)
+        - Add --dry-run flag to Hardcover enrichment script
+        - Dry-run output shows: books to be matched, books to be updated, new books to insert (preview only)
+        - Manual test: Run dry-run, verify preview accuracy
+        - Manual test: Sample 5-10 enriched records, verify against Hardcover.app website
+        - Logging shows match counts and any conflicts (if book exists with different metadata)
+      </task>
+      <task n="8">Create comprehensive documentation and runbook (AC 8)
+        - Create `docs/HARDCOVER-ENRICHMENT-SETUP.md` documenting purpose, API credentials, configuration, manual execution, systemd/cron integration, troubleshooting
+        - Include SQL validation queries for verification
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="1">Hardcover API authentication and connection validation</ac>
+    <ac id="2">Personal library query and book extraction from Hardcover</ac>
+    <ac id="3">Metadata transformation to Neon.tech books schema</ac>
+    <ac id="4">ISBN-based matching between Hardcover and existing books</ac>
+    <ac id="5">Data enrichment: Update books table with Hardcover metadata (author_id, publisher_id, rating, cover_url)</ac>
+    <ac id="6">Fallback matching: Title+author matching when ISBN unavailable</ac>
+    <ac id="7">Data source tracking: Record which books came from Hardcover vs KOReader</ac>
+    <ac id="8">Manual execution and validation: Dry-run mode, sample verification</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/guides/SCHEMA-DOCUMENTATION.md</path>
+        <title>BookHelper Database Schema Documentation</title>
+        <section>Table: books (CORE FACT TABLE), authors, publishers tables</section>
+        <snippet>Books table contains: book_id, title, author_id (FK), isbn_13, isbn_10, hardcover_book_id, publisher_id, cover_url, pages, rating fields. Authors and publishers are dimension tables for metadata enrichment. Foreign keys link books to authors and publishers.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-3.md</path>
+        <title>Technical Specification: Ebook Statistics Backup &amp; Analytics</title>
+        <section>Story 3.3: Integrate Hardcover API metadata and enrich books table</section>
+        <snippet>Story 3.3 enriches books dimension table with Hardcover API metadata (author, publisher, ISBN, rating, cover image). Match books by ISBN (primary) or title+author (fallback). Handle duplicates: Prefer Hardcover metadata over KOReader minimal metadata. Create data source mapping: Track which book metadata came from which source (koreader, hardcover, calibre).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.5. Analytics Layer &amp; Data Layer (Multi-Tier Strategy)</section>
+        <snippet>Hardcover.app acts as unified reading timeline, aggregating both ebook and audiobook progress and metadata. Neon.tech PostgreSQL serves as analytics data warehouse. Architecture prioritizes data safety, modular design, and data ownership through standard accessible formats.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ETL-PIPELINE-SETUP.md</path>
+        <title>ETL Pipeline Setup Guide</title>
+        <section>Architecture and Data Flow</section>
+        <snippet>ETL pipeline demonstrates pattern for reading statistics.sqlite3 backup, transforming data to Neon schema, and inserting with duplicate detection. Uses structured logging, error handling, and environment variable credential management. Story 3.3 should follow similar patterns for Hardcover API integration.</snippet>
+      </doc>
+      <doc>
+        <path>docs/guides/ETL-MAPPING-GUIDE.md</path>
+        <title>ETL Field Mappings and Procedures</title>
+        <section>Data source integration and field mappings</section>
+        <snippet>Provides patterns for ETL field mappings, source system integration, duplicate detection strategies, and validation procedures. Story 3.3 enrichment script should follow similar mapping patterns for Hardcover API fields.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <codeArtifact>
+        <path>resources/scripts/extract_koreader_stats.py</path>
+        <kind>service</kind>
+        <symbol>Config, KOReaderExtractor, SessionAggregator, DataTransformer, NeonLoader</symbol>
+        <lines>1-850+</lines>
+        <reason>Demonstrates ETL pipeline patterns for data extraction, transformation, database loading, structured logging, environment credential management, and dry-run mode. Story 3.3 enrichment script should reuse similar architectural patterns.</reason>
+      </codeArtifact>
+      <codeArtifact>
+        <path>resources/scripts/test_neon_connection.py</path>
+        <kind>test</kind>
+        <symbol>Connection validation patterns</symbol>
+        <reason>Demonstrates PostgreSQL connection testing, error handling, timeout management, and environment credential loading. Reusable patterns for Story 3.3 database connectivity validation.</reason>
+      </codeArtifact>
+      <codeArtifact>
+        <path>resources/scripts/test_schema_operations.py</path>
+        <kind>test</kind>
+        <symbol>Schema interaction patterns, data transformation testing</symbol>
+        <reason>Demonstrates patterns for interacting with Neon.tech schema, INSERT/UPDATE operations, foreign key handling, and data type conversions. Applicable to Story 3.3 books table enrichment operations.</reason>
+      </codeArtifact>
+      <codeArtifact>
+        <path>tests/test_3_2_etl_pipeline.py</path>
+        <kind>test</kind>
+        <symbol>TestDataTransformation, TestDuplicateDetection, TestIntegration</symbol>
+        <lines>1-400+</lines>
+        <reason>27-test suite demonstrating comprehensive testing of ETL pipeline including schema parsing, session aggregation, data transformation, duplicate detection, logging, and integration tests. Story 3.3 should adopt similar testing patterns for Hardcover enrichment.</reason>
+      </codeArtifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="psycopg2">Provides PostgreSQL client library for Neon.tech connectivity (required by Story 3.2 ETL)</package>
+        <package name="python-dotenv">Environment variable management from .env files (required by Story 3.2 ETL)</package>
+        <package name="sqlite3">Built-in Python library for SQLite interactions (used by Story 3.2 for backup reads)</package>
+        <package name="requests">HTTP client library for Hardcover API interaction (NEW - required for Story 3.3 API calls)</package>
+        <package name="Levenshtein">Fuzzy string matching for fallback title+author matching (optional, can use alternative algorithms)</package>
+      </python>
+      <external>
+        <service name="Hardcover.app API">Personal library export endpoint or GraphQL API for querying Hardcover book metadata</service>
+        <service name="Neon.tech PostgreSQL">Cloud-hosted PostgreSQL database for books table enrichment (initialized by Story 1.4)</service>
+      </external>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">Data enrichment strategy: Hardcover is authoritative for metadata fields (author, publisher, rating, cover), KOReader is authoritative for reading activity (reading_sessions). Do not overwrite KOReader fields with Hardcover data.</constraint>
+    <constraint type="architectural">Author/Publisher dimensions: If Hardcover author/publisher not in tables, INSERT new record. Use existing dimension IDs for matching. Handle name variations (e.g., "Penguin Books" vs "Penguin Classics" imprints).</constraint>
+    <constraint type="pattern">Reuse patterns from Story 3.2 ETL: Config class for env vars, Extractor class for API queries, Transformer class for schema mapping, Loader class for database operations, structured logging with file rotation.</constraint>
+    <constraint type="pattern">Implement dry-run mode (--dry-run flag) showing what would be enriched without database writes. Validate transformation logic with integration tests before production execution.</constraint>
+    <constraint type="testing">Unit tests for ISBN normalization, fuzzy matching logic. Integration tests with mocked Hardcover API. Manual validation: Compare 10-20 enriched records against Hardcover.app website.</constraint>
+    <constraint type="security">Hardcover API credentials stored in environment variables (HARDCOVER_API_KEY, HARDCOVER_ENDPOINT). Never hardcode credentials. Separate .env.hardcover file from Story 3.2 .env.etl.</constraint>
+    <constraint type="performance">Expected runtime: &lt;60 seconds for typical 500-1500 book personal library. Use streaming/batched operations for memory efficiency (&lt;200 MB). Target <30 second enrichment for most common case (ISBN matches).</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Hardcover API (Primary Option)</name>
+      <kind>GraphQL or REST API</kind>
+      <signature>Query personal library endpoint for books with metadata (ISBN, title, author, publisher, rating, cover_url, publication_date)</signature>
+      <path>https://hardcover.app/settings/integrations (for API credentials and documentation)</path>
+    </interface>
+    <interface>
+      <name>Hardcover Personal Library Export (Fallback Option)</name>
+      <kind>CSV/JSON file export</kind>
+      <signature>Download personal library export from Hardcover.app settings. Contains book metadata without requiring API authentication per request.</signature>
+      <path>https://hardcover.app/settings/integrations</path>
+    </interface>
+    <interface>
+      <name>PostgreSQL books table INSERT/UPDATE</name>
+      <kind>SQL DML</kind>
+      <signature>INSERT INTO books (title, author_id, publisher_id, isbn_13, cover_url, rating, data_source, enriched_at) VALUES (...) ON CONFLICT (book_id) DO UPDATE SET author_id=..., publisher_id=..., rating=..., cover_url=..., enriched_at=NOW()</signature>
+      <path>Neon.tech PostgreSQL (docs/guides/SCHEMA-DOCUMENTATION.md § books table)</path>
+    </interface>
+    <interface>
+      <name>PostgreSQL authors dimension INSERT</name>
+      <kind>SQL DML</kind>
+      <signature>INSERT INTO authors (author_name, born_year, is_bipoc, is_lgbtq) VALUES (...) ON CONFLICT (author_name) DO NOTHING RETURNING author_id</signature>
+      <path>Neon.tech PostgreSQL (docs/guides/SCHEMA-DOCUMENTATION.md § authors table)</path>
+    </interface>
+    <interface>
+      <name>PostgreSQL publishers dimension INSERT</name>
+      <kind>SQL DML</kind>
+      <signature>INSERT INTO publishers (publisher_name, parent_id, country) VALUES (...) ON CONFLICT (publisher_name) DO NOTHING RETURNING publisher_id</signature>
+      <path>Neon.tech PostgreSQL (docs/guides/SCHEMA-DOCUMENTATION.md § publishers table)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing approach mirrors Story 3.2 ETL pipeline: Unit tests for extraction/transformation logic, integration tests with mocked Hardcover API responses, manual validation against live Hardcover.app website. Test framework: pytest (Python, referenced by Story 3.2). Test locations: tests/test_3_3_hardcover_enrichment.py. Coverage target: >80% for transformation logic, >90% for duplicate detection and ISBN normalization. Reference existing test patterns in tests/test_3_2_etl_pipeline.py.
+    </standards>
+    <locations>
+      <location>tests/test_3_3_hardcover_enrichment.py (primary test file for Story 3.3)</location>
+      <location>resources/test-data/ (mock Hardcover API responses for testing)</location>
+      <location>tests/integration/ (integration tests for Neon.tech operations)</location>
+    </locations>
+    <ideas>
+      <test ac="1">Test Hardcover API authentication with valid/invalid credentials, timeout handling, connection error recovery</test>
+      <test ac="2">Test Hardcover data extraction: Query personal library, pagination handling, metadata field completeness</test>
+      <test ac="3">Test data transformation: Map Hardcover fields to books schema, handle NULL values, type conversions (URLs, dates, ratings)</test>
+      <test ac="4">Test ISBN-based matching: Match ISBN-13 and ISBN-10 variants, handle hyphens/spaces, count matches/mismatches</test>
+      <test ac="6">Test fuzzy matching: Title+author similarity calculation, confidence thresholds, edge cases (special characters, non-ASCII)</test>
+      <test ac="7">Test data source tracking: Verify data_source and enriched_at columns populated correctly for enriched books</test>
+      <test ac="8">Test dry-run mode: Verify preview output matches actual transformation without writing to database</test>
+      <test>Manual validation: Run enrichment on sample Hardcover library export, compare 10-20 records against Hardcover.app website</test>
+    </ideas>
+  </tests>
+</story-context>

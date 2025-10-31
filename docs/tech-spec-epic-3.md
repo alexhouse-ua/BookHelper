@@ -207,13 +207,58 @@ CREATE TABLE reading_sessions (
 - Nightly execution scheduled and verified
 - Logs created showing success/failure metrics
 
-**Status:** READY-FOR-DEV (story drafted with full context, ready for implementation)
+**Status:** DONE (completed 2025-10-31, 27-test suite 100% passing)
 
 **Blocking Dependency:** Story 1.4 (Neon.tech schema must exist before ETL can insert data)
 
 ---
 
-#### Story 3.3: Set up SQL query interface and validate analytics
+#### Story 3.3: Integrate Hardcover API metadata and enrich books table
+
+**Goal:** Enrich books dimension table with Hardcover API metadata (author, publisher, cover image, rating) and establish data source consolidation.
+
+**Design:**
+- Authenticate with Hardcover.com API using personal library export
+- Query Hardcover API for all books in personal library
+- Extract metadata: author, publisher, ISBN, rating, cover URL, publication date
+- Transform to Neon.tech books table schema (story 1.4)
+- Match books by ISBN (primary) or title+author (fallback)
+- Handle duplicates: Prefer Hardcover metadata over KOReader minimal metadata
+- Create data source mapping: Track which book metadata came from which source (koreader, hardcover, calibre)
+- Structured logging: Books matched, books enriched, API call counts, errors
+
+**Acceptance Criteria:**
+1. Hardcover API authentication and connection validation
+2. Personal library query and book extraction from Hardcover
+3. Metadata transformation to Neon.tech books schema
+4. ISBN-based matching between Hardcover and existing books
+5. Data enrichment: Update books table with Hardcover metadata (author_id, publisher_id, rating, cover_url)
+6. Fallback matching: Title+author matching when ISBN unavailable
+7. Data source tracking: Record which books came from Hardcover vs KOReader
+8. Manual execution and validation: Dry-run mode, sample verification
+
+**Success Criteria:**
+- Hardcover API connection established and authenticated
+- All books from Hardcover library extracted and matched
+- Books table enriched with complete metadata (author, publisher, rating, cover)
+- Duplicate detection prevents overwriting KOReader minimal data with empty Hardcover fields
+- Manual test run verifies enriched data in Neon.tech
+- Structured logging shows match statistics and any failures
+- Documentation explains API usage, authentication, and enrichment strategy
+
+**Status:** READY-FOR-DEV (story drafted with full context, ready for implementation)
+
+**Blocking Dependency:** Story 3.2 (ETL must be operational; Hardcover enriches the books table created by ETL)
+
+**Technical Notes:**
+- Hardcover API: Free personal library export available at https://hardcover.app/settings/integrations
+- API rate limiting: Reasonable limits for small personal library (<500 books)
+- Data enrichment strategy: Preserve KOReader fields; add Hardcover fields; use Hardcover as authoritative for metadata
+- Author/Publisher dimension: Insert new authors/publishers if not in dimension tables
+
+---
+
+#### Story 3.4: Set up SQL query interface and validate analytics
 
 **Goal:** Enable user to query analytics database and validate data accuracy.
 
@@ -240,7 +285,7 @@ CREATE TABLE reading_sessions (
 
 ---
 
-#### Story 3.4: Implement monitoring and alerting system
+#### Story 3.5: Implement monitoring and alerting system
 
 **Goal:** Detect backup and ETL pipeline failures before data loss occurs.
 
@@ -284,13 +329,19 @@ Story 3.2: Build ETL Pipeline
   ├─ Output: reading_sessions in Neon.tech schema from 1.4
   ↓ (pipeline operational)
   ↓
-Story 3.3: SQL Query Interface
-  ├─ Access analytics in Neon.tech from 3.2
-  ↓ (queries working)
+Story 3.3: Integrate Hardcover API
+  ├─ Enriches books table from 3.2
+  ├─ Adds metadata: author, publisher, rating, cover
+  ↓ (books table enriched with Hardcover metadata)
   ↓
-Story 3.4: Monitoring & Alerting
+Story 3.4: SQL Query Interface
+  ├─ Access enriched analytics in Neon.tech from 3.2+3.3
+  ↓ (queries working with enriched metadata)
+  ↓
+Story 3.5: Monitoring & Alerting
   ├─ Monitor 3.1 (backup freshness)
   ├─ Monitor 3.2 (ETL execution)
+  ├─ Monitor 3.3 (Hardcover API sync)
   ├─ Monitor Neon.tech (database uptime)
   ↓ (Epic 3 complete)
 ```
@@ -298,8 +349,9 @@ Story 3.4: Monitoring & Alerting
 **Sequencing Logic:**
 - 3.1 (backup) and 1.4 (schema) are independent; can proceed in parallel
 - 3.2 (ETL) depends on both 3.1 and 1.4; must proceed after both
-- 3.3 (query) depends on 3.2; requires working ETL to have data
-- 3.4 (monitoring) depends on 3.1 and 3.2; monitors both components
+- 3.3 (Hardcover API) depends on 3.2; enriches books created by ETL
+- 3.4 (query) depends on 3.2 and 3.3; requires working ETL + enriched metadata
+- 3.5 (monitoring) depends on 3.1, 3.2, and 3.3; monitors all components
 
 ---
 
@@ -363,18 +415,24 @@ Story 3.4: Monitoring & Alerting
 ### Story 3.2 (ETL Pipeline) Blockers
 
 - **Story 1.4 (Unified Schema)** — BLOCKER: Neon.tech schema (books + reading_sessions tables) must exist before ETL can insert data
-  - **Status:** Backlog → Must be prioritized before 3.2 implementation begins
-  - **Impact:** 3.2 cannot test/validate without target schema
+  - **Status:** Done ✅
+  - **Impact:** 3.2 requires target schema
 
-### Story 3.3 (Query Interface) Blockers
+### Story 3.3 (Hardcover API Enrichment) Blockers
 
-- **Story 3.2 (ETL Pipeline)** — BLOCKER: ETL must populate reading_sessions table with data before queries return meaningful results
-  - **Status:** Ready-for-dev → Must complete before 3.3 can validate
+- **Story 3.2 (ETL Pipeline)** — BLOCKER: ETL must create books table with KOReader data before Hardcover enrichment can match and update
+  - **Status:** Done ✅ (2025-10-31)
+  - **Impact:** 3.3 depends on 3.2 populating books table
 
-### Story 3.4 (Monitoring) Blockers
+### Story 3.4 (Query Interface) Blockers
 
-- **Story 3.1 + 3.2** — DEPENDENCY: Monitoring checks both backup freshness and ETL execution; both must exist
-  - **Status:** 3.1 review, 3.2 ready-for-dev → Both must be operational before 3.4 begins
+- **Story 3.2 + Story 3.3** — BLOCKER: ETL must populate reading_sessions, and Hardcover must enrich books table before queries return meaningful results
+  - **Status:** 3.2 done ✅, 3.3 ready-for-dev → Must complete 3.3 before 3.4 can validate enriched metadata
+
+### Story 3.5 (Monitoring) Blockers
+
+- **Story 3.1 + 3.2 + 3.3** — DEPENDENCY: Monitoring checks backup freshness, ETL execution, and Hardcover sync; all must exist
+  - **Status:** 3.1 review, 3.2 done ✅, 3.3 ready-for-dev → All must be operational before 3.5 begins
 
 ---
 

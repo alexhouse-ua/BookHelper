@@ -57,9 +57,10 @@ development_status:
   # ========== EPIC 3: Ebook Statistics Backup & Analytics ==========
   epic-3: contexted
   3-1-configure-one-way-statistics-backup-from-boox-to-rpi: review
-  3-2-build-etl-pipeline-for-statistics-extraction: ready-for-dev
-  3-3-set-up-sql-query-interface-and-validate-analytics: backlog
-  3-4-implement-monitoring-and-alerting-system: backlog
+  3-2-build-etl-pipeline-for-statistics-extraction: done
+  3-3-integrate-hardcover-api-metadata-and-enrich-books-table: review
+  3-4-set-up-sql-query-interface-and-validate-analytics: backlog
+  3-5-implement-monitoring-and-alerting-system: backlog
   epic-3-retrospective: optional
 
   # ========== EPIC 4: Audiobook Integration ==========

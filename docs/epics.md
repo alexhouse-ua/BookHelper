@@ -340,7 +340,27 @@ So that I can query unified analytics across all reading sources.
 
 ---
 
-**Story 3.3: Set up SQL query interface and validate analytics**
+**Story 3.3: Integrate Hardcover API metadata and enrich books table**
+
+As a developer,
+I want to enrich the books dimension table with Hardcover API metadata,
+So that reading analytics include complete book information (author, publisher, cover, rating).
+
+**Acceptance Criteria:**
+1. Hardcover API authentication and connection validation
+2. Personal library query and book extraction from Hardcover
+3. Metadata transformation to Neon.tech books schema
+4. ISBN-based matching between Hardcover and existing books
+5. Data enrichment: Update books table with Hardcover metadata
+6. Fallback matching: Title+author matching when ISBN unavailable
+7. Data source tracking: Record which books came from Hardcover vs KOReader
+8. Manual execution and validation: Dry-run mode, sample verification
+
+**Prerequisites:** Story 3.2 complete (ETL pipeline has created books table with KOReader data)
+
+---
+
+**Story 3.4: Set up SQL query interface and validate analytics**
 
 As a reader,
 I want to query my reading statistics using SQL,
@@ -358,11 +378,11 @@ So that I can answer questions about my reading habits.
 6. Documentation created with example queries and schema reference
 7. Saved queries library started for frequently-used analytics
 
-**Prerequisites:** Story 3.2 complete (ETL pipeline has loaded data into Neon.tech)
+**Prerequisites:** Story 3.3 complete (books table enriched with Hardcover metadata)
 
 ---
 
-**Story 3.4: Implement monitoring and alerting system**
+**Story 3.5: Implement monitoring and alerting system**
 
 As a reader,
 I want to be notified if backup or sync operations fail,
@@ -386,9 +406,9 @@ So that I can fix issues before data is lost.
 ---
 
 **Epic 3 Summary:**
-- **Total Stories:** 4
-- **Story Dependencies:** 3.1 depends on Epic 2; 3.2 depends on 1.4 and 3.1; 3.3 depends on 3.2; 3.4 depends on 3.1 and 3.2
-- **Completion Criteria:** Statistics backed up with 30-day retention, ETL pipeline loading data to Neon.tech nightly, SQL queries returning accurate reading analytics, monitoring system alerting on failures
+- **Total Stories:** 5
+- **Story Dependencies:** 3.1 depends on Epic 2; 3.2 depends on 1.4 and 3.1; 3.3 depends on 3.2; 3.4 depends on 3.3; 3.5 depends on 3.1, 3.2, and 3.3
+- **Completion Criteria:** Statistics backed up with 30-day retention, ETL pipeline loading data to Neon.tech nightly, books table enriched with Hardcover metadata, SQL queries returning accurate reading analytics, monitoring system alerting on failures
 
 ---
 
