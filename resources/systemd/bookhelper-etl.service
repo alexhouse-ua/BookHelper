@@ -1,0 +1,32 @@
+[Unit]
+Description=BookHelper ETL Pipeline - Extract KOReader Statistics to Neon.tech
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=alexhouse
+WorkingDirectory=/home/alexhouse
+
+# Load environment variables from systemd
+EnvironmentFile=/home/alexhouse/.env.etl
+
+# Execution
+ExecStart=/usr/bin/python3 /home/alexhouse/etl/extract_koreader_stats.py
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=bookhelper-etl
+
+# Timeouts
+TimeoutStartSec=60
+TimeoutStopSec=30
+
+# Restart on failure
+Restart=on-failure
+RestartSec=30
+MaxStartCount=3
+
+[Install]
+WantedBy=multi-user.target

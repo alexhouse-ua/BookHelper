@@ -1,6 +1,6 @@
 # Story 3.2: Build ETL pipeline for statistics extraction
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

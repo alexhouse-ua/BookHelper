@@ -1,0 +1,16 @@
+[Unit]
+Description=BookHelper ETL Pipeline Timer - Run nightly at 2 AM
+Requires=bookhelper-etl.service
+
+[Timer]
+# Run at 2 AM every day (UTC)
+OnCalendar=*-*-* 02:00:00
+
+# Run immediately if system was off at scheduled time
+Persistent=true
+
+# Allow randomization to avoid load spikes (±5 minutes)
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target
