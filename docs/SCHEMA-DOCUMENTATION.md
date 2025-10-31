@@ -20,6 +20,150 @@ The BookHelper unified database schema enables comprehensive reading analytics a
 
 ---
 
+## Entity-Relationship Diagram (ERD)
+
+### Visual Schema Structure
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  DIMENSION TABLES (Source-driven)                                          │
+│  ════════════════════════════════════════════════════════════════          │
+│                                                                             │
+│         ┌──────────────┐                  ┌──────────────┐                │
+│         │   authors    │                  │ publishers   │                │
+│         ├──────────────┤                  ├──────────────┤                │
+│         │ author_id◄PK │                  │publisher_id◄PK               │
+│         │ author_name  │                  │publisher_name                │
+│         │ born_year    │                  │ parent_pub_id                │
+│         │ is_bipoc     │                  │   (self-ref) │                │
+│         │ is_lgbtq     │                  │              │                │
+│         └──────────────┘                  └──────────────┘                │
+│              ▲                                   ▲                         │
+│              │                                   │                         │
+│              │ 1:N                               │ 1:N                     │
+│              │                                   │                         │
+│         ┌──────────────────────────────────────────────────┐              │
+│         │              books (FACT)                        │              │
+│         ├──────────────────────────────────────────────────┤              │
+│         │ book_id ◄PK                                      │              │
+│         │ title, author, author_id ──FK──►authors.id       │              │
+│         │ publisher_id ──FK──►publishers.id                │              │
+│         │ series_name, series_number                       │              │
+│         │ hardcover_rating, user_rating                    │              │
+│         │ media_types_owned[], read_count                  │              │
+│         │ (11 more category columns)                       │              │
+│         └──────────────────────────────────────────────────┘              │
+│              ▲              ▼ 1:N                                          │
+│              │    ┌─────────────────────────┐                            │
+│              │    │  reading_sessions (FT)  │                            │
+│              │    ├─────────────────────────┤                            │
+│              │    │ session_id ◄PK          │                            │
+│              │    │ book_id ──FK──►books    │                            │
+│              │    │ start_time, duration    │                            │
+│              │    │ read_instance_id (UUID) │                            │
+│              │    │ is_parallel_read        │                            │
+│              │    │ read_number             │                            │
+│              │    └─────────────────────────┘                            │
+│              │                                                             │
+│         1:N  │                                                             │
+│              │                                                             │
+│         ┌──────────────────────────────────┐                             │
+│         │   book_editions                  │                             │
+│         ├──────────────────────────────────┤                             │
+│         │ edition_id ◄PK                   │                             │
+│         │ book_id ──FK──►books             │                             │
+│         │ edition_format, edition_name     │                             │
+│         │ isbn_specific, condition         │                             │
+│         │ date_acquired, location          │                             │
+│         └──────────────────────────────────┘                             │
+│                                                                             │
+│  ───────────────────────────────────────────────────────────────────────  │
+│  DATA SOURCE LEGEND:                                                      │
+│     🔵 KOReader   (reading_sessions primary source)                       │
+│     🟢 Hardcover API (books, authors, publishers sources)                │
+│     🟣 User Input (ratings, edition data)                                 │
+│     🟡 Computed   (read_instance_id, read_count, views)                  │
+│  ───────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Cardinality Summary
+
+| Relationship | Cardinality | Notes |
+|---|---|---|
+| authors ← books | 1:N | One author has many books (pen names consolidated) |
+| publishers ← books | 1:N | One publisher publishes many books |
+| books → book_editions | 1:N | One book has multiple editions (hardcover, paperback, special) |
+| books → reading_sessions | 1:N | One book has many reading sessions |
+| publishers ← publishers | 1:N | Self-referential for imprints (parent_publisher_id) |
+
+---
+
+## Data Flow Architecture
+
+### High-Level ETL Pipeline
+
+```
+SOURCE DATA LAYER
+═════════════════════════════════════════════════════════════════
+        ↓ KOReader (SQLite)           ↓ Hardcover API           ↓ User Input
+    history.db                   (REST JSON)              (Web Form / Sync)
+    - reading_sessions          - book metadata          - ratings
+    - page progress             - author details         - edition data
+    - device stats              - publisher info         - physical library
+        ↓                               ↓                        ↓
+        └───────────────────────────────┼────────────────────────┘
+                                        ↓
+EXTRACTION & TRANSFORMATION LAYER
+═════════════════════════════════════════════════════════════════
+    • Parse KOReader history
+    • Validate/normalize dates
+    • Call Hardcover API for enrichment
+    • Detect tandem reads (overlap analysis)
+    • Assign read_instance_id
+    • Extract author/publisher hierarchies
+                                        ↓
+NORMALIZED TABLE LAYER (PostgreSQL)
+═════════════════════════════════════════════════════════════════
+    publishers table  ←  author table  ←  books table
+         ↓                   ↓               ↓
+    (publisher_id)    (author_id)     (all 5 dimensions)
+                            ↓
+                    reading_sessions
+                       (fact table)
+                            ↓
+                    book_editions
+                   (special editions)
+                                        ↓
+ANALYTICS & VIEWS LAYER
+═════════════════════════════════════════════════════════════════
+    book_stats              reading_timeline
+    (per-book metrics)      (session details with metadata)
+         ↓                           ↓
+    author_analytics        publisher_analytics
+    (author-level            (publisher-level
+     diversity tracking)      aggregations)
+         ↓
+    tandem_reading_sessions
+    (parallel read analysis)
+```
+
+### Data Source Attribution
+
+Every field is tagged with its source to ensure traceability:
+
+| Source | Description | Refresh | Reliability |
+|--------|-------------|---------|-------------|
+| **KOReader** | Reading statistics from KOReader SQLite (statistics.sqlite3, page_stat_data) | User syncs (via KOSync) | High - direct reading data |
+| **Hardcover API** | Book metadata, author info, publisher hierarchy | On-demand enrichment during ETL | High - curated metadata source |
+| **User Input** | Personal ratings, edition tracking, library curation | Manual or web form | User-dependent |
+| **Computed** | read_instance_id, read_count, views, aggregations | Derived during ETL/load | Deterministic |
+| **ETL Pipeline** | Metadata fields set during transformation (load timestamp, job ID) | Once per pipeline run | Deterministic |
+
+---
+
 ## Table: `authors`
 
 ### Purpose
@@ -469,6 +613,229 @@ SELECT
 FROM reading_sessions
 WHERE book_id = 1;
 ```
+
+---
+
+## Advanced Analytics: Tandem Reading Detection
+
+### Overview
+
+Tandem reading is when you read the same book in parallel using multiple formats (e.g., ebook chapters 1-5 while listening to audiobook chapters 6-15). The schema supports detecting and analyzing these overlapping reads.
+
+### Detection Algorithm
+
+**Definition:** Two reading sessions of the same book are "tandem" if they overlap in time by 7+ days (configurable threshold).
+
+**Logic:**
+```
+FOR each book_id:
+  GET all reading_sessions for that book
+  FOR each pair of sessions with different media_types:
+    IF session_a.start_time <= session_b.end_time AND
+       session_b.start_time <= session_a.end_time AND
+       (overlap_days >= 7):
+      Mark both sessions: is_parallel_read = TRUE
+      Assign same read_instance_id (UUID)
+      Set read_number to distinguish read #1, #2, #3 etc.
+    END IF
+  END FOR
+END FOR
+```
+
+### SQL Implementation: Identifying Tandem Reads
+
+```sql
+-- Find all books with overlapping reading sessions (tandem reads)
+SELECT
+  b.book_id,
+  b.title,
+  rs1.session_id as session_1_id,
+  rs2.session_id as session_2_id,
+  rs1.media_type as format_1,
+  rs2.media_type as format_2,
+  rs1.start_time as session_1_start,
+  rs2.start_time as session_2_start,
+  GREATEST(rs1.start_time, rs2.start_time)::date -
+  LEAST(rs1.end_time, rs2.end_time)::date as overlap_days,
+  rs1.read_instance_id,
+  rs1.is_parallel_read
+FROM reading_sessions rs1
+JOIN reading_sessions rs2 ON
+  rs1.book_id = rs2.book_id AND
+  rs1.session_id < rs2.session_id AND  -- Avoid duplicates
+  rs1.media_type != rs2.media_type      -- Different formats only
+JOIN books b ON rs1.book_id = b.book_id
+WHERE
+  -- Check for overlap: session_1 starts before session_2 ends AND vice versa
+  rs1.start_time <= rs2.end_time AND
+  rs2.start_time <= rs1.end_time AND
+  -- Overlap is 7+ days (configurable)
+  GREATEST(rs1.start_time, rs2.start_time)::date -
+  LEAST(rs1.end_time, rs2.end_time)::date >= 7
+ORDER BY rs1.book_id, rs1.start_time;
+```
+
+### Overlap Duration Calculation
+
+**Overlap-aware duration** (don't double-count overlapping time):
+
+```sql
+-- For tandem reads, calculate actual reading time (not sum of overlaps)
+SELECT
+  book_id,
+  read_instance_id,
+  -- Overlap-aware: one continuous block of reading time
+  (MAX(end_time) - MIN(start_time)) as overlap_aware_duration_minutes,
+  -- Raw sum: may double-count overlapping time
+  SUM(duration_minutes) as total_duration_all_formats
+FROM reading_sessions
+WHERE is_parallel_read = TRUE
+GROUP BY book_id, read_instance_id;
+```
+
+### Example Tandem Reading Scenario
+
+**Book:** "The Midnight Library" by Matt Haig
+
+| Session | Format | Start Date | End Date | Pages/Duration | Overlap |
+|---------|--------|-----------|----------|-----------------|---------|
+| 1 | Ebook | 2024-10-01 | 2024-10-10 | 150 pages | ← |
+| 2 | Audiobook | 2024-10-05 | 2024-10-12 | 420 minutes | → |
+
+**Overlap Analysis:**
+- Session 1: Oct 1-10 (ebook reading)
+- Session 2: Oct 5-12 (audiobook listening)
+- **Overlap dates:** Oct 5-10 (6 days) — BELOW 7-day threshold, so NOT tandem
+- If Session 2 extended to Oct 14: Oct 5-10 (10 days) — ABOVE threshold, IS tandem
+
+**Assigned read_instance_id:** `550e8400-e29b-41d4-a716-446655440000`
+**Overlap-aware duration:** Oct 1 - Oct 12 = 11 days = 15,840 minutes
+**Raw sum:** 420 + 150 pages ≠ comparable to audiobook minutes (different units)
+
+---
+
+## Advanced Analytics: Re-read Detection and Tracking
+
+### Overview
+
+Re-reads are when you read the same book multiple times. The schema supports tracking:
+- Number of times a book has been read
+- Which read it is (1st, 2nd, 3rd, etc.)
+- Different formats across reads
+- Time between reads
+
+### Detection Algorithm
+
+**Definition:** A re-read is identified when multiple `reading_sessions` exist for the same `book_id`. Each distinct read is grouped by `read_instance_id` (UUID).
+
+**Logic:**
+```
+FOR each book_id:
+  GET all reading_sessions ordered by start_time
+  FOR each session group (contiguous temporal block):
+    Assign new UUID → read_instance_id
+    Assign ordinal number → read_number (1st, 2nd, 3rd)
+    Set is_parallel_read flag based on overlap with other sessions
+  END FOR
+END FOR
+```
+
+### SQL Implementation: Identifying Re-reads
+
+```sql
+-- Method 1: Count distinct reads per book
+SELECT
+  b.book_id,
+  b.title,
+  COUNT(DISTINCT rs.read_instance_id) as times_read,
+  MIN(rs.start_time) as first_read_date,
+  MAX(rs.start_time) as most_recent_read_date,
+  (MAX(rs.start_time)::date - MIN(rs.start_time)::date) as days_between_reads
+FROM reading_sessions rs
+JOIN books b ON rs.book_id = b.book_id
+GROUP BY b.book_id, b.title
+HAVING COUNT(DISTINCT rs.read_instance_id) > 1
+ORDER BY times_read DESC;
+```
+
+```sql
+-- Method 2: Assign read_instance_id (for ETL backfill)
+WITH re_reads AS (
+  SELECT
+    rs.session_id,
+    rs.book_id,
+    rs.start_time,
+    ROW_NUMBER() OVER (PARTITION BY rs.book_id ORDER BY rs.start_time) as read_number,
+    gen_random_uuid() as new_read_instance_id  -- Generate UUID for each group
+  FROM reading_sessions rs
+)
+UPDATE reading_sessions
+SET
+  read_instance_id = re_reads.new_read_instance_id,
+  read_number = re_reads.read_number
+FROM re_reads
+WHERE reading_sessions.session_id = re_reads.session_id;
+```
+
+```sql
+-- Method 3: Show re-reads with format diversity
+SELECT
+  b.title,
+  rs.read_number as which_read,
+  rs.start_time as read_date,
+  STRING_AGG(DISTINCT rs.media_type, ', ') as formats_used,
+  COUNT(DISTINCT rs.media_type) as format_count,
+  SUM(rs.duration_minutes) as total_time_this_read
+FROM reading_sessions rs
+JOIN books b ON rs.book_id = b.book_id
+WHERE rs.read_instance_id IS NOT NULL
+GROUP BY b.book_id, b.title, rs.read_instance_id, rs.read_number, rs.start_time
+ORDER BY b.book_id, rs.read_number;
+```
+
+### Example Re-read Scenario
+
+**Book:** "Project Hail Mary" by Andy Weir
+
+| Read # | Format | Start Date | End Date | Duration |
+|--------|--------|-----------|----------|----------|
+| 1 | Ebook | 2023-02-15 | 2023-03-05 | 18 hours |
+| 2 | Audiobook | 2024-01-10 | 2024-01-20 | 14 hours |
+| 3 | Ebook | 2025-09-01 | 2025-10-31 | 20 hours |
+
+**Tracking Fields:**
+- `book_id`: 42
+- `books.read_count`: 3 (computed from COUNT(DISTINCT read_instance_id))
+- `reading_sessions.read_instance_id`: UUID assigned per read
+- `reading_sessions.read_number`: 1, 2, 3 (sequential)
+
+**Query Example:**
+```sql
+SELECT
+  read_number,
+  media_type,
+  DATE(start_time) as read_date,
+  (end_time - start_time) as duration
+FROM reading_sessions
+WHERE book_id = 42
+ORDER BY read_number;
+
+-- Result:
+-- read_number | media_type | read_date  | duration
+-- 1           | ebook      | 2023-02-15 | 18:00:00
+-- 2           | audiobook  | 2024-01-10 | 14:00:00
+-- 3           | ebook      | 2025-09-01 | 20:00:00
+```
+
+### Edge Cases & Handling
+
+| Scenario | Handling | Notes |
+|----------|----------|-------|
+| **Same-day re-read** | Assign different read_instance_id | Different UUID even if same day |
+| **Different editions** | Same book_id, same read_instance_id | Focus is on book content, not format |
+| **Interruption gap** | If gap > 30 days, likely new read | Configurable threshold |
+| **Format switching mid-read** | Same read_instance_id | Tandem reading detected via is_parallel_read flag |
+| **Null start/end times** | Skip from re-read count | Require valid dates for tracking |
 
 ---
 

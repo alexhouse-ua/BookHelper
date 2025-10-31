@@ -685,6 +685,571 @@ VACUUM ANALYZE reading_sessions;
 
 ---
 
+## Advanced ETL Procedures: Tandem Reading Detection
+
+### Definition
+Tandem reading occurs when the same book is read in multiple formats simultaneously (e.g., ebook + audiobook), with overlapping time periods of 7+ days.
+
+### ETL Detection Algorithm
+
+**Input:** All reading_sessions for a single book_id, sorted by start_time
+
+**Process:**
+```python
+def detect_tandem_reads(sessions_for_book):
+    """
+    Identify and flag tandem reads within a book's reading history.
+
+    Returns: List of read_instance_id assignments
+    """
+    reads = []
+    current_read_sessions = []
+    min_overlap_days = 7
+
+    for session in sorted(sessions_for_book, key=lambda s: s['start_time']):
+        # Check if this session overlaps with existing sessions
+        overlapping = []
+        for existing in current_read_sessions:
+            overlap_start = max(session['start_time'], existing['start_time'])
+            overlap_end = min(session['end_time'], existing['end_time'])
+            overlap_days = (overlap_end - overlap_start).days
+
+            if overlap_days >= min_overlap_days:
+                overlapping.append(existing)
+
+        if overlapping:
+            # Session overlaps with existing ones → tandem read
+            read_instance_id = overlapping[0]['read_instance_id']  # Use first group's ID
+            session['read_instance_id'] = read_instance_id
+            session['is_parallel_read'] = True
+            current_read_sessions.append(session)
+        else:
+            # No overlap → new read instance
+            read_instance_id = uuid.uuid4()
+            session['read_instance_id'] = read_instance_id
+            session['is_parallel_read'] = False
+            reads.append(current_read_sessions)
+            current_read_sessions = [session]
+
+    if current_read_sessions:
+        reads.append(current_read_sessions)
+
+    return reads
+```
+
+### SQL Implementation for ETL
+
+```sql
+-- Step 1: Identify all tandem read pairs (requires manual review/approval)
+WITH tandem_pairs AS (
+  SELECT
+    rs1.session_id as session_1,
+    rs2.session_id as session_2,
+    rs1.media_type as format_1,
+    rs2.media_type as format_2,
+    (GREATEST(rs1.start_time, rs2.start_time)::date -
+     LEAST(rs1.end_time, rs2.end_time)::date) as overlap_days
+  FROM reading_sessions rs1
+  JOIN reading_sessions rs2 ON
+    rs1.book_id = rs2.book_id AND
+    rs1.session_id < rs2.session_id AND
+    rs1.media_type != rs2.media_type
+  WHERE
+    rs1.start_time <= rs2.end_time AND
+    rs2.start_time <= rs1.end_time AND
+    GREATEST(rs1.start_time, rs2.start_time)::date -
+    LEAST(rs1.end_time, rs2.end_time)::date >= 7
+)
+SELECT * FROM tandem_pairs;
+
+-- Step 2: Assign read_instance_id to tandem pairs
+WITH tandem_groups AS (
+  SELECT
+    rs1.book_id,
+    array_agg(DISTINCT rs1.session_id) as session_group,
+    gen_random_uuid() as read_instance_id
+  FROM reading_sessions rs1
+  WHERE rs1.book_id IN (SELECT DISTINCT book_id FROM tandem_pairs)
+  GROUP BY rs1.book_id
+)
+UPDATE reading_sessions
+SET
+  read_instance_id = tg.read_instance_id,
+  is_parallel_read = TRUE
+FROM tandem_groups tg
+WHERE reading_sessions.book_id = tg.book_id
+  AND reading_sessions.session_id = ANY(tg.session_group);
+```
+
+### Configuration
+- **Overlap Threshold:** 7 days (configurable)
+- **Format Requirement:** Must be different media_types (ebook ≠ audiobook)
+- **Validation:** Manual review recommended before marking is_parallel_read=TRUE
+
+---
+
+## Advanced ETL Procedures: Re-read Detection & ID Assignment
+
+### Definition
+A re-read is identified when multiple distinct temporal blocks of reading_sessions exist for the same book_id.
+
+### ETL Detection Algorithm
+
+**Input:** All reading_sessions for a single book_id, sorted by start_time
+
+**Process:**
+```python
+def detect_and_assign_re_reads(sessions_for_book):
+    """
+    Assign read_instance_id and read_number to identify re-reads.
+
+    Logic:
+    1. Sort all sessions by start_time
+    2. Group sessions with gaps < 30 days as same read
+    3. Assign unique UUID per group (read_instance_id)
+    4. Assign ordinal number (read_number: 1, 2, 3...)
+    """
+    reads = []
+    current_group = []
+    max_gap_days = 30  # Configurable
+
+    sorted_sessions = sorted(sessions_for_book, key=lambda s: s['start_time'])
+
+    for i, session in enumerate(sorted_sessions):
+        if current_group:
+            last_session = current_group[-1]
+            gap_days = (session['start_time'] - last_session['end_time']).days
+
+            if gap_days <= max_gap_days:
+                # Same read → add to current group
+                current_group.append(session)
+            else:
+                # New read → start new group
+                reads.append(current_group)
+                current_group = [session]
+        else:
+            current_group = [session]
+
+    if current_group:
+        reads.append(current_group)
+
+    # Assign read_instance_id and read_number
+    results = []
+    for read_num, group in enumerate(reads, 1):
+        read_instance_id = uuid.uuid4()
+        for session in group:
+            session['read_instance_id'] = read_instance_id
+            session['read_number'] = read_num
+            results.append(session)
+
+    return results
+```
+
+### SQL Implementation for ETL
+
+```sql
+-- Step 1: Identify temporal gaps to find read boundaries
+WITH session_gaps AS (
+  SELECT
+    session_id,
+    book_id,
+    start_time,
+    end_time,
+    LAG(end_time) OVER (PARTITION BY book_id ORDER BY start_time) as prev_end_time,
+    (start_time::date - LAG(end_time)::date OVER (PARTITION BY book_id ORDER BY start_time)) as gap_days
+  FROM reading_sessions
+  WHERE book_id = ?  -- Process one book at a time
+)
+SELECT * FROM session_gaps WHERE gap_days > 30 OR gap_days IS NULL;
+
+-- Step 2: Assign read_instance_id and read_number
+WITH read_boundaries AS (
+  SELECT
+    session_id,
+    book_id,
+    start_time,
+    SUM(CASE WHEN gap_days > 30 OR gap_days IS NULL THEN 1 ELSE 0 END)
+      OVER (PARTITION BY book_id ORDER BY start_time) as read_group
+  FROM (
+    SELECT
+      session_id,
+      book_id,
+      start_time,
+      (start_time::date - LAG(end_time)::date OVER (PARTITION BY book_id ORDER BY start_time)) as gap_days
+    FROM reading_sessions
+  ) grouped
+),
+read_assignments AS (
+  SELECT
+    session_id,
+    read_group as read_number,
+    gen_random_uuid() as read_instance_id
+  FROM read_boundaries
+)
+UPDATE reading_sessions rs
+SET
+  read_number = ra.read_number,
+  read_instance_id = ra.read_instance_id
+FROM read_assignments ra
+WHERE rs.session_id = ra.session_id;
+```
+
+### Configuration
+- **Gap Threshold:** 30 days (configurable; if reading gap > 30 days, treat as new read)
+- **Initial read_number:** Always starts at 1 for first read
+- **read_instance_id:** UUID to group sessions belonging to same read
+
+---
+
+## Advanced ETL Procedures: Edition Tracking
+
+### Definition
+Each unique physical book owned is tracked as a `book_editions` record. One book can have multiple editions (hardcover, paperback, special edition).
+
+### ETL Procedures
+
+**When to create a book_editions record:**
+1. **ISBN changes** - Different ISBN = different edition
+2. **Format changes** - hardcover, paperback, special edition, audiobook (physical)
+3. **Publisher changes** - Different publisher = different edition
+4. **Special editions** - Anniversary, signed, limited, etc.
+5. **User tracking** - Physical library curation (you own multiple copies)
+
+### Edition Detection & Population
+
+```python
+def process_physical_editions(book_record, user_library):
+    """
+    Extract edition information from user's physical library
+    and populate book_editions table.
+    """
+    editions = []
+
+    for owned_copy in user_library.get(book_record['book_id'], []):
+        edition = {
+            'book_id': book_record['book_id'],
+            'edition_format': owned_copy['format'],  # hardcover, paperback, special
+            'edition_name': owned_copy.get('edition_name', None),  # Anniversary, Signed, etc.
+            'publication_year': owned_copy.get('publication_year', None),
+            'isbn_specific': owned_copy.get('isbn', None),
+            'condition': owned_copy.get('condition', 'unknown'),  # new, like-new, good, fair, poor
+            'date_acquired': owned_copy.get('date_acquired', None),
+            'display_location': owned_copy.get('shelf_location', None),  # "Bedroom shelf A3"
+        }
+        editions.append(edition)
+
+    return editions
+```
+
+### SQL Implementation
+
+```sql
+-- Insert new editions for a book (with deduplication)
+INSERT INTO book_editions (book_id, edition_format, edition_name, isbn_specific, condition)
+VALUES (?, ?, ?, ?, ?)
+ON CONFLICT (book_id, isbn_specific, edition_format) DO UPDATE
+SET edition_name = EXCLUDED.edition_name, condition = EXCLUDED.condition;
+
+-- Query: Show all owned editions of a book
+SELECT
+  b.title,
+  be.edition_format,
+  be.edition_name,
+  be.isbn_specific,
+  be.condition,
+  be.display_location
+FROM books b
+JOIN book_editions be ON b.book_id = be.book_id
+WHERE b.title = 'Dune'
+ORDER BY be.date_acquired DESC;
+```
+
+### Example: Multi-Edition Book
+
+**Book:** "The Lord of the Rings" by J.R.R. Tolkien
+
+| Edition | Format | Publisher | ISBN | Condition | Acquired | Notes |
+|---------|--------|-----------|------|-----------|----------|-------|
+| 1 | Hardcover | Houghton Mifflin | 978-0544003415 | Good | 2018-05-15 | Original reading copy |
+| 2 | Paperback | Penguin | 978-0008322953 | Like-New | 2020-10-20 | Travel copy |
+| 3 | Special Edition | Harper Voyager | 978-0062415639 | New | 2024-12-01 | Collectible edition |
+
+**Corresponding book_editions records:**
+```sql
+INSERT INTO book_editions (book_id, edition_format, publisher_specific, isbn_specific, condition, date_acquired)
+VALUES
+  (1, 'hardcover', 'Houghton Mifflin', '978-0544003415', 'good', '2018-05-15'),
+  (1, 'paperback', 'Penguin', '978-0008322953', 'like-new', '2020-10-20'),
+  (1, 'special-edition', 'Harper Voyager', '978-0062415639', 'new', '2024-12-01');
+```
+
+---
+
+## Data Quality & Error Handling
+
+### Validation Rules by Field Type
+
+#### Date Fields
+- **Format:** YYYY-MM-DD or TIMESTAMP
+- **Constraints:** start_time <= end_time, both <= CURRENT_DATE
+- **On Violation:** Log error with session_id, skip record, send alert
+
+#### ISBN Fields
+- **Format:** ISBN-10 (10 digits) or ISBN-13 (13 digits)
+- **Validation:** Check digit algorithm (mod 11 for ISBN-10, mod 10 for ISBN-13)
+- **On Invalid:** Log warning, attempt lookup by title+author, fallback to NULL
+
+#### Page Count
+- **Range:** 1 to 9,999 pages
+- **On Invalid:** Log warning, skip if 0, estimate if > 10,000
+- **On NULL:** Use Hardcover API value if available
+
+#### Numeric Fields (rating, duration_minutes, pages_read)
+- **Range:** Rating (0-5), duration (0-10,080), pages (0-9,999)
+- **On Violation:** Log error, set to NULL, check data source
+
+### Error Handling Flowchart
+
+```
+ETL Pipeline Start
+        ↓
+Extract from Source → Validate Fields
+        ↓
+Validation Fails? ──YES→ Log Error
+        │                 ↓
+        └────── Attempt Recovery/Fallback
+                 ↓
+Recovery Succeeds? ──YES→ Continue with fixed data
+        │
+        └─NO─→ Mark Record as SKIPPED, Send Alert
+                 ↓
+               Continue to Next Record
+        ↓
+Transform Data ──ERROR→ Log Transform Error, Skip
+        ↓
+Check Constraints ──VIOLATION→ Log Constraint Error, Rollback
+        ↓
+Insert to Database
+        ↓
+Log Success Metrics (rows_inserted, rows_skipped, rows_failed)
+        ↓
+Pipeline Complete
+```
+
+### Error Logging Requirements
+
+```python
+# Log format for all ETL errors
+{
+  'timestamp': ISO 8601,
+  'pipeline_id': unique UUID,
+  'stage': 'extraction|transformation|validation|load',
+  'error_type': 'validation|constraint|api|network',
+  'source_record_id': original record identifier,
+  'message': human-readable description,
+  'severity': 'info|warning|error|critical',
+  'action_taken': 'skip|retry|fallback|alert'
+}
+
+# Example:
+{
+  'timestamp': '2025-10-31T14:30:45Z',
+  'pipeline_id': 'etl_koreader_20251031',
+  'stage': 'validation',
+  'error_type': 'validation',
+  'source_record_id': 'session_1234',
+  'message': 'ISBN "978-00000000000" failed mod-10 check',
+  'severity': 'warning',
+  'action_taken': 'fallback to title+author lookup'
+}
+```
+
+### Retry Policies
+
+| Error Type | Retry Count | Backoff | Max Time | Action on Fail |
+|-----------|-----------|---------|----------|---|
+| **API Timeout** | 3 | Exponential (1s, 2s, 4s) | 10 minutes | Queue for manual review |
+| **Network Error** | 5 | Exponential (5s, 10s, 20s) | 1 hour | Pause pipeline, alert ops |
+| **Validation Fail** | 0 | — | — | Log & skip |
+| **Constraint Violation** | 1 | — | 30 seconds | Rollback & skip |
+| **API Rate Limit** | Wait | Exponential backoff | 24 hours | Pause pipeline |
+
+---
+
+## Example ETL Workflows
+
+### Workflow 1: Load Single Reading Session from KOReader
+
+**Input:** One `page_stat_data` row from KOReader history
+
+**Steps:**
+```
+1. Extract from page_stat_data
+   - Extract: id_book, start_time (Unix timestamp), duration
+   - Validate: start_time valid, duration > 0
+
+2. Lookup book in books table
+   - Query: SELECT book_id FROM books WHERE file_hash = ?
+   - Result: book_id = 42
+
+3. Create reading session
+   - Transform: duration (minutes), start_time → TIMESTAMP
+   - Assign: device='boox-palma-2', media_type='ebook', data_source='koreader'
+
+4. Detect tandem/re-read
+   - Check: Any overlapping sessions for this book?
+   - If yes: Assign read_instance_id, set is_parallel_read=TRUE
+   - If no: Generate new read_instance_id, set is_parallel_read=FALSE
+
+5. Insert to reading_sessions
+   - INSERT INTO reading_sessions (...) VALUES (...)
+   - Log: "Session 42_001 loaded, 45 minutes, ebook"
+
+6. Update book_stats view
+   - View automatically reflects new session
+```
+
+### Workflow 2: Batch Import from KOReader History
+
+**Input:** 100+ page_stat_data rows
+
+**Steps:**
+```
+1. Disable indexes on reading_sessions (performance)
+   - ALTER INDEX idx_reading_sessions_* UNUSABLE
+
+2. Batch aggregate sessions
+   - Group page_stat_data rows into reading sessions (30-min gap threshold)
+   - FOR each session:
+       a. Transform to reading_sessions format
+       b. Validate fields
+       c. Detect tandem/re-read
+       d. Prepare INSERT batch (1000 rows)
+
+3. Insert in batches
+   - INSERT INTO reading_sessions (...) VALUES (...), (...), ...
+   - Commit after each 1000-row batch
+
+4. Rebuild indexes
+   - ALTER INDEX idx_reading_sessions_* REBUILD
+   - ANALYZE reading_sessions
+
+5. Verify counts
+   - SELECT COUNT(*) FROM reading_sessions → expected count
+   - Log: "Imported 2,734 sessions in 45 batches"
+
+6. Update book_stats
+   - Views automatically refresh
+```
+
+### Workflow 3: Detect Tandem Reads (Batch Process)
+
+**Input:** reading_sessions table with preliminary data
+
+**Steps:**
+```
+1. FOR each book_id with multiple sessions:
+
+2. Retrieve all sessions for book_id
+   - SELECT * FROM reading_sessions WHERE book_id = ?
+
+3. Check for overlaps (different formats)
+   - Use detection algorithm (see Advanced ETL Procedures)
+   - Calculate overlap_days for each pair
+
+4. Filter pairs with overlap >= 7 days
+   - Mark both sessions: is_parallel_read=TRUE
+   - Assign same read_instance_id (UUID)
+
+5. Manual review step (optional)
+   - Output report of detected tandem reads
+   - Ask user: "Approve these as tandem reads?"
+   - If approved: Commit. If not: Skip
+
+6. Update reading_sessions
+   - UPDATE reading_sessions SET is_parallel_read=TRUE, read_instance_id=?
+   - Log: "Detected 3 tandem reads (12 sessions affected)"
+```
+
+### Workflow 4: Backfill Hardcover Metadata
+
+**Input:** books table (populated from KOReader, missing Hardcover enrichment)
+
+**Steps:**
+```
+1. FOR each book in books table:
+
+2. Call Hardcover API
+   - Query: /search/books?title={title}&author={author}
+   - Handle: No match, multiple matches, API errors
+
+3. Evaluate match quality
+   - Score: (title_similarity * 0.7) + (author_similarity * 0.3)
+   - If score >= 80: Accept match
+   - If score < 80: Log as "manual review needed"
+
+4. Extract metadata from API response
+   - hardcover_rating, rating_count
+   - isbn_13, asin
+   - description, cover_url
+   - cached_tags (JSON)
+   - publisher_name, author details
+
+5. Update books table
+   - UPDATE books SET hardcover_rating=?, isbn_13=?, ...
+   - WHERE book_id = ?
+
+6. Extract/update authors table
+   - Check: Does author exist? (UPSERT)
+   - If not: INSERT new author from API response
+   - Update books.author_id FK
+
+7. Extract/update publishers table
+   - Check: Does publisher exist? (UPSERT)
+   - If not: INSERT new publisher
+   - Update books.publisher_id FK
+
+8. Log results
+   - Count: 9 matched, 0 manual review, 0 failed
+   - Duration: 12 seconds
+   - Average API time: 1.3s per book
+```
+
+### Workflow 5: Handle API Failure & Retry
+
+**Input:** Hardcover API call fails (timeout, rate limit, network error)
+
+**Steps:**
+```
+1. API call fails
+   - Exception: Timeout after 30 seconds
+   - Record: book_id=42, title="Project Hail Mary"
+
+2. Check retry count
+   - Current: 0 of 3 allowed
+   - Action: Retry with exponential backoff
+
+3. Wait & retry
+   - Sleep: 1 second
+   - Retry API call
+
+4. Retry succeeds
+   - Continue with normal processing
+   - Log: "Retry #1 succeeded for book_id 42"
+
+5. All retries exhausted
+   - Current: 3 of 3 retries done
+   - Mark record: status='manual_review_needed'
+   - Queue for human inspection: user reviews and manually provides metadata
+   - Log: "book_id 42 queued for manual enrichment"
+
+6. Monitoring
+   - Alert: "ETL rate: 95% success (1 failure in 20 attempts)"
+   - If > 5% failures: Page on-call engineer
+```
+
+---
+
 ## Troubleshooting Guide
 
 ### Issue: Duplicate sessions detected
