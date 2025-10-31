@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>5</storyId>
+    <title>Implement library backup to separate storage</title>
+    <storyKey>1-5-implement-library-backup-to-separate-storage</storyKey>
+    <status>drafted</status>
+    <generatedAt>2025-10-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-5-implement-library-backup-to-separate-storage.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>my ebook library and CWA configuration automatically backed up to cloud storage each night</iWant>
+    <soThat>I have disaster recovery protection if the Raspberry Pi fails or the Calibre library becomes corrupted</soThat>
+    <tasks>
+      <task id="1">Install and configure rclone on Raspberry Pi</task>
+      <task id="2">Configure AES-256 encryption for backups</task>
+      <task id="3">Define backup scope and paths</task>
+      <task id="4">Schedule nightly backup execution</task>
+      <task id="5">Execute and verify initial backup</task>
+      <task id="6">Create logging and monitoring</task>
+      <task id="7">Document restore procedure</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">rclone installed on Raspberry Pi</criterion>
+    <criterion id="2">Koofr WebDAV account configured as backup destination</criterion>
+    <criterion id="3">Encryption configured: AES-256 encryption for all data in transit and at rest</criterion>
+    <criterion id="4">Backup scope: entire ebook library folder + CWA configuration files (metadata.db, config folder)</criterion>
+    <criterion id="5">Nightly backup scheduled via cron or systemd timer (e.g., 2 AM daily)</criterion>
+    <criterion id="6">Initial backup completed successfully; files verified encrypted in Koofr</criterion>
+    <criterion id="7">Backup logs created showing success/failure status and size transferred</criterion>
+    <criterion id="8">Restore procedure documented: steps to recover library from encrypted Koofr backup</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Core Library Server & Database Foundation</title>
+        <section>Backup Infrastructure</section>
+        <snippet>Configure rclone + Koofr for nightly encrypted library backup. rclone daemon syncs library folder + config to Koofr WebDAV storage with AES-256 encryption. Nightly schedule avoids resource contention with CWA operations.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.2. Sync & Backup Layer - Disaster Recovery Backup</section>
+        <snippet>Library Backup: entire ebook library and CWA configuration files backed up nightly from RPi to Koofr using rclone with encryption. Separate from statistics backup (Syncthing one-way). Enables full recovery if RPi storage fails.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements § FR009</section>
+        <snippet>System shall backup library files to separate storage from primary PC to prevent data loss.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper - Epic Breakdown</title>
+        <section>Epic 1 § Story 1.5</section>
+        <snippet>Implement library backup to separate storage. rclone + Koofr with AES-256 encryption, nightly scheduling, logging, and disaster recovery documentation.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>resources/scripts/</path>
+        <kind>directory</kind>
+        <reason>Location for backup script: /home/pi/backup/backup-library.sh (to be created)</reason>
+      </artifact>
+      <artifact>
+        <path>/home/pi/backup/backup-library.sh</path>
+        <kind>shell script</kind>
+        <reason>Bash script orchestrating rclone backup operations with error handling and logging</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="tools">
+        <package name="rclone" version="latest">
+          <installed>false</installed>
+          <reason>File synchronization with encryption to Koofr; primary backup mechanism</reason>
+        </package>
+        <package name="cron" version="system">
+          <installed>true</installed>
+          <reason>Nightly backup scheduling (alternative to systemd timer)</reason>
+        </package>
+        <package name="systemd" version="system">
+          <installed>true</installed>
+          <reason>Nightly backup scheduling via timer unit (preferred alternative to cron)</reason>
+        </package>
+      </ecosystem>
+      <ecosystem name="cloud">
+        <package name="Koofr" version="free-tier">
+          <installed>false</installed>
+          <reason>WebDAV-compatible cloud storage for encrypted backup; free tier provides 1 GB (check library size)</reason>
+        </package>
+      </ecosystem>
+      <ecosystem name="shell">
+        <package name="bash" version="4+">
+          <installed>true</installed>
+          <reason>Backup script implementation language</reason>
+        </package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="arch-1">
+      <title>One-way backup pattern (RPi → Koofr only)</title>
+      <description>Backup is one-directional to prevent accidental overwrite of production library. rclone sync ensures incremental updates without full re-transfers. [Source: docs/architecture.md § 3.2]</description>
+    </constraint>
+    <constraint id="arch-2">
+      <title>Encryption mandatory for all backup data</title>
+      <description>AES-256 encryption required per privacy-first architecture principle. Data encrypted in transit and at rest on Koofr. Encryption password stored locally, never committed to git. [Source: docs/architecture.md § 1. System Architecture Philosophy]</description>
+    </constraint>
+    <constraint id="arch-3">
+      <title>Backup scope: library files + metadata.db + config</title>
+      <description>Backup must include both library files (ebooks) and metadata database (metadata.db) and CWA configuration. Enables full recovery if RPi fails.</description>
+    </constraint>
+    <constraint id="ops-1">
+      <title>Nightly execution schedule (2 AM default)</title>
+      <description>Backup runs during low-traffic hours to avoid impacting CWA operations or ingest workflows. Scheduled via cron or systemd timer.</description>
+    </constraint>
+    <constraint id="perf-1">
+      <title>Expected completion in <10 minutes</title>
+      <description>Typical library 100-200 books (100-500 MB). Backup must not consume excessive bandwidth during residential internet usage patterns.</description>
+    </constraint>
+    <constraint id="ops-2">
+      <title>Logs and monitoring required</title>
+      <description>All backup operations logged to /var/log/bookhelper-backup.log with rotation policy (daily, 7-day retention). Enables troubleshooting and verification of backup success.</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface id="rclone-cli">
+      <name>rclone Command-Line Interface</name>
+      <kind>System CLI</kind>
+      <signature>rclone sync /source/ koofr_encrypted:/dest/ --progress</signature>
+      <path>/usr/bin/rclone (installed via package or curl script)</path>
+      <description>rclone CLI for synchronizing library to encrypted Koofr remote. Supports incremental sync with bandwidth limits and resume on failure.</description>
+    </interface>
+    <interface id="koofr-webdav">
+      <name>Koofr WebDAV Interface</name>
+      <kind>Cloud Storage API</kind>
+      <signature>WebDAV over HTTPS to Koofr API; auth via WebDAV credentials</signature>
+      <path>Koofr account (created in Task 1)</path>
+      <description>Koofr WebDAV endpoint for encrypted backup storage. rclone communicates via HTTPS; credentials stored in rclone config.</description>
+    </interface>
+    <interface id="systemd-timer">
+      <name>Systemd Timer (Alternative Scheduler)</name>
+      <kind>System Scheduler</kind>
+      <signature>[Timer] OnCalendar=*-*-* 02:00:00</signature>
+      <path>/etc/systemd/system/bookhelper-backup.timer</path>
+      <description>Optional: Replace cron with systemd timer for more robust scheduling and logging integration.</description>
+    </interface>
+    <interface id="cron-scheduler">
+      <name>Cron Job (Alternative Scheduler)</name>
+      <kind>System Scheduler</kind>
+      <signature>0 2 * * * /home/pi/backup/backup-library.sh >> /var/log/bookhelper-backup.log 2>&1</signature>
+      <path>crontab entry</path>
+      <description>Alternative: Traditional cron job for nightly backup execution at 2 AM.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing focuses on backup functionality, encryption, scheduling, and recovery procedures. Manual testing: verify initial backup completes, files are encrypted in Koofr, and restore from backup works. Automated testing: verify cron/timer execution, log creation, and error handling. No unit tests required; integration test is the backup execution itself.</standards>
+    <locations>
+      <location>tests/integration/test_backup_*.py (integration tests for rclone and Koofr)</location>
+      <location>/var/log/bookhelper-backup.log (backup execution logs)</location>
+    </locations>
+    <ideas>
+      <idea acId="1">Test: Install rclone; verify installation with 'rclone version'</idea>
+      <idea acId="2">Test: Create Koofr account and configure WebDAV credentials; test connectivity with 'rclone ls koofr_backup:'</idea>
+      <idea acId="3">Test: Create encrypted remote; verify files in Koofr are not readable as plaintext</idea>
+      <idea acId="4">Test: Define backup script with correct paths for books folder, metadata.db, config folder</idea>
+      <idea acId="5">Test: Schedule backup via cron or systemd; verify execution at scheduled time</idea>
+      <idea acId="6">Test: Execute initial backup manually; verify all files transfer; check Koofr for encrypted files</idea>
+      <idea acId="7">Test: Backup logs created with success status, file count, bytes transferred</idea>
+      <idea acId="8">Test: Document and test recovery: restore from backup to secondary location or test instance</idea>
+    </ideas>
+  </tests>
+
+</story-context>

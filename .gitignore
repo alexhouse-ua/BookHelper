@@ -15,6 +15,7 @@
 .env
 .env.local
 .env.*.local
+.env.neon
 credentials.json
 secrets.json
 

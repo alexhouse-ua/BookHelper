@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/stories/3-1-statistics-backup" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <storyKey>3-1-configure-one-way-statistics-backup-from-boox-to-rpi</storyKey>
+    <title>Configure one-way statistics backup from Boox to RPi</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-10-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-1-configure-one-way-statistics-backup-from-boox-to-rpi.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>reader</asA>
+    <iWant>my KOReader statistics automatically backed up to my Raspberry Pi</iWant>
+    <soThat>I don't lose my reading history if my Boox device fails or the database becomes corrupted</soThat>
+
+    <tasks>
+      <task id="t1" ac="1">Prepare Boox device for statistics backup</task>
+      <task id="t2" ac="1-2">Configure Syncthing "Send Only" folder on Boox</task>
+      <task id="t3" ac="3">Configure Syncthing "Receive Only" folder on RPi</task>
+      <task id="t4" ac="5">Enable file versioning for 30-day retention</task>
+      <task id="t5" ac="4,7">Validate one-way sync and corruption prevention</task>
+      <task id="t6" ac="4">Test realistic sync latency</task>
+      <task id="t7" ac="8">Create documentation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">New Syncthing folder configured for KOReader statistics directory on Boox</criterion>
+    <criterion id="2">Syncthing configured as "Send Only" from Boox (device is source of truth)</criterion>
+    <criterion id="3">Syncthing configured as "Receive Only" on RPi (server never writes back)</criterion>
+    <criterion id="4">Statistics.sqlite3 backed up to RPi within 5 minutes of reading session end</criterion>
+    <criterion id="5">File versioning enabled on RPi to maintain 30-day backup history</criterion>
+    <criterion id="6">Test: Read on Boox, verify statistics.sqlite3 backed up successfully to RPi</criterion>
+    <criterion id="7">Validation: Confirm RPi never writes to Boox statistics folder (corruption prevention)</criterion>
+    <criterion id="8">Documentation: Clearly mark this backup as disaster recovery only (NOT for progress sync - that's KOSync)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.2. Sync & Backup Layer - Disaster Recovery Backup</section>
+        <snippet>Statistics Backup: The statistics.sqlite3 file is backed up from the Boox device to the Raspberry Pi server using Syncthing. This is a one-way sync, with the Boox device configured as "Send Only". This backup is for disaster recovery only and is never synced back to the device.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>4. Critical Warnings &amp; Risk Mitigation - CRITICAL WARNING: SQLite Corruption Risk</section>
+        <snippet>File-level synchronization of a live SQLite database is the number one cause of catastrophic and irreversible data loss. The architecture is designed with non-negotiable safeguards: (1) Progress Sync MUST use application-aware protocols, (2) Statistics Backup MUST be one-way, (3) Separation of concerns is MANDATORY.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper Epic Breakdown</title>
+        <section>Epic 3: Ebook Statistics Backup & Analytics - Story 3.1</section>
+        <snippet>Configure one-way statistics backup from Boox to RPi. New Syncthing folder configured for KOReader statistics directory on Boox with Send Only mode. File versioning enabled on RPi to maintain 30-day backup history for disaster recovery.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements - Data Safety</section>
+        <snippet>System shall protect reading statistics from data loss through multi-layer backup strategy including one-way file-level sync for disaster recovery and versioned backups for recovery point options.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-1-story.md</path>
+        <title>Story 2.1: Configure Syncthing for one-way library sync to Boox Palma 2</title>
+        <section>Dev Notes - One-way sync design rationale</section>
+        <snippet>Syncthing choice justification: Open-source, peer-to-peer (no cloud intermediary), supports "Send Only" / "Receive Only" modes (perfect for one-way pattern), Android app available for Boox, supports folder versioning and conflict resolution.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>docker-compose.yml</path>
+        <kind>configuration</kind>
+        <symbol>syncthing</symbol>
+        <reason>Syncthing service already configured in docker-compose (from Story 2.1). Story 3.1 adds a second folder for statistics backup using same service.</reason>
+      </artifact>
+      <artifact>
+        <path>docs/STORY-2.1-SYNCTHING-SETUP.md</path>
+        <kind>guide</kind>
+        <symbol>Syncthing Configuration Guide</symbol>
+        <reason>Comprehensive setup guide from Story 2.1 completion. Provides detailed procedures for Boox and RPi configuration, device pairing, folder sharing, and troubleshooting. Story 3.1 follows same patterns for statistics folder.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <docker>
+        <package name="syncthing" version="any">Syncthing daemon (already in docker-compose.yml from Story 2.1)</package>
+      </docker>
+      <system>
+        <package name="Boox Palma 2">Android e-reader with Syncthing app installed (from Story 2.1)</package>
+        <package name="Raspberry Pi 4 2GB">Host server with docker-compose running Syncthing service</package>
+        <package name="KOReader">E-reader app on Boox Palma 2 (pre-installed, generates statistics.sqlite3)</package>
+      </system>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <name>One-Way Sync Only</name>
+      <description>Boox folder MUST be configured as "Send Only", RPi folder MUST be configured as "Receive Only". Never use two-way sync for statistics.sqlite3 - this prevents corruption if the source device ever receives back a corrupted version of its own database.</description>
+      <source>docs/architecture.md § 4. Critical Warnings</source>
+    </constraint>
+    <constraint>
+      <name>Separate from Progress Sync</name>
+      <description>This backup is for disaster recovery ONLY, not for live progress synchronization. Progress sync uses KOSync (Story 2.4), which is application-aware and safe for live data. Do NOT attempt to sync the statistics database for progress - use KOSync instead.</description>
+      <source>docs/architecture.md § 3.2. Sync &amp; Backup Layer</source>
+    </constraint>
+    <constraint>
+      <name>File Versioning Required</name>
+      <description>Syncthing file versioning MUST be enabled on the RPi folder to maintain 30-day backup history. This allows recovery if the file is accidentally deleted or corrupted on the Boox device.</description>
+      <source>docs/epics.md § Epic 3 § Story 3.1 AC5</source>
+    </constraint>
+    <constraint>
+      <name>Latency Requirement</name>
+      <description>Statistics backup must complete within 5 minutes of reading session end. Typical Syncthing sync on LAN is &lt;1 minute, so this is easily achievable.</description>
+      <source>docs/epics.md § Epic 3 § Story 3.1 AC4</source>
+    </constraint>
+    <constraint>
+      <name>KOReader Statistics Directory Path</name>
+      <description>KOReader statistics directory varies by device: /storage/emulated/0/koreader/ or /sdcard/koreader/ on Boox. Must verify exact path before configuring Syncthing folder.</description>
+      <source>Task 1 subtask 1 in story file</source>
+    </constraint>
+    <constraint>
+      <name>Syncthing Already Running</name>
+      <description>Syncthing is already installed and running on both Boox and RPi from Story 2.1 completion. Story 3.1 configures a NEW folder within the same Syncthing infrastructure, not a separate service.</description>
+      <source>Story 2.1 completion status in sprint-status.yaml</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Syncthing Web UI</name>
+      <kind>HTTP Web Interface</kind>
+      <signature>http://raspberrypi.local:8384 (or configure STGUIADDRESS if needed)</signature>
+      <path>docker-compose.yml § syncthing service</path>
+      <description>Used to configure folders, device pairing, and versioning settings on RPi. Accessible from development machine on local network.</description>
+    </interface>
+    <interface>
+      <name>Syncthing Android App</name>
+      <kind>Mobile Application</kind>
+      <signature>Syncthing Android (F-Droid or Play Store)</signature>
+      <path>Boox Palma 2 system</path>
+      <description>Used to configure "Send Only" folder and add RPi device. Settings accessed via Syncthing app on Boox.</description>
+    </interface>
+    <interface>
+      <name>Syncthing REST API (optional)</name>
+      <kind>REST API</kind>
+      <signature>http://raspberrypi.local:8384/rest/system/status (verify running state)</signature>
+      <path>Syncthing daemon</path>
+      <description>Can be used to programmatically verify sync status, though web UI is sufficient for this story.</description>
+    </interface>
+    <interface>
+      <name>File System - RPi Statistics Backup Path</name>
+      <kind>File System</kind>
+      <signature>/home/pi/backups/koreader-statistics/</signature>
+      <path>RPi local filesystem</path>
+      <description>Destination directory where statistics.sqlite3 is backed up. Configured in Syncthing "Receive Only" folder settings.</description>
+    </interface>
+    <interface>
+      <name>SSH Access to RPi</name>
+      <kind>Command Line</kind>
+      <signature>ssh pi@raspberrypi.local</signature>
+      <path>RPi network access</path>
+      <description>Used to verify backup directory exists, check file permissions, enable versioning, monitor sync status via logs.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <paragraph>Testing for this story focuses on validating the one-way sync mechanism and file versioning at both the Syncthing service level and the file system level. Tests verify that statistics data is protected from corruption through the one-way sync pattern and that disaster recovery is possible through versioning. Integration testing ensures that reading activity on the Boox device (statistics file updates) triggers sync to the RPi within the 5-minute SLA. Tests are manual (device-based) rather than automated, as this story involves physical devices and file system operations.</paragraph>
+    </standards>
+
+    <locations>
+      <location>/docs/</location>
+      <location>Manual testing on Boox Palma 2 and Raspberry Pi</location>
+      <location>Syncthing web UI verification on http://raspberrypi.local:8384</location>
+    </locations>
+
+    <ideas>
+      <idea id="test-1" ac="1-2">Boox Syncthing Folder Configuration: Verify that a new "Send Only" folder can be created in Syncthing on Boox pointing to KOReader statistics directory</idea>
+      <idea id="test-2" ac="3">RPi Syncthing Folder Configuration: Verify that a matching "Receive Only" folder is created on RPi at /home/pi/backups/koreader-statistics/ and is paired with the Boox folder</idea>
+      <idea id="test-3" ac="4,6">Sync Latency Test: Trigger reading activity on Boox (open book, read pages, close book), verify statistics.sqlite3 is synced to RPi within 5 minutes, document actual latency observed</idea>
+      <idea id="test-4" ac="5">File Versioning Test: Enable "Simple File Versioning" on RPi folder with 30-day retention, verify that old versions are retained, test recovery by deleting file and restoring from version</idea>
+      <idea id="test-5" ac="7">One-Way Sync Validation: Verify that Syncthing folder on RPi is "Receive Only" (no uploads from RPi to Boox), ensure that RPi cannot modify the Boox statistics folder</idea>
+      <idea id="test-6" ac="4">Realistic Sync Scenario: Multi-day reading monitoring to verify sync works consistently during normal usage (not just single test), document any sync failures or latency variations</idea>
+      <idea id="test-7" ac="8">Documentation Review: Verify that created STATISTICS-BACKUP-SETUP.md clearly explains backup purpose (disaster recovery, not progress sync), documents Boox and RPi configuration, includes troubleshooting steps</idea>
+    </ideas>
+  </tests>
+
+  <implementation-notes>
+    <note type="critical">
+      <title>Syncthing Folder ID Naming</title>
+      <description>Choose a clear, descriptive folder ID (e.g., "koreader-statistics") to distinguish this statistics backup from the library sync folder (e.g., "boox-library" or "boox-downloads" from Story 2.1). This makes logs and UI clearer.</description>
+    </note>
+    <note type="critical">
+      <title>Do NOT Mix with Progress Sync</title>
+      <description>This story backs up the statistics.sqlite3 file for disaster recovery. Progress sync (Story 2.4) uses KOSync, which is application-aware and safe for live data. Do NOT attempt to use Syncthing for progress sync - it will cause corruption.</description>
+    </note>
+    <note type="info">
+      <title>Reuse From Story 2.1</title>
+      <description>Story 2.1 (Syncthing library sync) already set up Syncthing infrastructure on both Boox and RPi. Story 3.1 adds a second folder within the same Syncthing service. The device pairing and basic configuration is already complete.</description>
+    </note>
+    <note type="info">
+      <title>Testing with Real Data</title>
+      <description>Unlike Story 2.1 (which tested with synthetic files), Story 3.1 should be tested with actual KOReader usage: reading books on the Boox and verifying that the real statistics database is synced. This provides realistic latency measurements and confirms the backup works with production data.</description>
+    </note>
+    <note type="technical">
+      <title>Syncthing Versioning Types</title>
+      <description>Simple File Versioning keeps old file versions in a ".stversions" hidden directory. This is preferred for statistics.sqlite3 because it's simple and provides reliable recovery. Alternative: "Trash Can File Versioning" moves deleted files to trash (less secure). Alternative: "Staggered File Versioning" (for larger files, not needed here).</description>
+    </note>
+  </implementation-notes>
+
+  <prerequisites>
+    <prerequisite status="complete">Story 2.1 - Configure Syncthing: Syncthing installed and running on both Boox and RPi, devices paired, infrastructure ready</prerequisite>
+    <prerequisite status="complete">Story 2.3 - Configure Tailscale: Enables remote monitoring of backup if needed (optional but useful)</prerequisite>
+    <prerequisite status="complete">Epic 1 - CWA operational with database schema initialized (provides context for unified database)</prerequisite>
+  </prerequisites>
+
+  <references>
+    <ref>docs/epics.md § Epic 3 § Story 3.1</ref>
+    <ref>docs/architecture.md § 3.2. Sync &amp; Backup Layer</ref>
+    <ref>docs/architecture.md § 4. Critical Warnings - SQLite Corruption Risk</ref>
+    <ref>docs/stories/2-1-story.md § Dev Notes - One-way sync design rationale</ref>
+    <ref>docs/stories/2-4-enable-kosync-progress-sync-across-devices.md § Learnings for statistics backup</ref>
+    <ref>docs/STORY-2.1-SYNCTHING-SETUP.md § Configuration procedures and troubleshooting</ref>
+  </references>
+
+  <related-stories>
+    <story id="2-1" status="done">Story 2.1: Configure Syncthing for one-way library sync (establishes Syncthing infrastructure)</story>
+    <story id="2-4" status="done">Story 2.4: Enable KOSync progress sync (application-aware progress sync, complement to this file backup)</story>
+    <story id="3-2" status="backlog">Story 3.2: Build ETL pipeline (consumes the statistics.sqlite3 backup created by Story 3.1)</story>
+  </related-stories>
+
+</story-context>

@@ -1,6 +1,6 @@
 # Story 2.4: Enable KOSync progress sync across devices
 
-Status: Ready for Development
+Status: done
 
 ## Story
 

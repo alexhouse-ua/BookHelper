@@ -10,6 +10,7 @@
 -- - books: Book dimension table with enriched metadata from Hardcover API
 -- - book_editions: Physical/format edition tracking for owned copies
 -- - reading_sessions: Fact table for reading events (ebook + audiobook)
+-- - sync_status: ETL synchronization tracking
 -- - Views: Computed aggregations for multi-source analytics
 --
 -- Key Features:
@@ -35,14 +36,15 @@ CREATE TABLE IF NOT EXISTS authors (
 
   -- Core identity
   author_name VARCHAR(255) NOT NULL,
-  alternate_names TEXT[] DEFAULT '{}',
+  alternate_names JSONB DEFAULT '[]',
   author_slug VARCHAR(255),
 
   -- Hardcover API references
   author_hardcover_id VARCHAR(100) UNIQUE,
 
   -- Author metrics
-  books_count INT,
+  book_count INT,
+  contributions JSONB DEFAULT '[]',
   born_year INT,
 
   -- Diversity metrics
@@ -63,9 +65,10 @@ CREATE INDEX IF NOT EXISTS idx_authors_name ON authors(author_name);
 
 COMMENT ON TABLE authors IS 'Author dimension table with diversity metrics and prolific indicators. Source: Hardcover API.';
 COMMENT ON COLUMN authors.author_name IS 'Primary author name. Source: KOReader/Hardcover.';
-COMMENT ON COLUMN authors.alternate_names IS 'Array of pen names and pseudonyms. Source: Hardcover API.';
+COMMENT ON COLUMN authors.alternate_names IS 'Array of pen names and pseudonyms (JSONB). Source: Hardcover API.';
 COMMENT ON COLUMN authors.author_hardcover_id IS 'Hardcover API author ID. Source: Hardcover API.';
-COMMENT ON COLUMN authors.books_count IS 'Total published works by author. Source: Hardcover API.';
+COMMENT ON COLUMN authors.book_count IS 'Total published works by author. Source: Hardcover API.';
+COMMENT ON COLUMN authors.contributions IS 'Array of contribution types (author, editor, translator, illustrator). Source: Hardcover API.';
 COMMENT ON COLUMN authors.born_year IS 'Author birth year for temporal analytics. Source: Hardcover API.';
 COMMENT ON COLUMN authors.is_bipoc IS 'Author diversity flag. Source: Hardcover API.';
 COMMENT ON COLUMN authors.is_lgbtq IS 'Author LGBTQ+ flag. Source: Hardcover API.';
@@ -89,7 +92,8 @@ CREATE TABLE IF NOT EXISTS publishers (
 
   -- Publisher hierarchy (P3, P4)
   canonical_hardcover_id INT,
-  parent_publisher_id INT REFERENCES publishers(publisher_id) ON DELETE SET NULL,
+  parent_id INT,
+  parent_publisher VARCHAR(255),
 
   -- Metadata
   country VARCHAR(100),
@@ -109,7 +113,8 @@ COMMENT ON COLUMN publishers.publisher_name IS 'Canonical publisher name. Source
 COMMENT ON COLUMN publishers.alternate_names IS 'Known alternate names. Source: Hardcover API.';
 COMMENT ON COLUMN publishers.publisher_hardcover_id IS 'Hardcover API publisher ID (P1). Source: Hardcover API.';
 COMMENT ON COLUMN publishers.canonical_hardcover_id IS 'Canonical publisher if consolidated (P3). Source: Hardcover API.';
-COMMENT ON COLUMN publishers.parent_publisher_id IS 'Parent publisher for imprints (P4). Source: Hardcover API.';
+COMMENT ON COLUMN publishers.parent_id IS 'Parent publisher ID from Hardcover (reference only, not FK). Source: Hardcover API.';
+COMMENT ON COLUMN publishers.parent_publisher IS 'Parent publisher name (denormalized reference). Source: Hardcover API.';
 
 -- ============================================================================
 -- TABLE 3: books (Books Dimension Table)
@@ -159,8 +164,14 @@ CREATE TABLE IF NOT EXISTS books (
   author_birth_year INT,
   author_books_count INT,
 
-  -- ========== GENRE & CONTENT ==========
+  -- ========== GENRE & CONTENT METADATA ==========
+  genres JSONB DEFAULT '[]',
+  moods JSONB DEFAULT '[]',
+  content_warnings JSONB DEFAULT '[]',
   cached_tags JSONB DEFAULT '[]',
+  alternative_titles JSONB DEFAULT '[]',
+  activities_count INT,
+  cover_color JSONB,
   users_read_count INT,
   users_count INT,
 
@@ -174,7 +185,14 @@ CREATE TABLE IF NOT EXISTS books (
   -- ========== COVER & DISPLAY ==========
   cover_url TEXT,
 
-  -- ========== MULTI-FORMAT OWNERSHIP TRACKING ==========
+  -- ========== USER LIBRARY TRACKING (from Hardcover Activities) ==========
+  user_owns_ebook BOOLEAN DEFAULT FALSE,
+  user_owns_audiobook BOOLEAN DEFAULT FALSE,
+  user_owns_physical BOOLEAN DEFAULT FALSE,
+  user_reading_status VARCHAR(50),
+  user_added_date TIMESTAMP,
+
+  -- ========== MULTI-FORMAT OWNERSHIP (deprecated, use user_owns_* fields) ==========
   media_types_owned TEXT[] DEFAULT '{"ebook"}',
   owned_physical_formats TEXT[] DEFAULT '{}',
   owned_special_editions TEXT[] DEFAULT '{}',
@@ -196,6 +214,8 @@ CREATE INDEX IF NOT EXISTS idx_books_publisher_id ON books(publisher_id);
 CREATE INDEX IF NOT EXISTS idx_books_source ON books(source);
 CREATE INDEX IF NOT EXISTS idx_books_published_date ON books(published_date);
 CREATE INDEX IF NOT EXISTS idx_books_cached_tags ON books USING GIN(cached_tags);
+CREATE INDEX IF NOT EXISTS idx_books_genres ON books USING GIN(genres);
+CREATE INDEX IF NOT EXISTS idx_books_moods ON books USING GIN(moods);
 
 COMMENT ON TABLE books IS 'Book dimension table with multi-source enrichment. Supports ebook, audiobook, and physical library tracking. Sources: KOReader, Hardcover API, computed.';
 COMMENT ON COLUMN books.author IS 'Primary author name (colloquial). Source: KOReader/Hardcover.';
@@ -206,9 +226,17 @@ COMMENT ON COLUMN books.audio_seconds IS 'Total audiobook duration in seconds. S
 COMMENT ON COLUMN books.hardcover_rating IS 'Hardcover community rating. Source: Hardcover API.';
 COMMENT ON COLUMN books.user_rating IS 'Your personal rating of the book. Source: Hardcover API (user activities).';
 COMMENT ON COLUMN books.user_rating_date IS 'When you rated this book. Source: Hardcover API (user activities).';
-COMMENT ON COLUMN books.media_types_owned IS 'Format array: ["ebook", "audiobook"]. Source: User tracking.';
-COMMENT ON COLUMN books.owned_physical_formats IS 'Physical copy formats: ["hardcover", "paperback", "special-edition"]. Source: User tracking.';
-COMMENT ON COLUMN books.owned_special_editions IS 'Special edition details. Source: User tracking.';
+COMMENT ON COLUMN books.genres IS 'Array of genres from Hardcover. Source: Hardcover API.';
+COMMENT ON COLUMN books.moods IS 'Array of moods (dark, cozy, inspirational). Source: Hardcover API.';
+COMMENT ON COLUMN books.content_warnings IS 'Array of content warnings. Source: Hardcover API.';
+COMMENT ON COLUMN books.alternative_titles IS 'Array of alternative titles (localized, original). Source: Hardcover API.';
+COMMENT ON COLUMN books.user_owns_ebook IS 'Whether user owns ebook edition. Source: Hardcover API (activities).';
+COMMENT ON COLUMN books.user_owns_audiobook IS 'Whether user owns audiobook edition. Source: Hardcover API (activities).';
+COMMENT ON COLUMN books.user_owns_physical IS 'Whether user owns physical edition. Source: Hardcover API (activities).';
+COMMENT ON COLUMN books.user_reading_status IS 'Current reading status (reading, finished, want-to-read, dnf). Source: Hardcover API (activities).';
+COMMENT ON COLUMN books.user_added_date IS 'When user added book to library. Source: Hardcover API (activities).';
+COMMENT ON COLUMN books.media_types_owned IS 'DEPRECATED: Use user_owns_* fields instead. Format array: ["ebook", "audiobook"]. Source: User tracking.';
+COMMENT ON COLUMN books.owned_physical_formats IS 'DEPRECATED: Track via book_editions table. Physical copy formats. Source: User tracking.';
 COMMENT ON COLUMN books.read_count IS 'Number of times read/heard. Increments on new read_instance_id. Source: Computed from reading_sessions.';
 
 -- ============================================================================
@@ -222,18 +250,20 @@ CREATE TABLE IF NOT EXISTS book_editions (
   edition_id SERIAL PRIMARY KEY,
   book_id INT NOT NULL REFERENCES books(book_id) ON DELETE CASCADE,
 
-  -- Edition details
+  -- Edition details (from Hardcover Editions API)
   edition_format VARCHAR(50),
   edition_name VARCHAR(255),
   publication_year INT,
   publisher_specific VARCHAR(255),
-
-  -- Physical library metadata
   isbn_specific VARCHAR(20),
+  language VARCHAR(10),
+  pages INT,
+  audio_seconds INT,
+  release_date DATE,
+
+  -- Physical library metadata (user tracking)
   condition VARCHAR(50),
   notes TEXT,
-
-  -- Tracking
   date_acquired DATE,
   display_location VARCHAR(100),
 
@@ -245,9 +275,9 @@ CREATE TABLE IF NOT EXISTS book_editions (
 CREATE INDEX IF NOT EXISTS idx_book_editions_book_id ON book_editions(book_id);
 CREATE INDEX IF NOT EXISTS idx_book_editions_format ON book_editions(edition_format);
 
-COMMENT ON TABLE book_editions IS 'Track specific physical editions owned (hardcover, paperback, special editions, etc.). Source: User tracking.';
-COMMENT ON COLUMN book_editions.edition_format IS 'Format type: hardcover, paperback, special-edition, signed, limited. Source: User input.';
-COMMENT ON COLUMN book_editions.edition_name IS 'Edition name (Anniversary Edition, Premium Edition, etc.). Source: User input.';
+COMMENT ON TABLE book_editions IS 'Track specific physical editions owned (hardcover, paperback, special editions, etc.). Source: Hardcover Editions API + User tracking.';
+COMMENT ON COLUMN book_editions.edition_format IS 'Format type: hardcover, paperback, special-edition, signed, limited. Source: Hardcover API / User input.';
+COMMENT ON COLUMN book_editions.edition_name IS 'Edition name (Anniversary Edition, Premium Edition, etc.). Source: Hardcover API / User input.';
 COMMENT ON COLUMN book_editions.condition IS 'Condition: new, like-new, good, fair, poor. Source: User input.';
 
 -- ============================================================================
@@ -311,6 +341,36 @@ COMMENT ON COLUMN reading_sessions.read_instance_id IS 'UUID grouping tandem rea
 COMMENT ON COLUMN reading_sessions.is_parallel_read IS 'Flag for tandem reading sessions. Source: Computed.';
 COMMENT ON COLUMN reading_sessions.read_number IS 'Which read of the book (1=first, 2=reread). Increments with new read_instance_id. Source: Computed from books.read_count.';
 COMMENT ON COLUMN reading_sessions.data_source IS 'ETL source: koreader, bookplayer, kindle, audible, hardcover. Source: ETL.';
+
+-- ============================================================================
+-- TABLE 6: sync_status (ETL Synchronization Tracking)
+-- ============================================================================
+-- Purpose: Track ETL sync state for incremental updates and monitoring
+-- Strategy: One row per data source with cursor and status tracking
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS sync_status (
+  sync_id SERIAL PRIMARY KEY,
+  source_name VARCHAR(50) NOT NULL UNIQUE,
+  last_sync_time TIMESTAMP,
+  last_sync_cursor VARCHAR(255),
+  records_synced INT DEFAULT 0,
+  records_created INT DEFAULT 0,
+  records_updated INT DEFAULT 0,
+  sync_status VARCHAR(50) DEFAULT 'pending',
+  error_message TEXT,
+  sync_duration_seconds INT,
+  next_scheduled_sync TIMESTAMP,
+  sync_mode VARCHAR(50) DEFAULT 'incremental',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE sync_status IS 'ETL synchronization tracking for incremental updates. Sources: koreader, hardcover_books, hardcover_activities, hardcover_editions, kindle, audible.';
+COMMENT ON COLUMN sync_status.source_name IS 'Data source identifier (koreader, hardcover_books, etc.). Source: ETL.';
+COMMENT ON COLUMN sync_status.last_sync_cursor IS 'Cursor/bookmark for incremental queries (max timestamp, last_id, offset). Source: ETL.';
+COMMENT ON COLUMN sync_status.sync_status IS 'Status: pending, in_progress, success, partial_success, failed. Source: ETL.';
+COMMENT ON COLUMN sync_status.sync_mode IS 'Type of sync: full_refresh, incremental, or validation. Source: ETL.';
 
 -- ============================================================================
 -- COMPUTED VIEWS FOR MULTI-SOURCE AGGREGATION
@@ -380,7 +440,7 @@ CREATE OR REPLACE VIEW publisher_analytics AS
 SELECT
   p.publisher_id,
   p.publisher_name,
-  p.parent_publisher_id,
+  p.parent_id,
   COUNT(DISTINCT b.book_id) as books_read,
   COUNT(DISTINCT rs.session_id) as total_sessions,
   SUM(rs.duration_minutes) FILTER (WHERE rs.media_type = 'ebook') as total_ebook_minutes,
@@ -390,7 +450,7 @@ SELECT
 FROM publishers p
 LEFT JOIN books b ON p.publisher_id = b.publisher_id
 LEFT JOIN reading_sessions rs ON b.book_id = rs.book_id
-GROUP BY p.publisher_id, p.publisher_name, p.parent_publisher_id;
+GROUP BY p.publisher_id, p.publisher_name, p.parent_id;
 
 COMMENT ON VIEW publisher_analytics IS 'Publisher-level analytics. Sources: books, reading_sessions, publishers.';
 
@@ -426,9 +486,43 @@ SELECT
   MAX(end_time) as instance_end,
   STRING_AGG(DISTINCT media_type, ', ' ORDER BY media_type) as media_types_combined,
   SUM(duration_minutes) as total_duration_all_formats,
-  MAX(end_time) - MIN(start_time) as overlap_aware_duration
+  EXTRACT(EPOCH FROM (MAX(end_time) - MIN(start_time)))/60 as overlap_aware_duration_minutes
 FROM reading_sessions
 WHERE is_parallel_read = true
 GROUP BY read_instance_id, book_id;
 
 COMMENT ON VIEW tandem_reading_sessions IS 'Tandem reading session analysis. Shows overlapping reads with duration calculations. Sources: reading_sessions.';
+
+-- ============================================================================
+-- TRIGGERS FOR AUTOMATIC TIMESTAMP UPDATES
+-- ============================================================================
+
+-- Function to update modified timestamp
+CREATE OR REPLACE FUNCTION update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply trigger to all tables with updated_at
+CREATE TRIGGER update_authors_updated_at
+BEFORE UPDATE ON authors
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+CREATE TRIGGER update_publishers_updated_at
+BEFORE UPDATE ON publishers
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+CREATE TRIGGER update_books_updated_at
+BEFORE UPDATE ON books
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+CREATE TRIGGER update_sync_status_updated_at
+BEFORE UPDATE ON sync_status
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();

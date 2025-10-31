@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>Build ETL pipeline for statistics extraction</title>
+    <storyKey>3-2-build-etl-pipeline-for-statistics-extraction</storyKey>
+    <status>drafted</status>
+    <generatedAt>2025-10-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-2-build-etl-pipeline-for-statistics-extraction.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>reading session data automatically extracted from statistics.sqlite3 and loaded into Neon.tech</iWant>
+    <soThat>I can query unified analytics across all reading sources</soThat>
+    <tasks>
+      <task id="1">
+        <title>Analyze statistics.sqlite3 schema (AC 1-2)</title>
+        <subtasks>
+          <subtask>Load sample statistics.sqlite3 from Story 3.1 backup on RPi</subtask>
+          <subtask>Use sqlite3 CLI to inspect schema: `.tables`, `.schema` commands</subtask>
+          <subtask>Document table structure (reading_sessions, book references, timestamps)</subtask>
+          <subtask>Identify all relevant fields for reading analytics</subtask>
+          <subtask>Note any schema version differences or variations</subtask>
+        </subtasks>
+      </task>
+      <task id="2">
+        <title>Develop data transformation logic (AC 3-4)</title>
+        <subtasks>
+          <subtask>Create Python script structure: `/home/pi/etl/extract_koreader_stats.py`</subtask>
+          <subtask>Implement SQLite3 query to extract: book_title, start_time, end_time, pages_read, duration_minutes</subtask>
+          <subtask>Transform KOReader schema fields to Neon.tech PostgreSQL schema</subtask>
+          <subtask>Implement duplicate detection: hash comparison or timestamp-based uniqueness check</subtask>
+          <subtask>Handle data types and timezone conversions</subtask>
+        </subtasks>
+      </task>
+      <task id="3">
+        <title>Implement Neon.tech database connectivity (AC 5)</title>
+        <subtasks>
+          <subtask>Verify Neon.tech PostgreSQL database exists and is accessible from RPi</subtask>
+          <subtask>Validate schema exists: `books` and `reading_sessions` tables (from Story 1.1)</subtask>
+          <subtask>Test connection from RPi: `psql -h &lt;neon-host&gt; -U &lt;user&gt; -d &lt;database&gt;`</subtask>
+          <subtask>Store database credentials securely (environment variables, not hardcoded)</subtask>
+          <subtask>Implement Python psycopg2 connection in ETL script</subtask>
+        </subtasks>
+      </task>
+      <task id="4">
+        <title>Implement ETL execution and validation (AC 6)</title>
+        <subtasks>
+          <subtask>Complete Python ETL script with error handling</subtask>
+          <subtask>Implement transaction management: begin → insert/update → commit/rollback</subtask>
+          <subtask>Add dry-run mode (show what would be loaded without writing)</subtask>
+          <subtask>Test ETL script manually: `python3 /home/pi/etl/extract_koreader_stats.py`</subtask>
+          <subtask>Verify data appears in Neon.tech: select count(*) from reading_sessions</subtask>
+          <subtask>Validate sample data accuracy (spot-check 5-10 records against source)</subtask>
+        </subtasks>
+      </task>
+      <task id="5">
+        <title>Schedule nightly ETL execution (AC 7)</title>
+        <subtasks>
+          <subtask>Create systemd service file: `/etc/systemd/system/bookhelper-etl.service`</subtask>
+          <subtask>Create systemd timer file: `/etc/systemd/system/bookhelper-etl.timer` (2 AM daily)</subtask>
+          <subtask>Or configure cron job: `crontab -e` → `0 2 * * * /home/pi/etl/extract_koreader_stats.py`</subtask>
+          <subtask>Test timer/cron: verify execution at scheduled time</subtask>
+          <subtask>Verify logs appear in `/var/log/etl.log`</subtask>
+        </subtasks>
+      </task>
+      <task id="6">
+        <title>Implement logging and monitoring (AC 8)</title>
+        <subtasks>
+          <subtask>Add structured logging to ETL script (start time, connection status, record counts)</subtask>
+          <subtask>Log file location: `/var/log/etl.log` (rotatable, max 10 MB, keep 7 days)</subtask>
+          <subtask>Log format: timestamp + severity (INFO/WARNING/ERROR) + message</subtask>
+          <subtask>Configure log rotation: `/etc/logrotate.d/bookhelper-etl` (daily, 7 days retention)</subtask>
+        </subtasks>
+      </task>
+      <task id="7">
+        <title>Documentation and runbook (AC 8)</title>
+        <subtasks>
+          <subtask>Create `docs/ETL-PIPELINE-SETUP.md` with configuration and troubleshooting</subtask>
+          <subtask>Include data flow diagram: statistics.sqlite3 → Python ETL → Neon.tech PostgreSQL</subtask>
+          <subtask>Include schema mapping: KOReader fields → Neon.tech tables</subtask>
+          <subtask>Include example SQL queries to validate loaded data</subtask>
+          <subtask>Include dry-run example showing preview without writes</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Python ETL script created to parse statistics.sqlite3 structure</criterion>
+    <criterion id="2">Script extracts reading sessions: book title, start time, end time, pages read, duration</criterion>
+    <criterion id="3">Script transforms data to match Neon.tech schema (books + reading_sessions tables)</criterion>
+    <criterion id="4">Script handles duplicate detection (don't re-insert same sessions)</criterion>
+    <criterion id="5">Script connects to Neon.tech and inserts/updates data successfully</criterion>
+    <criterion id="6">Test: Run ETL manually, verify data appears correctly in Neon.tech database</criterion>
+    <criterion id="7">Cron job or systemd timer configured for nightly ETL execution (e.g., 2 AM)</criterion>
+    <criterion id="8">ETL logs created showing success/failure and record counts</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.5. Analytics Layer (MVP)</section>
+        <snippet>ETL Pipeline: A nightly Python script will run on the Raspberry Pi. It will read the `statistics.sqlite3` backup, transform the data, and load it into the **Neon.tech PostgreSQL** database. Data Warehouse: The Neon.tech database will store structured data on reading sessions, pages read, reading velocity, etc.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper - Epic Breakdown</title>
+        <section>Epic 3 § Story 3.2: Build ETL pipeline for statistics extraction</section>
+        <snippet>As a developer, I want reading session data automatically extracted from statistics.sqlite3 and loaded into Neon.tech, So that I can query unified analytics across all reading sources. Acceptance Criteria: Script creates ETL pipeline; transforms to schema; handles duplicates; connects to Neon.tech; test runs verify accuracy; cron/timer configured for nightly execution; logs created.</snippet>
+      </doc>
+      <doc>
+        <path>docs/STATISTICS-BACKUP-SETUP.md</path>
+        <title>Statistics Backup Configuration Guide</title>
+        <section>Complete guide for Syncthing statistics backup from Boox to RPi</section>
+        <snippet>Statistics.sqlite3 syncs within &lt;1 minute of reading session end. File versioning enabled on RPi maintains 30-day backup history with Staggered retention strategy. One-way sync ensures RPi never writes back to Boox (corruption prevention).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>BookHelper Product Requirements Document</title>
+        <section>Functional Requirements § FR013</section>
+        <snippet>System shall maintain unified database (Neon.tech PostgreSQL) consolidating ebook and audiobook reading data via nightly ETL pipeline with automated conflict resolution for multi-device updates.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <codeArtifact>
+        <path>resources/scripts/monitor-resources-1.2.py</path>
+        <kind>monitoring script</kind>
+        <symbol>get_container_stats, parse_memory_to_mb, detect_operation, main</symbol>
+        <lines>1-183</lines>
+        <reason>Example Python script pattern for subprocess calls, CSV output formatting, and structured error handling. Can serve as template for ETL logging and statistics collection approach.</reason>
+      </codeArtifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="python">
+        <package name="python3" version="3.9+">
+          <installed>true</installed>
+          <reason>Primary implementation language for ETL pipeline</reason>
+        </package>
+        <package name="sqlite3" version="builtin">
+          <installed>true</installed>
+          <reason>Parse and extract data from statistics.sqlite3 backup file</reason>
+        </package>
+        <package name="psycopg2" version="latest">
+          <installed>false</installed>
+          <reason>PostgreSQL database adapter for Python; required to connect to Neon.tech and execute INSERT/UPDATE queries</reason>
+        </package>
+      </ecosystem>
+      <ecosystem name="system">
+        <package name="postgres-client" version="latest">
+          <installed>false</installed>
+          <reason>Optional: CLI tools (psql) for testing database connectivity and manual validation</reason>
+        </package>
+        <package name="systemd" version="system">
+          <installed>true</installed>
+          <reason>Schedule nightly ETL execution via systemd timer (preferred over cron for better logging)</reason>
+        </package>
+        <package name="cron" version="system">
+          <installed>true</installed>
+          <reason>Alternative scheduler if systemd timer not preferred</reason>
+        </package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="arch-1">
+      <title>One-way statistics backup (non-negotiable)</title>
+      <description>Statistics.sqlite3 must never be written to by the server. ETL pipeline reads from read-only backup on RPi. This prevents corruption of the source database on Boox device. [Source: docs/architecture.md § 4. Critical Warnings - SQLite Corruption Risk]</description>
+    </constraint>
+    <constraint id="arch-2">
+      <title>ETL pipeline scheduled nightly, not on-demand</title>
+      <description>ETL must run on a fixed schedule (2 AM default) to avoid excessive database load. Should not run more frequently than once per 24 hours unless explicitly triggered manually.</description>
+    </constraint>
+    <constraint id="arch-3">
+      <title>Database credentials must be environment variables</title>
+      <description>Never hardcode Neon.tech credentials in script. Use environment variables: NEON_HOST, NEON_USER, NEON_PASSWORD, NEON_DATABASE. Store in `.env` file or systemd service environment.</description>
+    </constraint>
+    <constraint id="arch-4">
+      <title>Duplicate detection required</title>
+      <description>ETL must implement duplicate detection to prevent re-inserting the same reading sessions on repeated runs. Use PostgreSQL ON CONFLICT clause or hash-based comparison before insert.</description>
+    </constraint>
+    <constraint id="arch-5">
+      <title>Structured logging mandatory</title>
+      <description>All ETL runs must log: start time, connection status, records extracted, records inserted, duplicates skipped, errors, and completion time. Logs must be rotatable and retained for 7 days minimum.</description>
+    </constraint>
+    <constraint id="arch-6">
+      <title>Schema from Story 1.1 is authoritative</title>
+      <description>ETL script must conform to the Neon.tech schema created in Story 1.1 (books and reading_sessions tables). Schema changes must be coordinated with Story 1.1/1.4 planning.</description>
+    </constraint>
+    <constraint id="perf-1">
+      <title>ETL runtime must be &lt;30 seconds</title>
+      <description>For typical backup sizes (&lt;1 GB), ETL should complete in under 30 seconds to avoid excessive load on RPi 4 2GB system.</description>
+    </constraint>
+    <constraint id="perf-2">
+      <title>Memory usage must be bounded</title>
+      <description>ETL script must not load entire statistics.sqlite3 into memory. Use streaming or batched inserts to keep memory footprint &lt;200 MB during execution.</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface id="source-db">
+      <name>Statistics Database (KOReader)</name>
+      <kind>SQLite3 database file</kind>
+      <path>/home/alexhouse/backups/koreader-statistics/statistics.sqlite3</path>
+      <description>Read-only backup of KOReader statistics from Boox. Contains reading_sessions, book references, timestamps. Never write to this file from ETL.</description>
+    </interface>
+    <interface id="target-db">
+      <name>Neon.tech PostgreSQL Analytics Database</name>
+      <kind>PostgreSQL connection</kind>
+      <signature>psycopg2.connect(host=NEON_HOST, user=NEON_USER, password=NEON_PASSWORD, database=NEON_DATABASE)</signature>
+      <path>Neon.tech cloud (via TCP port 5432)</path>
+      <description>Target database for ETL pipeline. Must have books and reading_sessions tables created (from Story 1.1/1.4).</description>
+    </interface>
+    <interface id="shell-execution">
+      <name>Systemd Timer or Cron Scheduler</name>
+      <kind>System scheduler</kind>
+      <signature>/etc/systemd/system/bookhelper-etl.timer or crontab entry: `0 2 * * * /home/pi/etl/extract_koreader_stats.py`</signature>
+      <path>System-level scheduling</path>
+      <description>Execute ETL script nightly at 2 AM. Either systemd timer (preferred) or cron job can be used.</description>
+    </interface>
+    <interface id="env-config">
+      <name>Environment Variables for Configuration</name>
+      <kind>Shell environment</kind>
+      <signature>export NEON_HOST=... NEON_USER=... NEON_PASSWORD=... NEON_DATABASE=...</signature>
+      <path>Systemd service environment or .env file</path>
+      <description>Database connection credentials and configuration. Must be set before ETL script execution.</description>
+    </interface>
+    <interface id="logging">
+      <name>Structured Logging Output</name>
+      <kind>File-based logging</kind>
+      <signature>logger = logging.getLogger(__name__); handler = logging.FileHandler('/var/log/etl.log')</signature>
+      <path>/var/log/etl.log</path>
+      <description>Log all ETL operations with timestamps, severity levels (INFO/WARNING/ERROR), and structured data. Rotate daily, keep 7 days.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing for this story follows the BookHelper testing strategy (see docs/testing-strategy.md if present). Primary focus: integration testing of the ETL pipeline with real Neon.tech database and statistics.sqlite3 backup. Unit tests should validate data transformation logic and duplicate detection. All tests must verify accuracy of extracted data (spot-check at least 5-10 records against source). Automated testing of cron/systemd scheduler execution is optional but recommended. Testing must be non-destructive (use --dry-run flag) until final validation run. Performance testing: verify ETL completes in &lt;30 seconds on RPi 4 2GB system.
+    </standards>
+    <locations>
+      <location>/Users/alhouse2/Documents/GitHub/BookHelper/tests/</location>
+      <location>tests/test_*_story_*.py</location>
+      <globPattern>tests/test_3_2_*.py (once created)</globPattern>
+    </locations>
+    <ideas>
+      <idea acId="1">Test: Parse sample statistics.sqlite3 and validate schema inspection (Python sqlite3 CLI commands)</idea>
+      <idea acId="2">Test: Extract reading sessions from sample database; verify fields match expected: book_title, start_time, end_time, pages_read, duration</idea>
+      <idea acId="3">Test: Transform KOReader fields to Neon.tech schema; validate data types (timestamps, integers, strings)</idea>
+      <idea acId="4">Test: Duplicate detection: run ETL twice on same data, verify second run inserts 0 new records</idea>
+      <idea acId="5">Test: Database connectivity: verify psycopg2 connects to Neon.tech; test INSERT and SELECT queries</idea>
+      <idea acId="6">Test: Manual ETL execution; run script on sample data; query Neon.tech to verify records appear; spot-check 5-10 records for accuracy</idea>
+      <idea acId="7">Test: Systemd timer/cron execution; verify script runs at scheduled time; check logs for success/failure messages</idea>
+      <idea acId="8">Test: Logging validation; run ETL and inspect /var/log/etl.log; verify log entries include start time, connection status, record counts, errors if any</idea>
+    </ideas>
+  </tests>
+
+</story-context>

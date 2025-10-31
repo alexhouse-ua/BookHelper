@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>6</storyId>
+    <title>Document Calibre CLI fallback procedures</title>
+    <storyKey>1-6-document-calibre-cli-fallback-procedures</storyKey>
+    <status>drafted</status>
+    <generatedAt>2025-10-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-6-document-calibre-cli-fallback-procedures.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>documented Calibre CLI procedures for manual library management</iWant>
+    <soThat>I have fallback procedures if CWA auto-ingest fails and can troubleshoot the library database</soThat>
+    <tasks>
+      <task id="1">Document calibredb basic commands</task>
+      <task id="2">Document metadata enrichment via CLI</task>
+      <task id="3">Create batch import script</task>
+      <task id="4">Document CWA rescan procedure</task>
+      <task id="5">Create troubleshooting guide</task>
+      <task id="6">Document metadata.db backup and recovery</task>
+      <task id="7">Provide command examples and reference</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Documentation created showing how to add books via calibredb CLI</criterion>
+    <criterion id="2">Metadata fetch command documented (calibredb fetch-ebook-metadata)</criterion>
+    <criterion id="3">Batch import script provided for processing multiple files via CLI</criterion>
+    <criterion id="4">Instructions for triggering CWA rescan after manual Calibre CLI additions</criterion>
+    <criterion id="5">Troubleshooting guide for common CWA ingest failure modes</criterion>
+    <criterion id="6">metadata.db backup/restore procedure documented</criterion>
+    <criterion id="7">Examples provided for each command with expected output</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Core Library Server & Database Foundation</title>
+        <section>Objectives and Scope § Fallback Procedures</section>
+        <snippet>Document Calibre CLI commands for manual ingestion if CWA auto-ingest fails. Provides operational resilience through low-tech, proven alternative for library management.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.3. Library Management Layer</section>
+        <snippet>Ingestion: New ebooks automatically ingested via CWA. Fallback: Calibre CLI for manual management if auto-ingest fails. Supports operational resilience principle.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper - Epic Breakdown</title>
+        <section>Epic 1 § Story 1.6</section>
+        <snippet>Document Calibre CLI fallback procedures. calibredb commands, batch import script, troubleshooting guide, metadata.db recovery. Operational resilience if CWA auto-ingest fails.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements § FR001, FR005</section>
+        <snippet>System shall parse and import 100% of ebook data with fallback procedures. System shall automatically ingest ebooks through monitored folder with fallback to manual CLI.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>scripts/batch-import-calibre.sh</path>
+        <kind>shell script</kind>
+        <reason>Batch import script for processing multiple EPUB/PDF files via calibredb CLI</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="tools">
+        <package name="calibredb" version="5.0+">
+          <installed>true</installed>
+          <reason>Calibre command-line tool for library database manipulation; comes with CWA or standalone Calibre</reason>
+        </package>
+        <package name="bash" version="4+">
+          <installed>true</installed>
+          <reason>Shell script language for batch import script and CLI examples</reason>
+        </package>
+      </ecosystem>
+      <ecosystem name="api">
+        <package name="Google Books API" version="free">
+          <installed>false</installed>
+          <reason>Metadata enrichment source for calibredb fetch-ebook-metadata command</reason>
+        </package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="arch-1">
+      <title>Calibre CLI is fallback only, not primary path</title>
+      <description>CWA auto-ingest is preferred; calibredb CLI is manual fallback if auto-ingest fails or is unavailable. Documented procedures reduce MTTR (Mean Time To Recovery) if ingest system fails. [Source: docs/architecture.md § 3.3]</description>
+    </constraint>
+    <constraint id="arch-2">
+      <title>Stability Over Features principle</title>
+      <description>Calibre CLI represents proven, well-maintained tool. Documentation emphasizes low-tech, reliable alternative that doesn't depend on CWA web service. Enables recovery from various failure modes. [Source: docs/architecture.md § 1]</description>
+    </constraint>
+    <constraint id="data-1">
+      <title>metadata.db is source of truth for Calibre library</title>
+      <description>All calibredb operations modify this SQLite database. Backup required before major operations. Corruption requires recovery from backup. [Source: docs/tech-spec-epic-1.md]</description>
+    </constraint>
+    <constraint id="doc-1">
+      <title>Documentation must include examples with expected output</title>
+      <description>Each command documented with syntax, parameters, example invocation, and expected output. Enables copy-paste usage without extensive trial-and-error.</description>
+    </constraint>
+    <constraint id="ops-1">
+      <title>Troubleshooting guide must cover common failure modes</title>
+      <description>Document at least 5 common failures: ingest trigger failure, metadata enrichment failure, database lock errors, corrupted files, permission issues. For each: symptoms, root cause, resolution, prevention tips.</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface id="calibredb-cli">
+      <name>calibredb Command-Line Tool</name>
+      <kind>System CLI</kind>
+      <signature>calibredb add <file.epub> --library-path=<path></signature>
+      <path>Calibre installation (/usr/bin/calibredb or similar)</path>
+      <description>Primary interface for manual library management. Commands: add books, list library, remove books, fetch metadata, set custom metadata. Operates directly on metadata.db file.</description>
+    </interface>
+    <interface id="metadata-db">
+      <name>Calibre metadata.db Database</name>
+      <kind>SQLite Database File</kind>
+      <signature>~/.local/share/Calibre/metadata.db</signature>
+      <path>Local filesystem on RPi</path>
+      <description>Source database for library. All calibredb commands read/write this file. Requires backup before major operations. Can be restored from backup if corruption occurs.</description>
+    </interface>
+    <interface id="cwa-rescan">
+      <name>CWA Library Rescan API</name>
+      <kind>REST API Endpoint</kind>
+      <signature>POST http://raspberrypi.local:8083/api/rescan</signature>
+      <path>CWA web service</path>
+      <description>After manual calibredb additions, CWA must rescan to detect new books in its web UI. Can be triggered via REST API, web UI admin panel, or CLI if available.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing focuses on documentation accuracy and completeness. Validation: follow each documented command step-by-step and verify output matches examples. Manual testing: execute batch import script on sample ebooks, verify CWA detects new books after rescan. Troubleshooting testing: simulate failure modes (locked database, corrupted file, permission error) and verify documented solutions work.</standards>
+    <locations>
+      <location>tests/integration/test_calibre_cli_*.py (integration tests for calibredb commands)</location>
+      <location>docs/CALIBRE-CLI-FALLBACK.md (main documentation, to be created)</location>
+      <location>docs/CALIBRE-CLI-REFERENCE.md (quick reference, to be created)</location>
+    </locations>
+    <ideas>
+      <idea acId="1">Test: Document and execute 'calibredb add' command; verify book appears in library</idea>
+      <idea acId="2">Test: Document and execute 'calibredb fetch-ebook-metadata' command; verify metadata enriched from Google Books API</idea>
+      <idea acId="3">Test: Create batch import script; test on directory with 5-10 EPUB files; verify all imported without errors</idea>
+      <idea acId="4">Test: After manual calibredb additions, trigger CWA rescan via API; verify new books appear in CWA web UI</idea>
+      <idea acId="5">Test: Troubleshooting guide: simulate database lock error, follow recovery steps, verify resolution</idea>
+      <idea acId="6">Test: Troubleshooting guide: simulate corrupted metadata.db, restore from backup, verify library recovers</idea>
+      <idea acId="7">Test: Document metadata.db backup command; verify backup file created and can be restored</idea>
+    </ideas>
+  </tests>
+
+</story-context>

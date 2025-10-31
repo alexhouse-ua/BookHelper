@@ -35,39 +35,33 @@ This is the foundation epic - no dependencies on other work. All subsequent epic
 
 ---
 
-**Story 1.1: Deploy CWA + Unified Database Foundation**
+**Story 1.1: Deploy Calibre-Web-Automated on Raspberry Pi 4**
 
 As a developer,
-I want to deploy Calibre-Web-Automated on Raspberry Pi 4 with Neon.tech PostgreSQL schema and encrypted backup,
-So that I have operational library infrastructure with analytics data foundation and disaster recovery.
+I want to deploy Calibre-Web-Automated in Docker Compose on Raspberry Pi 4 with persistent library database,
+So that I have operational library infrastructure ready for auto-ingestion and cross-device sync.
+
+**Status:** DONE
 
 **Acceptance Criteria:**
 1. Docker Compose stack configured for CWA v3.1.0+ on Raspberry Pi 4 2GB
 2. CWA web UI accessible on local network (http://raspberrypi.local:8083/)
-3. Basic Calibre library initialized with 20+ books test
+3. Calibre library initialized with 20+ books test
 4. Idle memory usage <600MB for CWA container
 5. CWA container auto-restarts on reboot (Docker restart policy configured)
-6. Neon.tech free-tier PostgreSQL created and accessible
-7. Books dimension table created with: book_id, title, author, isbn, source, media_type
-8. Reading_sessions fact table created with: session_id, book_id, start_time, end_time, pages_read, media_type, device
-9. Database connection tested from development environment
-10. Schema supports ebook + audiobook data (media_type differentiates)
-11. Koofr WebDAV storage configured as backup destination
-12. rclone installed with encrypted remote (AES-256) pointing to Koofr
-13. Initial backup completed successfully; files verified encrypted in Koofr
-14. Nightly backup scheduled via cron/systemd timer
-15. Backup logs created showing success/failure status
-16. Schema documentation created (ERD + field definitions)
+6. metadata.db backed up and verified
 
 **Prerequisites:** Raspberry Pi 4 2GB with Docker installed
 
 ---
 
-**Story 1.2: Auto-Ingestion + Metadata Enrichment**
+**Story 1.2: Configure hardware performance validation checkpoint**
 
-As a reader,
-I want to drop ebook files into a folder and have them automatically added with complete metadata, with validated performance under realistic usage,
-So that library ingestion is zero-touch and hardware performance is confirmed for production.
+As a developer,
+I want to validate CWA performance under realistic ebook ingestion workload,
+So that I can confirm the Raspberry Pi 4 2GB is adequate for sustained library management.
+
+**Status:** IN-PROGRESS
 
 **Acceptance Criteria:**
 1. CWA auto-ingest configured to monitor designated ingest folder
@@ -77,45 +71,127 @@ So that library ingestion is zero-touch and hardware performance is confirmed fo
 5. Imported book has enriched metadata: title, author, cover art, description, page count
 6. EPUB format optimization (epub-fixer) enabled in CWA settings
 7. Hardcover API authentication configured and validated
-8. Realistic workload validation: Monitor CWA during 1-week incremental ingestion (1-2 books/drop, typical usage)
+8. Realistic workload validation: Monitor CWA during 1-week incremental ingestion (1-2 books/drop)
 9. Memory remains <600MB idle, <1GB during metadata fetch
 10. Metadata enrichment maintains <30 seconds per book average
 11. Library scan (~20-50 books) completes in <2 minutes
 12. No crashes, database corruption, or OOM errors observed
-13. Documentation created with observed resource usage patterns
+13. Monitoring documented with observed resource usage patterns
 14. Go/no-go decision documented: Continue RPi 4 OR note constraints for future planning
 
-**Prerequisites:** Story 1.1 complete (CWA deployed, schema initialized)
+**Prerequisites:** Story 1.1 complete (CWA deployed)
 
 ---
 
-**Story 1.3: Fallback Procedures & Operational Resilience**
+**Story 1.3: Configure auto-ingestion workflow with Hardcover metadata**
+
+As a reader,
+I want to drop ebook files into a folder and have them automatically added with complete Hardcover metadata,
+So that library ingestion is zero-touch with proper enrichment.
+
+**Status:** BLOCKED-WAITING (Waiting on Story 1.2 validation, due 2025-11-05)
+
+**Acceptance Criteria:**
+1. CWA auto-ingest configured to monitor designated ingest folder
+2. Hardcover.app metadata provider integrated and authenticated
+3. Google Books fallback provider configured
+4. Auto-import within 30 seconds of file drop
+5. Metadata enrichment includes: title, author, cover art, description, page count
+6. EPUB format optimization enabled
+7. No data loss or corruption during ingestion
+8. Fallback to manual ingestion if auto-ingest fails
+
+**Prerequisites:** Story 1.2 complete (performance validation complete)
+
+---
+
+**Story 1.4: Design and implement unified database schema**
 
 As a developer,
-I want documented Calibre CLI fallback procedures and monitoring/alerting for backup health,
-So that I have runbooks and observability if CWA auto-ingest fails or backups become stale.
+I want a unified PostgreSQL schema designed and initialized on Neon.tech,
+So that reading session data from ebooks and audiobooks can be aggregated and queried for analytics.
+
+**Status:** BACKLOG
+
+**Acceptance Criteria:**
+1. Neon.tech free-tier PostgreSQL created and accessible
+2. Books dimension table created with: book_id, title, author, isbn, asin, source, media_type, cover_url, page_count, duration_minutes, published_date, created_at
+3. Reading_sessions fact table created with: session_id, book_id, start_time, end_time, pages_read, duration_minutes, device, media_type, device_stats_source, created_at
+4. Schema supports ebook + audiobook data via media_type field
+5. Indexes created on frequently queried fields (book_id, start_time, device)
+6. Database connection tested from development environment
+7. Schema documentation created (ERD + field definitions)
+8. Schema version control documented in tech-spec
+
+**Prerequisites:** None (independent; enables Story 3.2)
+
+---
+
+**Story 1.5: Implement library backup to separate storage**
+
+As a reader,
+I want my ebook library and CWA configuration automatically backed up to cloud storage each night,
+So that I have disaster recovery protection if the Raspberry Pi fails.
+
+**Status:** BACKLOG
+
+**Acceptance Criteria:**
+1. rclone installed and configured on Raspberry Pi
+2. Koofr WebDAV account configured as backup destination
+3. AES-256 encryption configured for backup
+4. Backup scope: entire ebook library folder + CWA configuration files
+5. Nightly backup scheduled via cron or systemd timer (2 AM)
+6. Initial backup completed successfully; files verified encrypted in Koofr
+7. Backup logs created showing success/failure status
+8. Restore procedure documented with recovery steps
+
+**Prerequisites:** Story 1.1 complete (CWA operational)
+
+---
+
+**Story 1.6: Document Calibre CLI fallback procedures**
+
+As a developer,
+I want documented Calibre CLI procedures for manual library management,
+So that I have fallback procedures if CWA auto-ingest fails.
+
+**Status:** BACKLOG
 
 **Acceptance Criteria:**
 1. Documentation created showing how to add books via calibredb CLI
 2. Metadata fetch command documented (calibredb fetch-ebook-metadata)
-3. Batch import script provided for processing multiple files via CLI
-4. Instructions for triggering CWA rescan after manual Calibre CLI additions
+3. Batch import script provided for processing multiple files
+4. Instructions for triggering CWA rescan after manual additions
 5. Troubleshooting guide for common CWA ingest failure modes
 6. metadata.db backup/restore procedure documented
-7. Monitoring script created to check: backup age, library backup age, Syncthing sync status
-8. Alert mechanism configured (email, log file, or terminal notification)
-9. Monitoring script runs on schedule (e.g., hourly via cron)
-10. Alert logs maintained with timestamps and failure descriptions
-11. Documentation created for troubleshooting common failure modes
+7. Examples provided for each command with expected output
 
 **Prerequisites:** Story 1.2 complete (auto-ingest operational)
 
 ---
 
 **Epic 1 Summary:**
-- **Total Stories:** 3 (consolidated from 6)
-- **Story Dependencies:** 1.1 → 1.2 sequential; 1.3 depends on 1.2
-- **Completion Criteria:** CWA operational with realistic performance validation, auto-ingestion working with metadata enrichment and fallback, unified database schema ready for analytics, backup operational and monitored
+- **Total Stories:** 6 (decomposed during sprint planning)
+- **Story Dependencies & Sequencing:**
+  - 1.1 (Deploy CWA) → 1.2 (Validate Performance) → 1.3 (Auto-ingest)
+  - 1.4 (Schema) — independent; enables Epic 3 analytics
+  - 1.5 (Backup) — parallel after 1.1
+  - 1.6 (Fallback) — after 1.2
+- **Status Overview:** 1.1 DONE, 1.2 IN-PROGRESS, 1.3 BLOCKED-WAITING, 1.4-1.6 BACKLOG
+- **Completion Criteria:** CWA deployed and performance-validated, auto-ingestion configured with metadata enrichment, unified database schema designed, backup infrastructure operational, CLI fallback procedures documented
+
+---
+
+**Story Mapping (Epic Planning → Sprint Execution):**
+
+| Epic 1 Planning Name | Sprint Story Key | Current Status |
+|---|---|---|
+| Deploy CWA + Unified Database Foundation | 1-1-deploy-calibre-web-automated-on-raspberry-pi-4 | DONE |
+| (Infrastructure Core) | 1-4-design-and-implement-unified-database-schema | BACKLOG |
+| (Backup Layer) | 1-5-implement-library-backup-to-separate-storage | BACKLOG |
+| Auto-Ingestion + Metadata Enrichment | 1-2-configure-hardware-performance-validation-checkpoint | IN-PROGRESS |
+| | 1-3-configure-auto-ingestion-workflow-with-hardcover-metadata | BLOCKED-WAITING |
+| Fallback Procedures & Operational Resilience | 1-6-document-calibre-cli-fallback-procedures | BACKLOG |
 
 ---
 

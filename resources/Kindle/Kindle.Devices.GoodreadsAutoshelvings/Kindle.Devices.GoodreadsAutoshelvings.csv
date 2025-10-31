@@ -1,0 +1,448 @@
+﻿Created Timestamp,Preferred Marketplace,Device Family,ASIN,Event Type,Context,Action Id,Widget Layout,Autoshelving Tutorial Shown,Kindle ASIN,Autoshelving Hides By Default,Is Goodreads User,Widget Invoked By,Device Is Offline,Shelf Status
+2024-11-16T20:30:50Z,www.amazon.com,iOS,B0CDTXRNWY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CDTXRNWY,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-26T20:26:22Z,www.amazon.com,iOS,B071VBHT9W,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B071VBHT9W,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-08T03:26:54Z,www.amazon.com,iOS,B07G4H3665,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07G4H3665,Yes,Yes,InvokedByBookOpen,No,read
+2024-03-12T06:05:30Z,www.amazon.com,iOS,B09P5GT746,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09P5GT746,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-08T04:10:16Z,www.amazon.com,iOS,B07N1Y4SNJ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07N1Y4SNJ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-03T07:24:26Z,www.amazon.com,iOS,B0CB1RMZRC,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CB1RMZRC,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-30T04:52:49Z,www.amazon.com,iOS,B0CWJ2GTF3,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CWJ2GTF3,Yes,Yes,InvokedByBookOpen,No,read
+2024-12-31T02:17:35Z,www.amazon.com,iOS,B00TU3BTUI,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00TU3BTUI,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-20T21:09:48Z,www.amazon.com,iOS,B0DJM93XSS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJM93XSS,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-18T21:27:44Z,www.amazon.com,iOS,B00846REIS,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00846REIS,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-20T02:05:42Z,www.amazon.com,iOS,B0DJM93XSS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJM93XSS,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-05T03:59:46Z,www.amazon.com,iOS,B0DJT283QQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJT283QQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-06T13:42:43Z,www.amazon.com,iOS,B0CQ371ZTP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CQ371ZTP,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-09-28T12:22:09Z,www.amazon.com,iOS,B0BNQYVMCD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BNQYVMCD,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-26T17:10:52Z,www.amazon.com,iOS,B003IYI6TC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B003IYI6TC,Yes,Yes,Invoked By Book Menu,No,read
+2024-08-30T17:39:47Z,www.amazon.com,Mac,B0DDJXD72B,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DDJXD72B,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-16T00:06:06Z,www.amazon.com,iOS,B0CL5FT1GZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CL5FT1GZ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-20T21:00:23Z,www.amazon.com,iOS,B0D46PR72D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D46PR72D,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-02T18:54:55Z,www.amazon.com,iOS,B0CLFB86PL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CLFB86PL,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-22T10:13:45Z,www.amazon.com,iOS,B0BP7DM1VD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BP7DM1VD,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-12T02:06:11Z,www.amazon.com,iOS,B0CDWHN8FK,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CDWHN8FK,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-03T20:30:53Z,www.amazon.com,iOS,B0BKTXQPXR,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BKTXQPXR,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-21T02:36:43Z,www.amazon.com,iOS,B00NEQRNVG,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00NEQRNVG,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-22T00:40:25Z,www.amazon.com,iOS,B0CTCQ6MM4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CTCQ6MM4,Yes,Yes,InvokedByBookOpen,No,read
+2024-07-30T04:08:14Z,www.amazon.com,iOS,B09PNM8FFN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09PNM8FFN,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-02T05:01:23Z,www.amazon.com,iOS,B09X3DKLSZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09X3DKLSZ,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-20T23:09:05Z,,iOS,B0BYFW12CT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BYFW12CT,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-09T01:06:25Z,www.amazon.com,iOS,B0C1D5SZW4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C1D5SZW4,No,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-03T21:37:30Z,www.amazon.com,iOS,B08FZNYQJC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08FZNYQJC,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-16T08:52:05Z,www.amazon.com,iOS,B017S3J3X6,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B017S3J3X6,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-01T13:26:38Z,www.amazon.com,iOS,B09JT59YYX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09JT59YYX,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-05-18T15:07:33Z,www.amazon.com,iOS,B0DGCLB3X3,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DGCLB3X3,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-10T01:14:23Z,www.amazon.com,iOS,B0CZ9VJV5F,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CZ9VJV5F,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-04T23:24:31Z,www.amazon.com,iOS,B00WHGBTHI,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00WHGBTHI,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-17T17:24:08Z,www.amazon.com,iOS,B0CFD5NCP9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CFD5NCP9,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-05T01:34:53Z,www.amazon.com,iOS,B0CRPVLGRC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CRPVLGRC,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-23T04:22:05Z,www.amazon.com,iOS,B0CR1N7YGX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CR1N7YGX,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-09T20:49:21Z,www.amazon.com,iOS,B0D2PFVNXV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D2PFVNXV,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-31T21:31:52Z,www.amazon.com,iOS,B0CB4B21KB,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CB4B21KB,Yes,Yes,Invoked By Book Menu,No,read
+2025-08-18T18:03:24Z,www.amazon.com,iOS,B07DMZ5YR9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07DMZ5YR9,No,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-12T11:18:47Z,www.amazon.com,iOS,B0CKLQ12NB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKLQ12NB,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-16T04:04:17Z,www.amazon.com,iOS,B0C453T7BV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C453T7BV,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-03T00:50:02Z,www.amazon.com,iOS,B075CW598Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B075CW598Y,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-20T04:49:25Z,www.amazon.com,iOS,B0CKMFZN5Z,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKMFZN5Z,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-27T20:21:36Z,www.amazon.com,iOS,B00I43Z1J0,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00I43Z1J0,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-04-20T21:41:02Z,www.amazon.com,iOS,B01N9F5IOL,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01N9F5IOL,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2025-07-05T22:00:23Z,www.amazon.com,iOS,B0CS17PXNR,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CS17PXNR,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-12T02:02:05Z,www.amazon.com,iOS,B0BNQV7L3T,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BNQV7L3T,Yes,Yes,InvokedByBookOpen,No,read
+2025-02-09T22:35:32Z,www.amazon.com,iOS,B0BHV6ZHT1,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BHV6ZHT1,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-10T10:01:39Z,www.amazon.com,iOS,B081XD3QXJ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B081XD3QXJ,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-14T04:17:37Z,www.amazon.com,iOS,B0CMQ8X4LN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CMQ8X4LN,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-17T17:52:28Z,www.amazon.com,iOS,B0C85RV9VG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C85RV9VG,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-14T17:21:28Z,www.amazon.com,iOS,B0C7QYS91W,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0C7QYS91W,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-11T11:02:39Z,www.amazon.com,iOS,B09BTQ9HW6,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09BTQ9HW6,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-03T14:17:34Z,www.amazon.com,iOS,B0763NXSM7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0763NXSM7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-09T15:14:16Z,www.amazon.com,iOS,B0DY891B7R,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DY891B7R,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-22T11:25:20Z,www.amazon.com,iOS,B0CGJJTBKJ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CGJJTBKJ,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-23T10:42:30Z,www.amazon.com,iOS,B0DCTZPG8V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DCTZPG8V,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-05T18:12:19Z,www.amazon.com,iOS,B00WASWK7Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00WASWK7Q,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-07T10:13:35Z,www.amazon.com,iOS,B0BNFRLH91,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BNFRLH91,No,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-29T00:38:26Z,www.amazon.com,iOS,B0D1QKJLYT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D1QKJLYT,No,Yes,InvokedByBookOpen,No,currently-reading
+2024-04-09T18:40:14Z,www.amazon.com,iOS,B00H57X864,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00H57X864,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-18T11:02:29Z,www.amazon.com,iOS,B0BT9W3ZS2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BT9W3ZS2,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-05T12:20:15Z,www.amazon.com,iOS,B07NK59922,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07NK59922,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-14T02:37:37Z,www.amazon.com,iOS,B011LSLI9G,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B011LSLI9G,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-05T06:16:10Z,www.amazon.com,iOS,B074N6J64B,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B074N6J64B,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T07:27:37Z,www.amazon.com,iOS,B091SLLP6H,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B091SLLP6H,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-19T19:03:13Z,www.amazon.com,iOS,B00OZP5VRS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00OZP5VRS,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-17T04:05:54Z,www.amazon.com,iOS,B0CBHXCKPS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CBHXCKPS,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-19T22:28:37Z,www.amazon.com,iOS,B0DD7X5V3V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DD7X5V3V,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-07-25T21:36:45Z,www.amazon.com,iOS,B0B8YVRMW4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B8YVRMW4,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-07T12:02:42Z,www.amazon.com,iOS,B0BYWR9N4G,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BYWR9N4G,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-17T11:31:30Z,www.amazon.com,iOS,B0BJ7X6M16,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BJ7X6M16,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-23T15:15:10Z,www.amazon.com,iOS,B075818VDG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B075818VDG,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-08T05:54:19Z,www.amazon.com,iOS,B09VV2CR51,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09VV2CR51,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-05T06:18:44Z,www.amazon.com,iOS,B00TG1CZFC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00TG1CZFC,Yes,Yes,Invoked By Book Menu,No,read
+2024-07-08T21:11:59Z,www.amazon.com,iOS,B09C2PWWNP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09C2PWWNP,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-25T21:40:21Z,www.amazon.com,iOS,B0D888FZSD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D888FZSD,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-08T03:51:39Z,www.amazon.com,iOS,B0BNFRLH91,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BNFRLH91,No,Yes,Invoked By Book Menu,No,read
+2024-12-06T20:50:12Z,www.amazon.com,iOS,B07G6M9HDV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07G6M9HDV,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-18T14:55:44Z,www.amazon.com,iOS,B0FBMM3SCD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0FBMM3SCD,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-09-21T14:55:52Z,www.amazon.com,iOS,B0BP7DM1VD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BP7DM1VD,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-19T05:36:27Z,www.amazon.com,iOS,B008673ZAQ,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B008673ZAQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-12T14:16:15Z,www.amazon.com,iOS,B0CDWHN8FK,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CDWHN8FK,Yes,Yes,Invoked By Book Menu,No,read
+2024-05-10T03:00:14Z,www.amazon.com,iOS,B0CNWR8F16,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CNWR8F16,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-10T03:05:19Z,www.amazon.com,iOS,B0C1D5SZW4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C1D5SZW4,No,Yes,Invoked By Book Menu,No,read
+2025-01-08T22:53:12Z,www.amazon.com,iOS,B0872K48RW,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0872K48RW,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-22T12:07:16Z,www.amazon.com,iOS,B007N6JEII,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B007N6JEII,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-23T10:11:24Z,www.amazon.com,iOS,B01LOWN78Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B01LOWN78Y,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-17T00:45:43Z,www.amazon.com,iOS,B09PQFL2J7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09PQFL2J7,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-01T15:59:23Z,www.amazon.com,iOS,B0727NP66G,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0727NP66G,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-26T17:13:01Z,www.amazon.com,iOS,B003VPWY64,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B003VPWY64,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-15T23:46:09Z,www.amazon.com,iOS,B08W3RYS26,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08W3RYS26,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-11T19:00:36Z,www.amazon.com,iOS,B0BNQV7L3T,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BNQV7L3T,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-11T13:11:58Z,www.amazon.com,iOS,B0C6JG3XJB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C6JG3XJB,Yes,Yes,InvokedByBookOpen,No,read
+2024-12-01T01:37:51Z,www.amazon.com,iOS,B09NJG1KGK,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09NJG1KGK,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-25T08:30:20Z,www.amazon.com,iOS,B00V3MY186,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00V3MY186,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-25T05:09:41Z,www.amazon.com,iOS,B09HTD8KQD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09HTD8KQD,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-16T06:44:21Z,www.amazon.com,iOS,B09PQFL2J7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09PQFL2J7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-27T10:14:43Z,www.amazon.com,iOS,B0CR19MXKV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CR19MXKV,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-05-28T10:41:41Z,www.amazon.com,iOS,B0F1Y9XH1B,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0F1Y9XH1B,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-19T21:09:44Z,www.amazon.com,iOS,B0DWVCNRFT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DWVCNRFT,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-24T10:16:30Z,www.amazon.com,iOS,B0F45JL25S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0F45JL25S,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-17T20:19:18Z,www.amazon.com,iOS,B0757CRTLY,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0757CRTLY,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-07T15:56:34Z,www.amazon.com,iOS,B07G6M9HDV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07G6M9HDV,Yes,Yes,Invoked By Book Menu,No,read
+2024-05-03T01:58:29Z,www.amazon.com,iOS,B00HLU14CA,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00HLU14CA,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-12T02:14:07Z,www.amazon.com,iOS,B09BTQ9HW6,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09BTQ9HW6,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-23T00:10:18Z,www.amazon.com,iOS,B00L01GJBM,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00L01GJBM,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2025-06-07T23:52:37Z,www.amazon.com,iOS,B0C1LJS1XX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C1LJS1XX,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-08T19:14:26Z,www.amazon.com,iOS,B079JYG6D4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B079JYG6D4,Yes,Yes,Invoked By Book Menu,No,read
+2025-08-25T00:14:04Z,www.amazon.com,iOS,B004CLYLCG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B004CLYLCG,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-03T02:20:04Z,www.amazon.com,iOS,B07D7Q29LQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07D7Q29LQ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-03T03:54:20Z,www.amazon.com,iOS,B0BYKSTDNB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BYKSTDNB,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-14T17:57:56Z,www.amazon.com,iOS,B09QK389GG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09QK389GG,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-01T05:18:59Z,www.amazon.com,iOS,B0DZ3JM6XM,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DZ3JM6XM,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-11T00:01:38Z,www.amazon.com,iOS,B0C6JG3XJB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C6JG3XJB,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-14T18:42:41Z,www.amazon.com,iOS,B09Z9K12P2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09Z9K12P2,Yes,Yes,InvokedByBookOpen,No,read
+2024-04-04T13:47:12Z,www.amazon.com,iOS,B0BJJTTM8K,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BJJTTM8K,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-19T10:58:07Z,www.amazon.com,iOS,B0C3B5MXTS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C3B5MXTS,Yes,Yes,InvokedByBookOpen,No,read
+2025-06-16T00:06:13Z,www.amazon.com,iOS,B0BV1C2PJ8,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BV1C2PJ8,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-07T11:59:13Z,www.amazon.com,iOS,B0CQ371ZTP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CQ371ZTP,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-29T15:17:56Z,www.amazon.com,iOS,B0BKTCYCJ1,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BKTCYCJ1,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-25T15:24:09Z,www.amazon.com,iOS,B00W22ITCU,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00W22ITCU,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-22T17:37:02Z,www.amazon.com,iOS,B083GY7J9P,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B083GY7J9P,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-22T01:01:19Z,www.amazon.com,iOS,B0CTCQDVJL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CTCQDVJL,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-20T18:52:08Z,www.amazon.com,iOS,B0DJPX4312,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJPX4312,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-27T11:36:38Z,www.amazon.com,iOS,B09SS8VQD6,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09SS8VQD6,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-29T16:18:35Z,www.amazon.com,iOS,B0CX82WQ5Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CX82WQ5Q,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-28T04:27:08Z,www.amazon.com,iOS,B09PKTYKGZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09PKTYKGZ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-06T04:54:03Z,www.amazon.com,iOS,B07C7N5CBS,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07C7N5CBS,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-31T20:31:39Z,www.amazon.com,iOS,B093WB84G1,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B093WB84G1,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-03T06:59:50Z,www.amazon.com,iOS,B09QY2KWKY,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09QY2KWKY,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-01T01:38:07Z,www.amazon.com,iOS,B0CB4B21KB,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CB4B21KB,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-07T03:53:23Z,www.amazon.com,iOS,B0CHVBB7Y5,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CHVBB7Y5,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-04T03:03:54Z,www.amazon.com,iOS,B00WHGBTHI,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00WHGBTHI,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-02T05:47:59Z,www.amazon.com,iOS,B00H45XC5O,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00H45XC5O,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-29T15:05:11Z,www.amazon.com,iOS,B00TU3BTUI,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00TU3BTUI,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-27T11:10:08Z,www.amazon.com,iOS,B08X472VK3,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B08X472VK3,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-09T01:36:47Z,www.amazon.com,iOS,B00IERA5RY,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00IERA5RY,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2024-04-24T16:43:05Z,www.amazon.com,iOS,B0B89YQFNX,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0B89YQFNX,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T07:26:46Z,www.amazon.com,iOS,B08Y6DCS1Y,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B08Y6DCS1Y,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-29T02:33:58Z,www.amazon.com,iOS,B00B73MULG,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00B73MULG,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2024-12-07T19:32:09Z,www.amazon.com,iOS,B07G4H3665,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07G4H3665,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-04-29T22:01:08Z,www.amazon.com,iOS,B00B73MULG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00B73MULG,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-16T11:31:50Z,www.amazon.com,iOS,B0B9TBGC5X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B9TBGC5X,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-24T05:02:23Z,www.amazon.com,iOS,B075818VDG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B075818VDG,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-13T19:26:28Z,www.amazon.com,iOS,B0CL5FS86S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CL5FS86S,Yes,Yes,InvokedByBookOpen,No,read
+2025-03-13T19:43:59Z,www.amazon.com,iOS,B0CLJW5KC2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CLJW5KC2,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-10T05:16:55Z,www.amazon.com,iOS,B081XD3QXJ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B081XD3QXJ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-06T03:16:00Z,www.amazon.com,iOS,B0DD1VWZ4Z,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DD1VWZ4Z,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-22T13:18:33Z,www.amazon.com,iOS,B0CTXVHQW6,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CTXVHQW6,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-06T13:41:31Z,www.amazon.com,iOS,B0CS17PXNR,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CS17PXNR,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-31T04:54:53Z,www.amazon.com,iOS,B0D9KNVB11,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D9KNVB11,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-17T15:36:07Z,www.amazon.com,iOS,B0CDTXRNWY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CDTXRNWY,Yes,Yes,InvokedByBookOpen,No,read
+2025-07-20T22:04:14Z,www.amazon.com,iOS,B0CJDPTB3V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CJDPTB3V,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-17T04:51:39Z,www.amazon.com,iOS,B0B9TBGC5X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B9TBGC5X,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-25T02:11:19Z,www.amazon.com,iOS,B0D4YYKBC7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D4YYKBC7,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T17:24:32Z,www.amazon.com,iOS,B01MST9RU9,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01MST9RU9,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-17T03:06:37Z,www.amazon.com,iOS,B0CKBX1G7X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKBX1G7X,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-09-04T01:04:52Z,www.amazon.com,iOS,B0C6NMBN7H,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0C6NMBN7H,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2025-02-11T01:27:59Z,www.amazon.com,iOS,B0C7B3DFJZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C7B3DFJZ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-21T06:31:49Z,www.amazon.com,iOS,B0CTCQ6MM4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CTCQ6MM4,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-19T20:58:51Z,www.amazon.com,iOS,B0DDKHNVWF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DDKHNVWF,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-20T08:33:55Z,www.amazon.com,iOS,B09HJDSQ5P,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09HJDSQ5P,Yes,Yes,Invoked By Book Menu,No,read
+2025-08-21T14:18:48Z,www.amazon.com,iOS,B0D7ZVQG2N,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D7ZVQG2N,No,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-03T23:32:47Z,www.amazon.com,iOS,B0DJT283QQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJT283QQ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-09T18:26:29Z,www.amazon.com,iOS,B075CRQLKG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B075CRQLKG,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-24T01:00:48Z,www.amazon.com,iOS,B08HJDG47W,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08HJDG47W,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-20T04:18:41Z,www.amazon.com,iOS,B008UCJ7KO,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B008UCJ7KO,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-18T10:12:25Z,www.amazon.com,iOS,B0C3B5MXTS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C3B5MXTS,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-17T06:17:56Z,www.amazon.com,iOS,B0BHN8JB7C,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BHN8JB7C,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-02T14:31:40Z,www.amazon.com,iOS,B09JT59YYX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09JT59YYX,Yes,Yes,Invoked By Book Menu,No,read
+2024-08-15T21:32:15Z,www.amazon.com,iOS,B0B6V8WKN5,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B6V8WKN5,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-10T01:24:38Z,www.amazon.com,iOS,B07WJ2X243,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07WJ2X243,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-22T01:12:48Z,www.amazon.com,iOS,B0183KJZE0,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0183KJZE0,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-21T17:26:56Z,www.amazon.com,iOS,B0CXR6ZHLS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKMFZN5Z,Yes,Yes,InvokedByBookOpen,No,read
+2024-10-23T09:25:52Z,www.amazon.com,iOS,B0CPD3911D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CPD3911D,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-26T00:22:53Z,www.amazon.com,iOS,B0B7L29TB7,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0B7L29TB7,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2025-07-07T12:01:23Z,www.amazon.com,iOS,B0D67VHK43,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D67VHK43,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-07-28T06:33:56Z,www.amazon.com,iOS,B0BTZ8VWJ8,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BTZ8VWJ8,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-15T14:48:01Z,www.amazon.com,iOS,B09QK389GG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09QK389GG,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-16T01:03:48Z,www.amazon.com,iOS,B07XQK3SGQ,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07XQK3SGQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-08-25T20:02:47Z,www.amazon.com,iOS,B003IYI6TC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B003IYI6TC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-19T10:46:56Z,www.amazon.com,iOS,B0CGJJTBKJ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CGJJTBKJ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-14T13:34:05Z,www.amazon.com,iOS,B07XNKRV83,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07XNKRV83,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-11T19:13:43Z,www.amazon.com,Mac,B0C7B3DFJZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C7B3DFJZ,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-24T04:17:29Z,www.amazon.com,iOS,B07Y89DWCN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07Y89DWCN,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-11T09:10:24Z,www.amazon.com,iOS,B0CL7GMPD4,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CL7GMPD4,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-26T18:34:08Z,www.amazon.com,iOS,B0CV2Y8CQC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CV2Y8CQC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-25T21:45:34Z,www.amazon.com,iOS,B08XK8L1J7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08XK8L1J7,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-08T23:33:04Z,www.amazon.com,iOS,B09V2J7P9F,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09V2J7P9F,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-27T10:13:53Z,www.amazon.com,iOS,B0CV2Y8CQC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CV2Y8CQC,Yes,Yes,Invoked By Book Menu,No,read
+2025-08-27T18:21:35Z,www.amazon.com,iOS,B0DC66QD8K,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DC66QD8K,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-17T20:18:17Z,www.amazon.com,iOS,B0C13VFWML,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0C13VFWML,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-15T23:46:19Z,www.amazon.com,iOS,B0BSNRZSRF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BSNRZSRF,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-06T13:02:42Z,www.amazon.com,iOS,B09H7Q4B74,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09H7Q4B74,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-01T21:35:47Z,www.amazon.com,iOS,B09X3DKLSZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09X3DKLSZ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-08-31T14:46:30Z,www.amazon.com,iOS,B0DDJXD72B,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DDJXD72B,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-16T14:40:50Z,www.amazon.com,iOS,B01BU2NFTO,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01BU2NFTO,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-03T19:41:42Z,www.amazon.com,iOS,B01M8NHXGH,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B01M8NHXGH,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-11T17:34:44Z,www.amazon.com,iOS,B07J4LPZRN,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07J4LPZRN,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-11T22:27:30Z,www.amazon.com,iOS,B0D7NN1P97,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D7NN1P97,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-29T00:31:03Z,www.amazon.com,iOS,B0DC66QD8K,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DC66QD8K,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-11T06:00:19Z,www.amazon.com,iOS,B07B9WH8KT,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07B9WH8KT,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-06T00:34:25Z,www.amazon.com,iOS,B09VV2CR51,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09VV2CR51,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-05T03:17:06Z,www.amazon.com,iOS,B0DD1VWZ4Z,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DD1VWZ4Z,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-16T20:54:37Z,www.amazon.com,iOS,B01M04PNMH,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01M04PNMH,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-08T11:25:00Z,www.amazon.com,iOS,B09V2J7P9F,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09V2J7P9F,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-10T01:38:04Z,www.amazon.com,iOS,B0D2PFVNXV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D2PFVNXV,Yes,Yes,InvokedByBookOpen,No,read
+2025-04-21T17:26:59Z,www.amazon.com,iOS,B0D9CC3C9Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D9CC3C9Y,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-02T20:18:14Z,www.amazon.com,iOS,B0BY9M2C4X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BY9M2C4X,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-19T12:36:44Z,www.amazon.com,iOS,B0D9CC3C9Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D9CC3C9Y,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-04-28T19:11:31Z,www.amazon.com,iOS,B0B9KVDK8P,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B9KVDK8P,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-17T19:23:45Z,www.amazon.com,iOS,B0BM7X9WFJ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BM7X9WFJ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-09T22:43:51Z,www.amazon.com,iOS,B0D9KNVB11,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D9KNVB11,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-09T11:18:48Z,www.amazon.com,iOS,B0BGMZ9ZL2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BGMZ9ZL2,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-14T03:17:04Z,www.amazon.com,iOS,B0CXKKC82X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CXKKC82X,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-06T03:36:53Z,www.amazon.com,iOS,B08XLKH2Q2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08XLKH2Q2,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-02T19:55:13Z,www.amazon.com,iOS,B0DKG9MS7S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DKG9MS7S,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-13T05:03:06Z,www.amazon.com,iOS,B079JF4D4S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B079JF4D4S,Yes,Yes,Invoked By Book Menu,No,read
+2024-05-02T03:44:29Z,www.amazon.com,iOS,B00FIOHII0,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00FIOHII0,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-21T07:50:18Z,www.amazon.com,iOS,B0BYFW12CT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BYFW12CT,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-25T00:42:36Z,www.amazon.com,iOS,B00CU7YHQY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00CU7YHQY,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-22T20:53:13Z,www.amazon.com,iOS,B0CTCQDVJL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CTCQDVJL,Yes,Yes,Invoked By Book Menu,No,read
+2025-08-24T23:31:44Z,www.amazon.com,iOS,B0D7ZVQG2N,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D7ZVQG2N,No,Yes,Invoked By Book Menu,No,read
+2024-11-28T04:11:52Z,www.amazon.com,iOS,B0CR19MXKV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CR19MXKV,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-03T02:01:28Z,www.amazon.com,iOS,B08FZNYQJC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08FZNYQJC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-06T09:38:56Z,www.amazon.com,iOS,B0CHVBB7Y5,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CHVBB7Y5,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-06T13:28:16Z,www.amazon.com,iOS,B0BDZ2M91F,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BDZ2M91F,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-13T00:42:41Z,www.amazon.com,iOS,B0CL5FS86S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CL5FS86S,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-27T22:42:33Z,www.amazon.com,iOS,B09ZKRWCG4,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09ZKRWCG4,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-20T14:00:15Z,www.amazon.com,iOS,B0DD7X5V3V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DD7X5V3V,Yes,Yes,Invoked By Book Menu,No,read
+2024-05-16T02:00:28Z,www.amazon.com,iOS,B0B36FKPS8,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B36FKPS8,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-25T15:22:03Z,www.amazon.com,Mac,B0DDKHNVWF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DDKHNVWF,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-03T03:16:26Z,www.amazon.com,iOS,B0181ONKDU,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0181ONKDU,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-24T20:54:39Z,www.amazon.com,iOS,B08XK8L1J7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08XK8L1J7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-05-20T05:15:50Z,www.amazon.com,iOS,B0CRPVLGRC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CRPVLGRC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-24T04:52:05Z,www.amazon.com,iOS,B09BN2WNPP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09BN2WNPP,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-08T22:51:32Z,www.amazon.com,iOS,B075CRQLKG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B075CRQLKG,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-13T22:45:58Z,www.amazon.com,iOS,Not Applicable,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CM5L5T6D,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-29T03:43:42Z,www.amazon.com,iOS,B00VVG6LMI,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00VVG6LMI,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-19T22:32:42Z,www.amazon.com,iOS,B0DPLWFDWY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DPLWFDWY,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-23T22:04:58Z,www.amazon.com,iOS,B07DMZ5YR9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07DMZ5YR9,No,Yes,Invoked By Book Menu,No,read
+2024-10-01T00:45:00Z,www.amazon.com,iOS,B075CW598Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B075CW598Y,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-21T16:28:03Z,www.amazon.com,iOS,B0D46PR72D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D46PR72D,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-01T13:08:01Z,www.amazon.com,iOS,B0C3426KGW,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C3426KGW,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-05-31T03:47:11Z,www.amazon.com,iOS,B0DZ3JM6XM,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DZ3JM6XM,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-15T21:39:50Z,www.amazon.com,iOS,B0CKH896T8,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKH896T8,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-11T20:33:02Z,www.amazon.com,iOS,B08T6XN4FP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08T6XN4FP,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-05T15:02:34Z,www.amazon.com,iOS,B07QNKVR3N,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07QNKVR3N,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-28T12:15:06Z,www.amazon.com,iOS,B09SS8VQD6,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09SS8VQD6,Yes,Yes,InvokedByBookOpen,No,read
+2025-07-05T14:57:38Z,www.amazon.com,iOS,B0DJTBBNQX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJTBBNQX,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-20T02:02:38Z,www.amazon.com,iOS,B0DJPX4312,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJPX4312,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-12T17:53:56Z,www.amazon.com,iOS,B0C44DX85D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C44DX85D,Yes,Yes,InvokedByBookOpen,No,read
+2024-12-05T06:24:57Z,www.amazon.com,iOS,B00WASWK7Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00WASWK7Q,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-08T22:02:38Z,www.amazon.com,iOS,B0B4KR2X87,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B4KR2X87,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-26T03:58:28Z,www.amazon.com,iOS,B07Y82JMF8,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B07Y82JMF8,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-20T10:53:49Z,www.amazon.com,iOS,B0D3Z2M35D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D3Z2M35D,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-21T17:07:31Z,www.amazon.com,iOS,B01LOWN78Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B01LOWN78Y,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-02-29T01:11:51Z,www.amazon.com,iOS,B09HLCTYZ8,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09HLCTYZ8,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-01T19:09:07Z,www.amazon.com,iOS,B09Z7BYZS3,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09Z7BYZS3,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-04T20:25:20Z,www.amazon.com,iOS,B0BKTXQPXR,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BKTXQPXR,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-25T05:29:39Z,www.amazon.com,iOS,B0CW1FKFB9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CW1FKFB9,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-03T03:56:20Z,www.amazon.com,iOS,B0CLGW57HP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CLGW57HP,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-23T23:51:59Z,www.amazon.com,iOS,B0DFGDFM4V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DFGDFM4V,Yes,Yes,Invoked By Book Menu,No,read
+2024-05-08T01:37:46Z,www.amazon.com,iOS,B0BPVJ4RVR,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BPVJ4RVR,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T07:25:37Z,www.amazon.com,iOS,B09S1CMMBT,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09S1CMMBT,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-19T14:44:54Z,www.amazon.com,iOS,B0CN25HCG7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CN25HCG7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-09T01:54:29Z,www.amazon.com,iOS,B0C2JYSCLX,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0C2JYSCLX,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-10T02:36:20Z,www.amazon.com,iOS,B07JH7ZKVX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07JH7ZKVX,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-28T02:24:39Z,www.amazon.com,iOS,B0BC16PP4Z,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BC16PP4Z,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T20:20:52Z,www.amazon.com,iOS,B01N5C6HP9,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01N5C6HP9,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-24T19:50:50Z,www.amazon.com,iOS,B0DCTZPG8V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DCTZPG8V,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-11T02:32:53Z,www.amazon.com,iOS,B0D1PC9FHN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D1PC9FHN,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-22T12:08:48Z,www.amazon.com,iOS,B00CU7YHQY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00CU7YHQY,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-23T00:49:11Z,www.amazon.com,iOS,B0CHWQPB49,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CHWQPB49,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-21T18:35:47Z,www.amazon.com,iOS,B0CR1N7YGX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CR1N7YGX,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-06T07:32:35Z,www.amazon.com,iOS,B079JYG6D4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B079JYG6D4,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-29T03:36:18Z,www.amazon.com,iOS,B094GCNRBZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B094GCNRBZ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-29T21:14:31Z,www.amazon.com,iOS,B0D5YMWD9Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D5YMWD9Y,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-24T04:19:19Z,www.amazon.com,iOS,B0D1PC9FHN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D1PC9FHN,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-27T09:44:06Z,www.amazon.com,iOS,B0CW1FKFB9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CW1FKFB9,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-31T02:11:32Z,www.amazon.com,iOS,B0F1Y9XH1B,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0F1Y9XH1B,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-31T01:11:51Z,www.amazon.com,iOS,B0CLFB86PL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CLFB86PL,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-14T18:32:31Z,www.amazon.com,iOS,B0CPKCH1V8,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CPKCH1V8,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-08T09:21:54Z,www.amazon.com,iOS,B083TZV25B,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B083TZV25B,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-04T05:00:13Z,www.amazon.com,iOS,B0DKG9MS7S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DKG9MS7S,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-06T01:13:22Z,www.amazon.com,iOS,B09JBCGQB8,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09JBCGQB8,No,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-10T15:16:41Z,www.amazon.com,iOS,B07JH7ZKVX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07JH7ZKVX,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-15T22:51:34Z,www.amazon.com,iOS,B0CPHZP6S9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CPHZP6S9,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-24T03:10:24Z,www.amazon.com,iOS,B0CTXVHQW6,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CTXVHQW6,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-14T00:07:49Z,www.amazon.com,iOS,B08266SRVP,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B08266SRVP,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-04T20:27:40Z,www.amazon.com,iOS,B0763NXSM7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0763NXSM7,Yes,Yes,Invoked By Book Menu,No,read
+2025-07-12T16:08:00Z,www.amazon.com,iOS,B0C9MXW2JL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C9MXW2JL,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-17T17:19:17Z,www.amazon.com,iOS,B0CPHZP6S9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CPHZP6S9,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-26T22:04:51Z,www.amazon.com,iOS,B076G47245,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B076G47245,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-23T19:50:26Z,www.amazon.com,iOS,B09X6HZ4FT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09X6HZ4FT,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-02T23:00:08Z,www.amazon.com,iOS,B0CHBML59T,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CHBML59T,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-19T22:57:18Z,www.amazon.com,iOS,B0CN25HCG7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CN25HCG7,Yes,Yes,InvokedByBookOpen,No,read
+2025-02-11T00:04:23Z,www.amazon.com,iOS,B0BTZQ7TGP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BTZQ7TGP,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-10T11:02:58Z,www.amazon.com,iOS,B0DJPZ5CGC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJPZ5CGC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-09T22:10:15Z,www.amazon.com,iOS,B0BXMJDB4C,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BXMJDB4C,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-20T02:40:21Z,www.amazon.com,iOS,B0BTTJWYFN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BTTJWYFN,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-18T02:48:10Z,www.amazon.com,iOS,B0CNSGXRN9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CNSGXRN9,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-27T10:14:19Z,www.amazon.com,iOS,B0CX82WQ5Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CX82WQ5Q,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-17T23:01:23Z,www.amazon.com,iOS,B0CDJPKT7K,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CDJPKT7K,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-13T19:40:23Z,www.amazon.com,iOS,B08266V1T2,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B08266V1T2,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-24T01:03:50Z,www.amazon.com,iOS,B0BGDM197Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BGDM197Q,No,Yes,Invoked By Book Menu,No,read
+2025-07-19T14:15:45Z,www.amazon.com,iOS,B0C4GRKJTF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C4GRKJTF,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-26T22:51:56Z,www.amazon.com,iOS,B0089LOFGC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0089LOFGC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-22T11:51:01Z,www.amazon.com,iOS,B0CPD3911D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CPD3911D,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-10T15:52:08Z,www.amazon.com,iOS,B0BSYJCFHD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BSYJCFHD,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-22T22:50:52Z,www.amazon.com,iOS,B0BGDM197Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BGDM197Q,No,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-22T14:27:59Z,www.amazon.com,iOS,B0DFGDFM4V,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DFGDFM4V,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-29T20:17:29Z,www.amazon.com,iOS,B0CWJ2GTF3,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CWJ2GTF3,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-29T15:43:31Z,www.amazon.com,iOS,B00VVG6LMI,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00VVG6LMI,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-27T04:12:30Z,www.amazon.com,iOS,B00H45XC5O,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00H45XC5O,Yes,Yes,Invoked By Book Menu,No,read
+2024-07-27T12:19:23Z,www.amazon.com,iOS,B09Q9WSZ9G,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09Q9WSZ9G,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-22T23:15:28Z,www.amazon.com,iOS,B0C9KJRSX7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C9KJRSX7,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-28T16:19:48Z,www.amazon.com,iOS,B0BNQYVMCD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BNQYVMCD,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-30T05:02:31Z,www.amazon.com,iOS,B09QJM783S,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09QJM783S,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T07:25:56Z,www.amazon.com,iOS,B0BDW83LGQ,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BDW83LGQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-21T18:55:03Z,www.amazon.com,iOS,B0C9KJRSX7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C9KJRSX7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-18T02:39:56Z,www.amazon.com,iOS,B0C85RV9VG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C85RV9VG,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-30T23:07:21Z,www.amazon.com,iOS,B09CP3FR9K,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09CP3FR9K,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-24T23:16:20Z,www.amazon.com,iOS,B0D5YPRZHB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D5YPRZHB,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-07-13T18:05:38Z,www.amazon.com,iOS,B0CMJRJPC7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CMJRJPC7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-07-21T16:19:45Z,www.amazon.com,iOS,B00V12L3CU,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00V12L3CU,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-05T16:19:29Z,www.amazon.com,iOS,B0BY9M2C4X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BY9M2C4X,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-28T02:27:42Z,www.amazon.com,iOS,B0CZV38Z7J,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CZV38Z7J,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-15T03:48:01Z,www.amazon.com,iOS,B0BQ79WJLC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BQ79WJLC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-05-04T22:04:46Z,www.amazon.com,iOS,B00IUS9FOG,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00IUS9FOG,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-28T22:40:51Z,www.amazon.com,iOS,B0CYWDS6CT,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CYWDS6CT,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-11T15:51:22Z,www.amazon.com,iOS,B0C44DX85D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C44DX85D,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-12T22:23:21Z,www.amazon.com,iOS,B08T6XN4FP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08T6XN4FP,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-13T14:03:04Z,www.amazon.com,iOS,B083C3VKPW,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B083C3VKPW,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-03T07:25:24Z,www.amazon.com,iOS,B09X6KD3CS,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09X6KD3CS,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-10T22:50:56Z,www.amazon.com,iOS,B0C3SNCRXM,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C3SNCRXM,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-26T09:20:25Z,www.amazon.com,iOS,B0CZV38Z7J,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CZV38Z7J,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-22T02:39:10Z,www.amazon.com,iOS,B0DWVCNRFT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DWVCNRFT,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-03T02:18:41Z,www.amazon.com,iOS,B09QJZHVQT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09QJZHVQT,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-09T15:56:10Z,www.amazon.com,iOS,B091N9KW8N,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B091N9KW8N,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-24T01:27:24Z,www.amazon.com,iOS,B00V3MY1GS,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00V3MY1GS,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-29T00:30:50Z,www.amazon.com,iOS,B0BKTCYCJ1,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BKTCYCJ1,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-06T10:24:21Z,www.amazon.com,iOS,B0DJTBBNQX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DJTBBNQX,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-19T01:38:51Z,www.amazon.com,iOS,B0CNSGXRN9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CNSGXRN9,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-13T08:56:37Z,www.amazon.com,iOS,B0CCNBRNRQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CCNBRNRQ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-29T03:37:27Z,www.amazon.com,iOS,B0C3C7G6HN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C3C7G6HN,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-23T04:36:15Z,www.amazon.com,iOS,B0C4LHVJ82,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C4LHVJ82,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-02T05:45:31Z,www.amazon.com,iOS,B0994RZ2L1,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0994RZ2L1,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-18T03:02:41Z,www.amazon.com,iOS,B0CLT4QRQL,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0CLT4QRQL,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-28T23:01:16Z,www.amazon.com,iOS,B0BBNK34MY,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BBNK34MY,Yes,Yes,InvokedByBookOpen,No,read
+2024-10-30T04:07:59Z,www.amazon.com,iOS,B0BSXMNJ8C,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BSXMNJ8C,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-19T22:26:01Z,www.amazon.com,iOS,B0BGT7SZPT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BGT7SZPT,No,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-15T03:12:01Z,www.amazon.com,iOS,B0CXKKC82X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CXKKC82X,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-28T13:20:11Z,www.amazon.com,iOS,B0B5NMN9XQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B5NMN9XQ,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-07T09:57:29Z,www.amazon.com,iOS,B0BDZ2M91F,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BDZ2M91F,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-10T19:28:30Z,www.amazon.com,iOS,B00VJSQKWY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00VJSQKWY,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-25T01:26:24Z,www.amazon.com,iOS,B09BN2WNPP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09BN2WNPP,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-07T05:00:15Z,www.amazon.com,iOS,B0DQVGJ7ZK,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DQVGJ7ZK,Yes,Yes,Invoked By Book Menu,No,read
+2024-10-10T03:25:20Z,www.amazon.com,iOS,B0CR7FCTF2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CR7FCTF2,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-04T04:34:26Z,www.amazon.com,iOS,B0CLGW57HP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CLGW57HP,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-21T17:07:04Z,www.amazon.com,iOS,B015FELXQ0,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B015FELXQ0,Yes,Yes,Invoked By Book Menu,No,read
+2025-04-08T23:05:29Z,www.amazon.com,iOS,B0CM5L5T6D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CM5L5T6D,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-21T22:42:18Z,www.amazon.com,iOS,B08HJDG47W,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08HJDG47W,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-27T00:35:32Z,www.amazon.com,iOS,B0BCZWC3QZ,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BCZWC3QZ,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-18T23:38:40Z,www.amazon.com,iOS,B007N6JEII,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B007N6JEII,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-24T11:24:39Z,www.amazon.com,iOS,B0D5YMWD9Y,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D5YMWD9Y,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-07T03:52:39Z,www.amazon.com,iOS,B01KB8XC5A,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01KB8XC5A,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-03T07:26:13Z,www.amazon.com,iOS,B0BDW9C3JY,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BDW9C3JY,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-05T02:38:37Z,www.amazon.com,iOS,B08XLKH2Q2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08XLKH2Q2,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-02T04:33:41Z,www.amazon.com,iOS,B07DJPWWZT,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07DJPWWZT,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-20T16:31:32Z,www.amazon.com,iOS,B0DPLWFDWY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DPLWFDWY,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-16T21:53:32Z,www.amazon.com,iOS,B0BSNRZSRF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BSNRZSRF,Yes,Yes,Invoked By Book Menu,No,read
+2024-08-17T20:47:40Z,www.amazon.com,iOS,B08Y758VM1,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08Y758VM1,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-15T01:46:30Z,www.amazon.com,iOS,B08R9PX3ZL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08R9PX3ZL,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-18T15:57:14Z,www.amazon.com,iOS,B0CFD5NCP9,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CFD5NCP9,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-05T13:46:15Z,www.amazon.com,iOS,B008WOTQGU,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B008WOTQGU,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-03T20:24:32Z,www.amazon.com,iOS,B00TG1CZFC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00TG1CZFC,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-05T09:59:02Z,www.amazon.com,iOS,B09H7Q4B74,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09H7Q4B74,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-03T07:24:40Z,www.amazon.com,iOS,B08K62VYDJ,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B08K62VYDJ,No,Yes,Invoked By Book Menu,No,read
+2025-02-15T22:03:03Z,www.amazon.com,iOS,B0D3C17M1Z,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D3C17M1Z,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-17T12:41:36Z,www.amazon.com,iOS,B0CBHXCKPS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CBHXCKPS,Yes,Yes,InvokedByBookOpen,No,read
+2025-02-26T16:32:49Z,www.amazon.com,Mac,B0076790LA,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0076790LA,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-04-18T02:09:40Z,www.amazon.com,iOS,B0CL1C4PM4,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CL1C4PM4,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-13T13:34:31Z,www.amazon.com,iOS,B0D7NN1P97,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D7NN1P97,Yes,Yes,Invoked By Book Menu,No,read
+2024-11-15T20:00:20Z,www.amazon.com,iOS,B0BQ79WJLC,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BQ79WJLC,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-09T02:39:59Z,www.amazon.com,iOS,B00LJKT64Q,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00LJKT64Q,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-24T02:34:10Z,www.amazon.com,iOS,B0C4LHVJ82,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C4LHVJ82,Yes,Yes,InvokedByBookOpen,No,read
+2024-03-05T01:51:20Z,www.amazon.com,iOS,B09NJBVM8Z,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B09NJBVM8Z,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-20T05:11:37Z,www.amazon.com,iOS,B0DGCLB3X3,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DGCLB3X3,Yes,Yes,Invoked By Book Menu,No,read
+2024-12-08T04:15:36Z,www.amazon.com,iOS,B091N9KW8N,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B091N9KW8N,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-31T05:23:33Z,www.amazon.com,iOS,B0D9KJMVRB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D9KJMVRB,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-16T00:30:36Z,www.amazon.com,iOS,B0CZP7QV5D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CZP7QV5D,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-08-27T18:21:03Z,www.amazon.com,iOS,B003VPWY64,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B003VPWY64,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-27T08:30:17Z,www.amazon.com,iOS,B0D5YPRZHB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D5YPRZHB,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-14T11:27:11Z,www.amazon.com,iOS,B0BF16RV53,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BF16RV53,Yes,Yes,Invoked By Book Menu,No,read
+2024-09-30T10:42:46Z,www.amazon.com,iOS,B09CP3FR9K,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09CP3FR9K,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-28T00:32:03Z,www.amazon.com,iOS,B0B5NMN9XQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B5NMN9XQ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-19T01:57:13Z,www.amazon.com,iOS,B09GCC6Y5M,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09GCC6Y5M,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-02-11T22:27:24Z,www.amazon.com,iOS,B0D3C17M1Z,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D3C17M1Z,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-29T18:09:48Z,www.amazon.com,iOS,B0BSXMNJ8C,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BSXMNJ8C,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-09-29T12:43:57Z,www.amazon.com,iOS,B0BG8HC2NG,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BG8HC2NG,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-15T03:39:19Z,www.amazon.com,iOS,B00OZP5VRS,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00OZP5VRS,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-19T19:03:27Z,www.amazon.com,iOS,B015FELXQ0,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B015FELXQ0,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-30T11:23:01Z,www.amazon.com,iOS,B0C35K5GRL,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C35K5GRL,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-12-10T02:16:47Z,www.amazon.com,iOS,B0C3SNCRXM,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C3SNCRXM,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-17T11:27:38Z,www.amazon.com,iOS,B0CL5FT1GZ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BV1C2PJ8,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-03T03:58:20Z,www.amazon.com,iOS,B0CK55PS1P,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CK55PS1P,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-02T10:41:11Z,www.amazon.com,iOS,B0181ONKDU,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0181ONKDU,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-04-08T23:08:24Z,www.amazon.com,iOS,B09418JQMK,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09418JQMK,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-21T06:01:51Z,www.amazon.com,iOS,B0CKBX1G7X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKBX1G7X,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-04T01:45:56Z,www.amazon.com,iOS,B0CHBML59T,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CHBML59T,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-07T13:26:12Z,www.amazon.com,iOS,B0C1LJS1XX,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C1LJS1XX,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-01T13:10:21Z,www.amazon.com,iOS,B0D4W772V5,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D4W772V5,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-06-06T10:20:00Z,www.amazon.com,iOS,B0DQVGJ7ZK,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0DQVGJ7ZK,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-14T01:24:39Z,www.amazon.com,iOS,B0CCNBRNRQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CCNBRNRQ,Yes,Yes,InvokedByBookOpen,No,read
+2025-01-15T01:11:53Z,www.amazon.com,iOS,B0CKRXNDCF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKRXNDCF,Yes,Yes,InvokedByBookOpen,No,read
+2025-05-06T05:11:16Z,www.amazon.com,iOS,B00JAXSEFQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00JAXSEFQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-15T22:31:21Z,www.amazon.com,iOS,B0CMQ8X4LN,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CMQ8X4LN,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-23T20:43:04Z,www.amazon.com,iOS,B00V3MY1IQ,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B00V3MY1IQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-24T19:51:50Z,www.amazon.com,iOS,B0D2VNCDRQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D2VNCDRQ,Yes,Yes,Invoked By Book Menu,No,read
+2025-06-08T03:21:19Z,www.amazon.com,iOS,B08LD2HT9F,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B08LD2HT9F,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-10-07T01:12:10Z,www.amazon.com,ThirdPartyAndroid,B0DCG89SDJ,AutoShelving,end_actions,PerformAutoShelving,,Yes,B0DCG89SDJ,Yes,Yes,InvokedByBookFinish,No,read
+2024-12-14T11:57:11Z,www.amazon.com,iOS,B0C453T7BV,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0C453T7BV,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-09-24T23:19:03Z,www.amazon.com,iOS,B0D4YYKBC7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D4YYKBC7,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-03-17T12:41:58Z,www.amazon.com,iOS,B0CDJPKT7K,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CDJPKT7K,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-05-05T01:25:59Z,www.amazon.com,iOS,B00JAXSEFQ,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00JAXSEFQ,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-03-22T11:52:26Z,www.amazon.com,iOS,B0B1KVSRCL,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0B1KVSRCL,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-12T03:30:52Z,www.amazon.com,iOS,B00VJSQKWY,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B00VJSQKWY,Yes,Yes,Invoked By Book Menu,No,read
+2024-04-21T21:06:09Z,www.amazon.com,iOS,B0BXQP63XL,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B0BXQP63XL,Yes,Yes,Invoked By Book Menu,No,currently-reading
+2025-03-04T04:35:04Z,www.amazon.com,iOS,B0CWZ83PGD,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CLGW57HP,Yes,Yes,InvokedByBookOpen,No,read
+2024-04-27T23:34:31Z,www.amazon.com,iOS,B017O4W3V8,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B017O4W3V8,Yes,Yes,Invoked By Book Menu,No,read
+2024-05-06T01:12:53Z,www.amazon.com,iOS,B01MQLZ12X,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B01MQLZ12X,Yes,Yes,Invoked By Book Menu,No,read
+2025-05-23T08:26:12Z,www.amazon.com,iOS,B0D3Z2M35D,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D3Z2M35D,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-04T06:19:39Z,www.amazon.com,iOS,B01MTZDCUN,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01MTZDCUN,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-08T16:29:46Z,www.amazon.com,iOS,B0BYWR9N4G,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BYWR9N4G,Yes,Yes,Invoked By Book Menu,No,read
+2025-03-02T01:46:58Z,www.amazon.com,iOS,B0BYKSTDNB,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0BYKSTDNB,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-11-01T19:44:28Z,www.amazon.com,iOS,B0D4W772V5,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0D4W772V5,Yes,Yes,InvokedByBookOpen,No,read
+2025-01-14T11:18:55Z,www.amazon.com,iOS,B0CKRXNDCF,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CKRXNDCF,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2025-01-09T10:58:43Z,www.amazon.com,iOS,B0CK55PS1P,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0CK55PS1P,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-13T13:43:07Z,www.amazon.com,iOS,B08266PLCC,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B08266PLCC,Yes,Yes,Invoked By Book Menu,No,read
+2025-01-15T22:46:47Z,www.amazon.com,iOS,B07QBC8QTP,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B07QBC8QTP,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-10-13T16:19:26Z,www.amazon.com,iOS,B09Z9K12P2,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B09Z9K12P2,Yes,Yes,InvokedByBookOpen,No,currently-reading
+2024-04-26T19:04:23Z,www.amazon.com,iOS,B0B7L29TB7,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B0B7L29TB7,Yes,Yes,Invoked By Book Menu,No,read
+2025-02-02T23:47:56Z,www.amazon.com,iOS,B093WB84G1,AutoShelving,AnyActionsAutoShelvingWidget,PerformAutoShelving,AutoShelvingLayout,No,B093WB84G1,Yes,Yes,Invoked By Book Menu,No,read
+2024-03-09T03:34:34Z,www.amazon.com,iOS,B01D6TA9Y8,ManualShelving,AnyActionsAutoShelvingWidget,PerformManualShelving,ManualShelvingLayout,Yes,B01D6TA9Y8,Yes,Yes,Invoked By Book Menu,No,read

@@ -12,8 +12,8 @@ WORKFLOW_PATH: greenfield-level-2.yaml
 ## Current State
 
 CURRENT_PHASE: 4-Implementation
-CURRENT_WORKFLOW: Story 2.4: Enable KOSync progress sync across devices (Completed)
-CURRENT_AGENT: sm
+CURRENT_WORKFLOW: Story 3.1 complete and ready for review; Epic 3 (1/2 stories) in progress
+CURRENT_AGENT: dev
 PHASE_1_COMPLETE: true
 PHASE_2_COMPLETE: true
 PHASE_3_COMPLETE: true
@@ -21,15 +21,15 @@ PHASE_4_COMPLETE: false
 
 ## Blocking Status (Course Correction)
 
-STORY_2_2_BLOCKED: Technical blocker - OPDS catalog not accessible from iOS Readest
+STORY_2_2_BLOCKED: Technical blocker - OPDS catalog not accessible from iOS Readest (deferred to future sprint)
 STORY_1_3_BLOCKED: Waiting on Story 1.2 validation results (due 2025-11-03)
 STORY_1_2_STATUS: In progress (monitoring 7-day performance validation, resumes after 2025-11-03)
 
 ## Next Action
 
-NEXT_ACTION: Story 2.4 completed. Epic 2 has 3/4 stories done (Story 2.2 blocked). Continue with Story 1.2 or Story 1.3 when unblocked.
-NEXT_COMMAND: Monitor Story 1.2 validation (due 2025-11-03) or troubleshoot Story 2.2 OPDS blocking issue
-NEXT_AGENT: sm or dev
+NEXT_ACTION: Story 3.1 implementation complete and ready for code review. Options: (1) Run code-review workflow, or (2) Proceed to Story 3.2 (ETL Pipeline).
+NEXT_COMMAND: code-review OR create-story (Story 3.2)
+NEXT_AGENT: sm (for review/approval) OR dev (for Story 3.2 implementation)
 
 ## Story Backlog (REVISED - Course Correction Applied)
 
@@ -85,9 +85,22 @@ NEXT_AGENT: sm or dev
 - Progress synchronization working across Boox and iOS
 - Hardcover receiving updates from Boox
 
+**Epic 2 Status:** 3 of 4 stories complete (Story 2.2 blocked, deferred)
+
+✅ **Story 3.1: Configure one-way statistics backup from Boox to RPi** (Completed 2025-10-30)
+- All 8 acceptance criteria verified
+- Syncthing one-way sync configured (Boox Send Only → RPi Receive Only)
+- File versioning enabled with 30-day Staggered retention
+- Statistics.sqlite3 syncs within <1 minute (meets 5-minute AC requirement)
+- Comprehensive setup guide created (docs/STATISTICS-BACKUP-SETUP.md)
+- Story status: `review` (ready for peer review or code review)
+- Docker Compose updated with volume mapping for backups
+
+**Epic 3 Status:** 1 of 2 stories complete; Story 3.2 ready for development
+
 ---
 
-_Last Updated: 2025-10-29_
+_Last Updated: 2025-10-30_
 
 **Phase 1 Completed Workflows:**
 - research (deep research prompt generated)

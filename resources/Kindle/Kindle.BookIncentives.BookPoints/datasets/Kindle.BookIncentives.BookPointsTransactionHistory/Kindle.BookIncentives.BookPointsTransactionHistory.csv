@@ -1,0 +1,77 @@
+﻿Event Type,Marketplace,Pending Balance (Points),Pending Balance Changed (Points),Posted Time,Running Balance (Points),Running Balance Changed (Points)
+reversal,www.amazon.com,0,0,2025-10-08T14:33:45.149Z,45,-1
+clear balance,www.amazon.com,0,0,2025-10-04T02:52:00.248Z,46,-66
+clear balance,www.amazon.com,0,0,2025-09-01T14:53:56.212Z,112,-103
+finalize redeem,www.amazon.com,0,0,2025-08-20T20:10:01.386Z,215,45
+initialize redeem,www.amazon.com,0,0,2025-08-20T20:10:00.936Z,170,0
+cancel,www.amazon.com,0,0,2025-08-20T20:10:00.818Z,170,0
+initialize redeem,www.amazon.com,0,0,2025-08-20T19:51:56.573Z,170,0
+earn,www.amazon.com,0,0,2025-06-22T03:25:21.145Z,170,39
+finalize redeem,www.amazon.com,0,0,2025-06-10T05:01:24.147Z,131,1
+initialize redeem,www.amazon.com,0,0,2025-06-10T04:54:19.942Z,130,0
+cancel,www.amazon.com,0,0,2025-06-10T04:53:48.431Z,130,0
+initialize redeem,www.amazon.com,0,0,2025-06-10T04:51:44.024Z,130,0
+earn,www.amazon.com,0,0,2025-06-10T04:48:17.859Z,130,27
+clear balance,www.amazon.com,0,0,2025-06-01T12:34:54.897Z,103,-59
+earn,www.amazon.com,0,0,2025-05-31T03:41:43.532Z,162,1
+earn,www.amazon.com,0,0,2025-05-31T03:41:43.140Z,161,33
+earn,www.amazon.com,0,0,2025-05-28T02:36:28.521Z,128,23
+earn,www.amazon.com,0,0,2025-05-28T02:36:28.258Z,105,1
+earn,www.amazon.com,0,0,2025-05-18T15:07:17.406Z,104,45
+clear balance,www.amazon.com,0,0,2025-05-04T10:59:08.548Z,59,-128
+clear balance,www.amazon.com,0,0,2025-04-01T09:30:50.468Z,187,-13
+finalize redeem,www.amazon.com,0,-300,2025-02-11T22:26:54.329Z,200,0
+earn,www.amazon.com,300,0,2025-02-11T22:26:49.778Z,200,33
+initialize redeem,www.amazon.com,300,300,2025-02-11T22:26:49.279Z,167,-300
+earn,www.amazon.com,0,0,2025-02-11T22:25:49.763Z,467,26
+earn,www.amazon.com,0,0,2025-01-25T05:29:22.959Z,441,45
+earn,www.amazon.com,0,0,2025-01-06T02:48:46.698Z,396,28
+earn,www.amazon.com,0,0,2025-01-06T02:48:46.534Z,368,30
+earn,www.amazon.com,0,0,2025-01-06T02:48:46.464Z,338,25
+earn,www.amazon.com,0,0,2024-12-17T17:23:58.601Z,313,23
+finalize redeem,www.amazon.com,0,-300,2024-11-29T20:14:29.823Z,290,0
+earn,www.amazon.com,300,0,2024-11-29T20:14:25.242Z,290,29
+earn,www.amazon.com,300,0,2024-11-29T20:14:25.180Z,261,29
+initialize redeem,www.amazon.com,300,300,2024-11-29T20:14:24.364Z,232,-300
+earn,www.amazon.com,0,0,2024-11-29T20:13:02.710Z,532,12
+earn,www.amazon.com,0,0,2024-11-29T20:13:02.672Z,520,12
+earn,www.amazon.com,0,0,2024-11-29T19:49:24.507Z,508,30
+earn,www.amazon.com,0,0,2024-11-29T19:49:24.140Z,478,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:24.052Z,453,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.892Z,428,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.822Z,403,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.716Z,378,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.625Z,353,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.482Z,328,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.396Z,303,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.292Z,278,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.210Z,253,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.080Z,228,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:23.001Z,203,25
+earn,www.amazon.com,0,0,2024-11-29T19:49:22.973Z,178,30
+clear balance,www.amazon.com,0,0,2024-11-01T17:10:51.422Z,148,-26
+earn,www.amazon.com,0,0,2024-10-15T01:05:32.427Z,174,25
+earn,www.amazon.com,0,0,2024-10-15T01:04:32.812Z,149,25
+earn,www.amazon.com,0,0,2024-10-15T01:04:32.627Z,124,25
+earn,www.amazon.com,0,0,2024-10-15T01:04:32.448Z,99,25
+earn,www.amazon.com,0,0,2024-10-15T01:04:32.397Z,74,30
+earn,www.amazon.com,0,0,2024-09-24T04:09:35.221Z,44,18
+clear balance,www.amazon.com,0,0,2024-08-01T15:15:22.470Z,26,-118
+earn,www.amazon.com,0,0,2024-07-06T18:51:06.359Z,144,26
+clear balance,www.amazon.com,0,0,2024-07-01T16:07:17.927Z,118,-159
+earn,www.amazon.com,0,0,2024-04-17T01:24:53.354Z,277,26
+earn,www.amazon.com,0,0,2024-04-17T01:24:53.227Z,251,26
+earn,www.amazon.com,0,0,2024-04-11T20:29:32.883Z,225,6
+earn,www.amazon.com,0,0,2024-04-10T00:35:23.442Z,219,9
+earn,www.amazon.com,0,0,2024-04-06T22:45:39.917Z,210,9
+earn,www.amazon.com,0,0,2024-04-06T19:59:38.134Z,201,12
+earn,www.amazon.com,0,0,2024-04-06T19:59:38.039Z,189,18
+earn,www.amazon.com,0,0,2024-04-06T19:59:37.804Z,171,12
+earn,www.amazon.com,0,0,2024-03-25T00:43:42.261Z,159,27
+earn,www.amazon.com,0,0,2024-03-18T04:00:09.546Z,132,36
+earn,www.amazon.com,0,0,2024-03-18T04:00:09.427Z,96,30
+earn,www.amazon.com,0,0,2024-03-18T04:00:09.312Z,66,18
+earn,www.amazon.com,0,0,2024-03-18T04:00:09.220Z,48,36
+earn,www.amazon.com,0,0,2024-03-18T04:00:09.194Z,12,12
+clear balance,www.amazon.com,0,0,2023-10-02T05:29:09.278Z,0,-50
+earn,www.amazon.com,0,0,2023-03-21T16:48:21.588Z,50,50

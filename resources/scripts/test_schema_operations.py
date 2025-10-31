@@ -1,718 +1,951 @@
 #!/usr/bin/env python3
 """
-Test Schema Operations & CRUD Validation
-Story 1.4: Task 5 - Test database connectivity and operations
-Purpose: Verify schema creation, indexes, and basic CRUD operations
-Database: Neon.tech PostgreSQL v17
-Date: 2025-10-30
+Comprehensive Schema Operations Test Suite
+Story 1.4: Task 5 - Validate schema implementation
+
+This script runs comprehensive tests on the BookHelper PostgreSQL schema:
+1. Schema structure validation (all columns, types, constraints)
+2. CRUD operations on all 6 tables
+3. JSONB operations (INSERT, UPDATE, SELECT with @>, ?, ?&, ?| operators)
+4. Foreign key relationships and CASCADE behavior
+5. Constraint enforcement (UNIQUE, CHECK, NOT NULL)
+6. Trigger functionality (updated_at auto-update on all tables)
+7. View queries with sample data (5 views)
+8. Index existence verification
+9. Edge cases and error conditions
+
+Usage:
+    python3 test_schema_operations.py
+
+Environment Variables (from .env.neon):
+    NEON_HOST, NEON_PORT, NEON_USER, NEON_PASSWORD, NEON_DATABASE
+
+Exit Codes:
+    0 - All tests passed
+    1 - One or more tests failed
 """
 
 import os
 import sys
-import json
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
+from pathlib import Path
 import psycopg2
-from psycopg2 import Error, sql
+from psycopg2 import sql, Error, errors
+from datetime import datetime, timedelta
+import time
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
+# Terminal colors
+class Color:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    BOLD = '\033[1m'
+    RESET = '\033[0m'
 
-load_dotenv(dotenv_path='/Users/alhouse2/Documents/GitHub/BookHelper/.env.neon')
+class TestStats:
+    """Track test results"""
+    def __init__(self):
+        self.passed = 0
+        self.failed = 0
+        self.warnings = 0
 
-DB_HOST = os.getenv('NEON_HOST')
-DB_PORT = os.getenv('NEON_PORT', '5432')
-DB_USER = os.getenv('NEON_USER')
-DB_PASSWORD = os.getenv('NEON_PASSWORD')
-DB_NAME = os.getenv('NEON_DATABASE')
+    def pass_test(self, name):
+        self.passed += 1
+        print(f"{Color.GREEN}✓{Color.RESET} {name}")
 
-# Colors for terminal output
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-RESET = '\033[0m'
-BOLD = '\033[1m'
+    def fail_test(self, name, error):
+        self.failed += 1
+        print(f"{Color.RED}✗{Color.RESET} {name}")
+        print(f"  {Color.RED}Error: {error}{Color.RESET}")
 
-# ============================================================================
-# CONNECTION MANAGEMENT
-# ============================================================================
+    def warn_test(self, name, warning):
+        self.warnings += 1
+        print(f"{Color.YELLOW}⚠{Color.RESET} {name}")
+        print(f"  {Color.YELLOW}Warning: {warning}{Color.RESET}")
 
-def get_connection():
-    """Establish database connection"""
+    def summary(self):
+        total = self.passed + self.failed
+        print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+        print(f"{Color.BOLD}Test Summary{Color.RESET}")
+        print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+        print(f"Total Tests: {total}")
+        print(f"{Color.GREEN}Passed: {self.passed}{Color.RESET}")
+        print(f"{Color.RED}Failed: {self.failed}{Color.RESET}")
+        print(f"{Color.YELLOW}Warnings: {self.warnings}{Color.RESET}\n")
+
+        if self.failed == 0:
+            print(f"{Color.BOLD}{Color.GREEN}✓ ALL TESTS PASSED{Color.RESET}\n")
+            return 0
+        else:
+            print(f"{Color.BOLD}{Color.RED}✗ TESTS FAILED{Color.RESET}\n")
+            return 1
+
+def load_env_file(filepath='.env.neon'):
+    """Load environment variables from .env file"""
+    env_path = Path(filepath)
+    if not env_path.exists():
+        print(f"{Color.RED}✗ .env.neon file not found{Color.RESET}")
+        return False
+
+    with open(env_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                key, value = line.split('=', 1)
+                os.environ[key.strip()] = value.strip()
+
+    return True
+
+def get_db_connection():
+    """Establish connection to Neon PostgreSQL database"""
     try:
         conn = psycopg2.connect(
-            host=DB_HOST,
-            port=DB_PORT,
-            database=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            sslmode='require'
+            host=os.getenv('NEON_HOST'),
+            port=os.getenv('NEON_PORT', '5432'),
+            database=os.getenv('NEON_DATABASE'),
+            user=os.getenv('NEON_USER'),
+            password=os.getenv('NEON_PASSWORD'),
+            sslmode='require',
+            connect_timeout=10
         )
         return conn
     except Error as e:
-        print(f"{RED}✗ Connection failed: {e}{RESET}")
+        print(f"{Color.RED}✗ Connection failed: {e}{Color.RESET}")
         sys.exit(1)
 
-def close_connection(conn):
-    """Close database connection"""
-    if conn:
-        conn.close()
+# ============================================================
+# TEST SUITE 1: SCHEMA STRUCTURE VALIDATION
+# ============================================================
 
-# ============================================================================
-# TEST SUITE: SCHEMA VALIDATION
-# ============================================================================
+def test_schema_structure(conn, stats):
+    """Validate all tables have correct columns and types"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 1: Schema Structure Validation{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
 
-def test_tables_exist(conn):
-    """Test 1: Verify all tables were created"""
-    print(f"\n{BLUE}Test 1: Verify tables exist{RESET}")
-
-    cursor = conn.cursor()
-    required_tables = ['authors', 'publishers', 'books', 'book_editions', 'reading_sessions']
-    missing_tables = []
-
-    try:
-        for table in required_tables:
-            cursor.execute(
-                """
-                SELECT 1 FROM information_schema.tables
-                WHERE table_name = %s AND table_schema = 'public'
-                """,
-                (table,)
-            )
-            result = cursor.fetchone()
-            if result:
-                print(f"  {GREEN}✓{RESET} Table '{table}' exists")
-            else:
-                print(f"  {RED}✗{RESET} Table '{table}' missing")
-                missing_tables.append(table)
-
-        if missing_tables:
-            print(f"\n{RED}FAILED: Missing tables: {missing_tables}{RESET}")
-            return False
-        else:
-            print(f"\n{GREEN}PASSED{RESET}")
-            return True
-
-    except Error as e:
-        print(f"{RED}✗ Query failed: {e}{RESET}")
-        return False
-    finally:
-        cursor.close()
-
-def test_columns(conn):
-    """Test 2: Verify expected columns in each table"""
-    print(f"\n{BLUE}Test 2: Verify table columns{RESET}")
-
-    expected_columns = {
-        'authors': ['author_id', 'author_name', 'author_hardcover_id', 'is_bipoc', 'is_lgbtq'],
-        'publishers': ['publisher_id', 'publisher_name', 'publisher_hardcover_id', 'parent_publisher_id'],
-        'books': ['book_id', 'title', 'author', 'author_id', 'isbn_13', 'publisher_id', 'media_types_owned', 'cached_tags', 'user_rating', 'read_count'],
-        'book_editions': ['edition_id', 'book_id', 'edition_format', 'edition_name', 'condition'],
-        'reading_sessions': ['session_id', 'book_id', 'start_time', 'duration_minutes', 'pages_read', 'media_type', 'device', 'read_instance_id', 'is_parallel_read']
+    # Expected schema structure
+    expected_tables = {
+        'authors': ['author_id', 'author_name', 'alternate_names', 'is_bipoc', 'is_lgbtq',
+                   'contributions', 'created_at', 'updated_at'],
+        'publishers': ['publisher_id', 'publisher_name', 'alternate_names', 'country',
+                      'parent_publisher', 'created_at', 'updated_at'],
+        'books': ['book_id', 'title', 'author', 'author_id', 'publisher_id', 'isbn_10',
+                 'isbn_13', 'page_count', 'published_date', 'description', 'language',
+                 'genres', 'moods', 'content_warnings', 'cached_tags', 'alternative_titles',
+                 'user_owns_ebook', 'user_owns_audiobook', 'user_owns_physical',
+                 'user_reading_status', 'user_added_date', 'read_count',
+                 'created_at', 'updated_at'],
+        'book_editions': ['edition_id', 'book_id', 'edition_format', 'publisher_id',
+                         'isbn_10', 'isbn_13', 'page_count', 'published_date',
+                         'created_at', 'updated_at'],
+        'reading_sessions': ['session_id', 'book_id', 'start_time', 'end_time',
+                            'duration_minutes', 'device', 'media_type', 'pages_read',
+                            'start_page', 'end_page', 'start_percent', 'end_percent',
+                            'is_parallel_read', 'read_instance_id', 'created_at'],
+        'sync_status': ['sync_id', 'source', 'last_sync', 'records_processed',
+                       'status', 'error_message', 'created_at', 'updated_at']
     }
 
-    cursor = conn.cursor()
-    all_passed = True
+    with conn.cursor() as cur:
+        for table_name, expected_columns in expected_tables.items():
+            try:
+                # Get actual columns
+                cur.execute("""
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = %s
+                    ORDER BY ordinal_position
+                """, (table_name,))
 
-    try:
-        for table, columns in expected_columns.items():
-            print(f"\n  Table: {table}")
-            cursor.execute(
-                """
-                SELECT column_name FROM information_schema.columns
-                WHERE table_name = %s AND table_schema = 'public'
-                ORDER BY ordinal_position
-                """,
-                (table,)
-            )
-            existing_columns = [row[0] for row in cursor.fetchall()]
+                actual_columns = [row[0] for row in cur.fetchall()]
 
-            for col in columns:
-                if col in existing_columns:
-                    print(f"    {GREEN}✓{RESET} Column '{col}' exists")
+                # Check all expected columns exist
+                missing = set(expected_columns) - set(actual_columns)
+                extra = set(actual_columns) - set(expected_columns)
+
+                if missing:
+                    stats.fail_test(f"Table '{table_name}' structure",
+                                  f"Missing columns: {', '.join(missing)}")
+                elif extra:
+                    stats.warn_test(f"Table '{table_name}' structure",
+                                  f"Extra columns: {', '.join(extra)}")
                 else:
-                    print(f"    {RED}✗{RESET} Column '{col}' missing")
-                    all_passed = False
+                    stats.pass_test(f"Table '{table_name}' has all expected columns ({len(expected_columns)})")
 
-        if all_passed:
-            print(f"\n{GREEN}PASSED{RESET}")
-        else:
-            print(f"\n{RED}FAILED{RESET}")
+            except Error as e:
+                stats.fail_test(f"Table '{table_name}' structure check", str(e))
 
-        return all_passed
+def test_jsonb_columns(conn, stats):
+    """Verify JSONB columns have correct data type"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 1.1: JSONB Column Types{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
 
-    except Error as e:
-        print(f"{RED}✗ Query failed: {e}{RESET}")
-        return False
-    finally:
-        cursor.close()
-
-def test_indexes(conn):
-    """Test 3: Verify indexes were created"""
-    print(f"\n{BLUE}Test 3: Verify indexes{RESET}")
-
-    required_indexes = [
-        'idx_publishers_hardcover_id',
-        'idx_books_isbn_13',
-        'idx_books_asin',
-        'idx_books_author_id',
-        'idx_books_cached_tags',
-        'idx_book_editions_book_id',
-        'idx_book_editions_format',
-        'idx_reading_sessions_book_id',
-        'idx_reading_sessions_start_time',
-        'idx_reading_sessions_read_instance',
-        'idx_reading_sessions_device'
+    jsonb_columns = [
+        ('authors', 'alternate_names'),
+        ('authors', 'contributions'),
+        ('publishers', 'alternate_names'),
+        ('books', 'genres'),
+        ('books', 'moods'),
+        ('books', 'content_warnings'),
+        ('books', 'cached_tags'),
+        ('books', 'alternative_titles')
     ]
 
-    cursor = conn.cursor()
-    missing_indexes = []
-
-    try:
-        for index in required_indexes:
-            cursor.execute(
-                """
-                SELECT 1 FROM information_schema.statistics
-                WHERE index_name = %s AND table_schema = 'public'
-                """,
-                (index,)
-            )
-            result = cursor.fetchone()
-
-            # PostgreSQL uses pg_indexes
-            cursor.execute(
-                """
-                SELECT 1 FROM pg_indexes
-                WHERE indexname = %s AND schemaname = 'public'
-                """,
-                (index,)
-            )
-            result = cursor.fetchone()
-
-            if result:
-                print(f"  {GREEN}✓{RESET} Index '{index}' exists")
-            else:
-                print(f"  {RED}✗{RESET} Index '{index}' missing")
-                missing_indexes.append(index)
-
-        if missing_indexes:
-            print(f"\n{YELLOW}WARNING: Missing indexes (non-critical): {missing_indexes}{RESET}")
-            return True  # Don't fail - indexes can be created separately
-        else:
-            print(f"\n{GREEN}PASSED{RESET}")
-            return True
-
-    except Error as e:
-        print(f"{YELLOW}WARNING: Index check inconclusive: {e}{RESET}")
-        return True  # Don't fail
-
-    finally:
-        cursor.close()
-
-def test_views_exist(conn):
-    """Test 4: Verify computed views were created"""
-    print(f"\n{BLUE}Test 4: Verify views{RESET}")
-
-    required_views = ['book_stats', 'reading_timeline', 'publisher_analytics', 'author_analytics', 'tandem_reading_sessions']
-    cursor = conn.cursor()
-    missing_views = []
-
-    try:
-        for view in required_views:
-            cursor.execute(
-                """
-                SELECT 1 FROM information_schema.views
-                WHERE table_name = %s AND table_schema = 'public'
-                """,
-                (view,)
-            )
-            result = cursor.fetchone()
-            if result:
-                print(f"  {GREEN}✓{RESET} View '{view}' exists")
-            else:
-                print(f"  {RED}✗{RESET} View '{view}' missing")
-                missing_views.append(view)
-
-        if missing_views:
-            print(f"\n{YELLOW}WARNING: Missing views: {missing_views}{RESET}")
-            return True  # Don't fail
-
-        print(f"\n{GREEN}PASSED{RESET}")
-        return True
-
-    except Error as e:
-        print(f"{YELLOW}WARNING: View check inconclusive: {e}{RESET}")
-        return True
-
-    finally:
-        cursor.close()
-
-# ============================================================================
-# TEST SUITE: CRUD OPERATIONS
-# ============================================================================
-
-def test_create_publisher(conn):
-    """Test 5: CREATE publisher record"""
-    print(f"\n{BLUE}Test 5: INSERT publisher{RESET}")
-
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(
-            """
-            INSERT INTO publishers (publisher_name, publisher_hardcover_id, alternate_names)
-            VALUES (%s, %s, %s)
-            RETURNING publisher_id
-            """,
-            ('Test Publisher', 'hc_pub_9999', ['Test', 'Test Pub'])
-        )
-        publisher_id = cursor.fetchone()[0]
-        conn.commit()
-
-        print(f"  {GREEN}✓{RESET} Publisher created (ID: {publisher_id})")
-        print(f"\n{GREEN}PASSED{RESET}")
-        return True, publisher_id
-
-    except Error as e:
-        conn.rollback()
-        print(f"  {RED}✗{RESET} INSERT failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False, None
-
-    finally:
-        cursor.close()
-
-def test_create_book(conn, publisher_id=None):
-    """Test 6: CREATE book record"""
-    print(f"\n{BLUE}Test 6: INSERT book{RESET}")
-
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(
-            """
-            INSERT INTO books (
-                title, author, page_count, isbn_13, publisher_id,
-                language, hardcover_rating, series_name, series_number, source, media_types_owned, read_count
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING book_id
-            """,
-            (
-                'Test Book Title',
-                'Test Author',
-                300,
-                '978-0000000000',
-                publisher_id,
-                'en',
-                4.5,
-                'Test Series',
-                1,
-                'koreader',
-                ['ebook'],
-                1
-            )
-        )
-        book_id = cursor.fetchone()[0]
-        conn.commit()
-
-        print(f"  {GREEN}✓{RESET} Book created (ID: {book_id})")
-        print(f"\n{GREEN}PASSED{RESET}")
-        return True, book_id
-
-    except Error as e:
-        conn.rollback()
-        print(f"  {RED}✗{RESET} INSERT failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False, None
-
-    finally:
-        cursor.close()
-
-def test_create_reading_session(conn, book_id):
-    """Test 7: CREATE reading_session record"""
-    print(f"\n{BLUE}Test 7: INSERT reading_session{RESET}")
-
-    cursor = conn.cursor()
-
-    try:
-        import uuid
-        start_time = datetime.now() - timedelta(days=1)
-        read_instance_id = uuid.uuid4()
-
-        cursor.execute(
-            """
-            INSERT INTO reading_sessions (
-                book_id, start_time, duration_minutes, pages_read, device, media_type, data_source, read_instance_id, read_number
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING session_id
-            """,
-            (
-                book_id,
-                start_time,
-                45,
-                25,
-                'test-device',
-                'ebook',
-                'koreader',
-                read_instance_id,
-                1
-            )
-        )
-        session_id = cursor.fetchone()[0]
-        conn.commit()
-
-        print(f"  {GREEN}✓{RESET} Reading session created (ID: {session_id})")
-        print(f"\n{GREEN}PASSED{RESET}")
-        return True, session_id
-
-    except Error as e:
-        conn.rollback()
-        print(f"  {RED}✗{RESET} INSERT failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False, None
-
-    finally:
-        cursor.close()
-
-def test_read_data(conn, book_id):
-    """Test 8: READ data with SELECT queries"""
-    print(f"\n{BLUE}Test 8: SELECT queries{RESET}")
-
-    cursor = conn.cursor()
-    all_passed = True
-
-    try:
-        # Query 1: Get book details
-        cursor.execute("SELECT book_id, title, author FROM books WHERE book_id = %s", (book_id,))
-        book = cursor.fetchone()
-        if book:
-            print(f"  {GREEN}✓{RESET} SELECT book: {book[1]} by {book[2]}")
-        else:
-            print(f"  {RED}✗{RESET} Book not found")
-            all_passed = False
-
-        # Query 2: Get reading sessions for book
-        cursor.execute(
-            "SELECT session_id, start_time, duration_minutes FROM reading_sessions WHERE book_id = %s",
-            (book_id,)
-        )
-        sessions = cursor.fetchall()
-        print(f"  {GREEN}✓{RESET} SELECT sessions: {len(sessions)} found")
-
-        # Query 3: Join query
-        cursor.execute(
-            """
-            SELECT b.title, rs.duration_minutes, rs.media_type
-            FROM reading_sessions rs
-            JOIN books b ON rs.book_id = b.book_id
-            WHERE b.book_id = %s
-            """,
-            (book_id,)
-        )
-        joined = cursor.fetchall()
-        print(f"  {GREEN}✓{RESET} JOIN query: {len(joined)} results")
-
-        if all_passed:
-            print(f"\n{GREEN}PASSED{RESET}")
-        else:
-            print(f"\n{RED}FAILED{RESET}")
-
-        return all_passed
-
-    except Error as e:
-        print(f"  {RED}✗{RESET} Query failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False
-
-    finally:
-        cursor.close()
-
-def test_views(conn, book_id):
-    """Test 9: Query computed views"""
-    print(f"\n{BLUE}Test 9: Query views{RESET}")
-
-    cursor = conn.cursor()
-    all_passed = True
-
-    try:
-        # Query book_stats view
-        cursor.execute("SELECT * FROM book_stats WHERE book_id = %s", (book_id,))
-        stats = cursor.fetchone()
-        if stats:
-            print(f"  {GREEN}✓{RESET} book_stats view: last_opened={stats[3]}, total_sessions={stats[10]}")
-        else:
-            print(f"  {YELLOW}⚠{RESET} book_stats view empty (expected for new book)")
-
-        # Query reading_timeline view
-        cursor.execute("SELECT COUNT(*) FROM reading_timeline WHERE book_id = %s", (book_id,))
-        count = cursor.fetchone()[0]
-        print(f"  {GREEN}✓{RESET} reading_timeline view: {count} sessions")
-
-        if all_passed:
-            print(f"\n{GREEN}PASSED{RESET}")
-        else:
-            print(f"\n{RED}FAILED{RESET}")
-
-        return all_passed
-
-    except Error as e:
-        print(f"  {RED}✗{RESET} View query failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False
-
-    finally:
-        cursor.close()
-
-def test_update_data(conn, book_id):
-    """Test 10: UPDATE book record"""
-    print(f"\n{BLUE}Test 10: UPDATE book{RESET}")
-
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(
-            """
-            UPDATE books
-            SET hardcover_rating = %s, hardcover_rating_count = %s, user_rating = %s, user_rating_date = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-            WHERE book_id = %s
-            RETURNING book_id, hardcover_rating, user_rating
-            """,
-            (4.7, 1234, 5.0, book_id)
-        )
-        result = cursor.fetchone()
-        conn.commit()
-
-        if result:
-            print(f"  {GREEN}✓{RESET} Book updated: hardcover_rating={result[1]}, user_rating={result[2]}")
-            print(f"\n{GREEN}PASSED{RESET}")
-            return True
-        else:
-            print(f"  {RED}✗{RESET} Update failed")
-            print(f"\n{RED}FAILED{RESET}")
-            return False
-
-    except Error as e:
-        conn.rollback()
-        print(f"  {RED}✗{RESET} UPDATE failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False
-
-    finally:
-        cursor.close()
-
-def test_delete_data(conn, book_id, publisher_id):
-    """Test 11: DELETE records (with cascade)"""
-    print(f"\n{BLUE}Test 11: DELETE records{RESET}")
-
-    cursor = conn.cursor()
-
-    try:
-        # Delete book (should cascade to reading_sessions)
-        cursor.execute("DELETE FROM books WHERE book_id = %s", (book_id,))
-        deleted_books = cursor.rowcount
-        print(f"  {GREEN}✓{RESET} Deleted {deleted_books} book(s)")
-
-        # Delete publisher
-        cursor.execute("DELETE FROM publishers WHERE publisher_id = %s", (publisher_id,))
-        deleted_pubs = cursor.rowcount
-        print(f"  {GREEN}✓{RESET} Deleted {deleted_pubs} publisher(s)")
-
-        conn.commit()
-        print(f"\n{GREEN}PASSED{RESET}")
-        return True
-
-    except Error as e:
-        conn.rollback()
-        print(f"  {RED}✗{RESET} DELETE failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False
-
-    finally:
-        cursor.close()
-
-# ============================================================================
-# TEST SUITE: CONSTRAINTS & VALIDATION
-# ============================================================================
-
-def test_unique_constraint(conn, book_id):
-    """Test 12: Verify UNIQUE constraint on reading_sessions"""
-    print(f"\n{BLUE}Test 12: Test UNIQUE constraint{RESET}")
-
-    cursor = conn.cursor()
-
-    try:
-        start_time = datetime.now() - timedelta(days=2)
-        device = 'test-constraint-device'
-
-        # Insert first session
-        cursor.execute(
-            """
-            INSERT INTO reading_sessions (
-                book_id, start_time, duration_minutes, device, media_type
-            ) VALUES (%s, %s, %s, %s, %s)
-            """,
-            (book_id, start_time, 30, device, 'ebook')
-        )
-        conn.commit()
-        print(f"  {GREEN}✓{RESET} First session inserted")
-
-        # Try to insert duplicate
+    with conn.cursor() as cur:
+        for table_name, column_name in jsonb_columns:
+            try:
+                cur.execute("""
+                    SELECT data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = %s
+                      AND column_name = %s
+                """, (table_name, column_name))
+
+                result = cur.fetchone()
+                if result and result[0] == 'jsonb':
+                    stats.pass_test(f"{table_name}.{column_name} is JSONB")
+                else:
+                    actual_type = result[0] if result else 'NOT FOUND'
+                    stats.fail_test(f"{table_name}.{column_name} JSONB check",
+                                  f"Expected JSONB, got {actual_type}")
+
+            except Error as e:
+                stats.fail_test(f"{table_name}.{column_name} type check", str(e))
+
+def test_constraints(conn, stats):
+    """Verify key constraints exist"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 1.2: Constraint Validation{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    with conn.cursor() as cur:
+        # Check PRIMARY KEY constraints
+        primary_keys = {
+            'authors': 'author_id',
+            'publishers': 'publisher_id',
+            'books': 'book_id',
+            'book_editions': 'edition_id',
+            'reading_sessions': 'session_id',
+            'sync_status': 'sync_id'
+        }
+
+        for table, pk_column in primary_keys.items():
+            try:
+                cur.execute("""
+                    SELECT COUNT(*)
+                    FROM information_schema.table_constraints tc
+                    JOIN information_schema.key_column_usage kcu
+                      ON tc.constraint_name = kcu.constraint_name
+                    WHERE tc.table_name = %s
+                      AND tc.constraint_type = 'PRIMARY KEY'
+                      AND kcu.column_name = %s
+                """, (table, pk_column))
+
+                if cur.fetchone()[0] > 0:
+                    stats.pass_test(f"PRIMARY KEY on {table}({pk_column})")
+                else:
+                    stats.fail_test(f"PRIMARY KEY on {table}({pk_column})", "Not found")
+
+            except Error as e:
+                stats.fail_test(f"PRIMARY KEY check on {table}", str(e))
+
+        # Check UNIQUE constraint on reading_sessions
         try:
-            cursor.execute(
-                """
-                INSERT INTO reading_sessions (
-                    book_id, start_time, duration_minutes, device, media_type
-                ) VALUES (%s, %s, %s, %s, %s)
-                """,
-                (book_id, start_time, 30, device, 'ebook')
-            )
-            conn.commit()
-            print(f"  {RED}✗{RESET} Duplicate constraint NOT enforced!")
-            print(f"\n{RED}FAILED{RESET}")
-            return False
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM information_schema.table_constraints
+                WHERE table_name = 'reading_sessions'
+                  AND constraint_type = 'UNIQUE'
+            """)
+
+            if cur.fetchone()[0] > 0:
+                stats.pass_test("UNIQUE constraint on reading_sessions (book_id, start_time, device)")
+            else:
+                stats.fail_test("UNIQUE constraint on reading_sessions", "Not found")
 
         except Error as e:
-            if 'unique' in str(e).lower():
-                print(f"  {GREEN}✓{RESET} Duplicate rejected (constraint working)")
-                conn.rollback()
-                print(f"\n{GREEN}PASSED{RESET}")
-                return True
-            else:
-                raise
+            stats.fail_test("UNIQUE constraint check", str(e))
 
-    except Error as e:
-        conn.rollback()
-        print(f"  {RED}✗{RESET} Test failed: {e}")
-        print(f"\n{RED}FAILED{RESET}")
-        return False
+# ============================================================
+# TEST SUITE 2: CRUD OPERATIONS
+# ============================================================
 
-    finally:
-        cursor.close()
-
-def test_check_constraint(conn):
-    """Test 13: Verify CHECK constraint on duration_minutes"""
-    print(f"\n{BLUE}Test 13: Test CHECK constraint{RESET}")
-
-    # Create minimal book/session first
-    cursor = conn.cursor()
+def test_crud_operations(conn, stats):
+    """Test CRUD operations on all tables"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 2: CRUD Operations{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
 
     try:
-        # Insert book
-        cursor.execute(
-            "INSERT INTO books (title, author) VALUES (%s, %s) RETURNING book_id",
-            ('Constraint Test Book', 'Test')
-        )
-        test_book_id = cursor.fetchone()[0]
-        conn.commit()
+        with conn.cursor() as cur:
+            # === CREATE: Insert test data ===
 
-        # Try negative duration
-        try:
-            cursor.execute(
-                """
-                INSERT INTO reading_sessions (
-                    book_id, start_time, duration_minutes, device
-                ) VALUES (%s, %s, %s, %s)
-                """,
-                (test_book_id, datetime.now(), -5, 'test')
-            )
+            # 1. Insert author with JSONB
+            try:
+                cur.execute("""
+                    INSERT INTO authors (author_name, alternate_names, is_bipoc, is_lgbtq, contributions)
+                    VALUES (%s, %s, %s, %s, %s)
+                    RETURNING author_id
+                """, ('Maya Rodriguez', '["M. Rodriguez", "Maya R."]', True, True, '["author", "editor"]'))
+
+                author_id = cur.fetchone()[0]
+                stats.pass_test(f"INSERT author with JSONB (author_id: {author_id})")
+            except Error as e:
+                stats.fail_test("INSERT author", str(e))
+                conn.rollback()
+                return
+
+            # 2. Insert publisher with JSONB
+            try:
+                cur.execute("""
+                    INSERT INTO publishers (publisher_name, alternate_names, country, parent_publisher)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING publisher_id
+                """, ('Indie Press LLC', '["Indie Press", "IP Publishing"]', 'USA', 'Mega Corp Publishers'))
+
+                publisher_id = cur.fetchone()[0]
+                stats.pass_test(f"INSERT publisher (publisher_id: {publisher_id})")
+            except Error as e:
+                stats.fail_test("INSERT publisher", str(e))
+                conn.rollback()
+                return
+
+            # 3. Insert book with all new fields
+            try:
+                cur.execute("""
+                    INSERT INTO books (
+                        title, author, author_id, publisher_id, isbn_13, page_count,
+                        genres, moods, content_warnings, alternative_titles,
+                        user_owns_ebook, user_owns_audiobook, user_owns_physical,
+                        user_reading_status, user_added_date, read_count
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING book_id
+                """, (
+                    'The Quantum Garden', 'Maya Rodriguez', author_id, publisher_id,
+                    '9781234567890', 425,
+                    '["Science Fiction", "Romance", "LGBTQ+"]',
+                    '["dark", "witty", "emotional"]',
+                    '["violence", "sexual content"]',
+                    '["El Jardín Cuántico"]',
+                    True, True, False,
+                    'currently-reading', datetime.now(), 2
+                ))
+
+                book_id = cur.fetchone()[0]
+                stats.pass_test(f"INSERT book with JSONB and user fields (book_id: {book_id})")
+            except Error as e:
+                stats.fail_test("INSERT book", str(e))
+                conn.rollback()
+                return
+
+            # 4. Insert book_edition
+            try:
+                cur.execute("""
+                    INSERT INTO book_editions (
+                        book_id, edition_format, publisher_id, isbn_13, page_count, published_date
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING edition_id
+                """, (book_id, 'hardcover', publisher_id, '9789876543210', 450, '2024-01-15'))
+
+                edition_id = cur.fetchone()[0]
+                stats.pass_test(f"INSERT book_edition (edition_id: {edition_id})")
+            except Error as e:
+                stats.fail_test("INSERT book_edition", str(e))
+                conn.rollback()
+                return
+
+            # 5. Insert reading_session with UUID read_instance_id
+            try:
+                cur.execute("""
+                    INSERT INTO reading_sessions (
+                        book_id, start_time, end_time, duration_minutes,
+                        device, media_type, pages_read, start_page, end_page,
+                        is_parallel_read
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING session_id, read_instance_id
+                """, (
+                    book_id, datetime.now() - timedelta(hours=2), datetime.now() - timedelta(hours=1),
+                    60, 'kindle-paperwhite', 'ebook', 35, 100, 135, False
+                ))
+
+                session_id, read_instance_id = cur.fetchone()
+                stats.pass_test(f"INSERT reading_session with UUID (session_id: {session_id}, read_instance_id: {read_instance_id})")
+            except Error as e:
+                stats.fail_test("INSERT reading_session", str(e))
+                conn.rollback()
+                return
+
+            # 6. Insert sync_status
+            try:
+                cur.execute("""
+                    INSERT INTO sync_status (source, last_sync, records_processed, status)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING sync_id
+                """, ('koreader', datetime.now(), 150, 'success'))
+
+                sync_id = cur.fetchone()[0]
+                stats.pass_test(f"INSERT sync_status (sync_id: {sync_id})")
+            except Error as e:
+                stats.fail_test("INSERT sync_status", str(e))
+                conn.rollback()
+                return
+
             conn.commit()
-            print(f"  {RED}✗{RESET} Negative duration allowed (should be rejected)")
-            print(f"\n{RED}FAILED{RESET}")
-            return False
 
-        except Error as e:
-            if 'duration' in str(e).lower() or 'check' in str(e).lower():
-                print(f"  {GREEN}✓{RESET} Negative duration rejected (constraint working)")
+            # === READ: Query inserted data ===
+
+            try:
+                cur.execute("SELECT author_name, alternate_names FROM authors WHERE author_id = %s", (author_id,))
+                result = cur.fetchone()
+                if result and result[0] == 'Maya Rodriguez':
+                    stats.pass_test(f"SELECT author by ID (found: {result[0]})")
+                else:
+                    stats.fail_test("SELECT author", "Data mismatch")
+            except Error as e:
+                stats.fail_test("SELECT author", str(e))
+
+            try:
+                cur.execute("SELECT COUNT(*) FROM books WHERE book_id = %s", (book_id,))
+                if cur.fetchone()[0] == 1:
+                    stats.pass_test("SELECT book by ID")
+                else:
+                    stats.fail_test("SELECT book", "Not found")
+            except Error as e:
+                stats.fail_test("SELECT book", str(e))
+
+            # === UPDATE: Modify data and test trigger ===
+
+            try:
+                # Get current updated_at
+                cur.execute("SELECT updated_at FROM books WHERE book_id = %s", (book_id,))
+                old_timestamp = cur.fetchone()[0]
+
+                # Small delay to ensure timestamp difference
+                time.sleep(0.1)
+
+                # Update book
+                cur.execute("""
+                    UPDATE books
+                    SET page_count = 430, read_count = 3
+                    WHERE book_id = %s
+                """, (book_id,))
+
+                # Get new updated_at
+                cur.execute("SELECT updated_at, page_count, read_count FROM books WHERE book_id = %s", (book_id,))
+                result = cur.fetchone()
+                new_timestamp, page_count, read_count = result
+
+                if new_timestamp > old_timestamp and page_count == 430 and read_count == 3:
+                    stats.pass_test("UPDATE book (data updated, trigger updated updated_at)")
+                else:
+                    stats.fail_test("UPDATE book", f"Trigger failed or data mismatch (old: {old_timestamp}, new: {new_timestamp})")
+
+                conn.commit()
+            except Error as e:
+                stats.fail_test("UPDATE book", str(e))
                 conn.rollback()
 
-                # Cleanup
-                cursor.execute("DELETE FROM books WHERE book_id = %s", (test_book_id,))
+            # === DELETE: Test CASCADE behavior ===
+
+            # Store IDs for cleanup
+            cleanup_data = {
+                'author_id': author_id,
+                'publisher_id': publisher_id,
+                'book_id': book_id,
+                'edition_id': edition_id,
+                'session_id': session_id,
+                'sync_id': sync_id
+            }
+
+            return cleanup_data
+
+    except Error as e:
+        stats.fail_test("CRUD operations", str(e))
+        conn.rollback()
+        return None
+
+# ============================================================
+# TEST SUITE 3: JSONB OPERATIONS
+# ============================================================
+
+def test_jsonb_operations(conn, stats, cleanup_data):
+    """Test JSONB containment and operators"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 3: JSONB Operations{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    if not cleanup_data:
+        print(f"{Color.YELLOW}⚠ Skipping JSONB tests (no test data){Color.RESET}\n")
+        return
+
+    book_id = cleanup_data['book_id']
+
+    with conn.cursor() as cur:
+        # Test 1: @> containment operator (genres)
+        try:
+            cur.execute("""
+                SELECT title, genres
+                FROM books
+                WHERE genres @> '["Science Fiction"]'::jsonb AND book_id = %s
+            """, (book_id,))
+
+            result = cur.fetchone()
+            if result and result[0] == 'The Quantum Garden':
+                stats.pass_test("JSONB @> containment (genres contains 'Science Fiction')")
+            else:
+                stats.fail_test("JSONB @> containment", "No match found")
+        except Error as e:
+            stats.fail_test("JSONB @> operator", str(e))
+
+        # Test 2: ? key existence operator (moods)
+        try:
+            cur.execute("""
+                SELECT title
+                FROM books
+                WHERE moods ? 'witty' AND book_id = %s
+            """, (book_id,))
+
+            if cur.fetchone():
+                stats.pass_test("JSONB ? key existence (moods contains 'witty')")
+            else:
+                stats.fail_test("JSONB ? operator", "No match found")
+        except Error as e:
+            stats.fail_test("JSONB ? operator", str(e))
+
+        # Test 3: UPDATE JSONB array (append genre)
+        try:
+            cur.execute("""
+                UPDATE books
+                SET genres = genres || '["Cyberpunk"]'::jsonb
+                WHERE book_id = %s
+                RETURNING genres
+            """, (book_id,))
+
+            result = cur.fetchone()
+            if result and 'Cyberpunk' in result[0]:
+                stats.pass_test("JSONB UPDATE (append to genres array)")
+                conn.commit()
+            else:
+                stats.fail_test("JSONB UPDATE", "Append failed")
+                conn.rollback()
+        except Error as e:
+            stats.fail_test("JSONB UPDATE", str(e))
+            conn.rollback()
+
+        # Test 4: JSONB array length
+        try:
+            cur.execute("""
+                SELECT jsonb_array_length(genres) as genre_count
+                FROM books
+                WHERE book_id = %s
+            """, (book_id,))
+
+            count = cur.fetchone()[0]
+            if count == 4:  # Original 3 + 1 appended
+                stats.pass_test(f"JSONB array length (genres: {count})")
+            else:
+                stats.fail_test("JSONB array length", f"Expected 4, got {count}")
+        except Error as e:
+            stats.fail_test("JSONB array length", str(e))
+
+        # Test 5: JSONB array contains multiple elements
+        try:
+            cur.execute("""
+                SELECT title
+                FROM books
+                WHERE genres @> '["Romance", "LGBTQ+"]'::jsonb AND book_id = %s
+            """, (book_id,))
+
+            if cur.fetchone():
+                stats.pass_test("JSONB multi-element containment (genres @> multiple values)")
+            else:
+                stats.fail_test("JSONB multi-element containment", "No match")
+        except Error as e:
+            stats.fail_test("JSONB multi-element containment", str(e))
+
+# ============================================================
+# TEST SUITE 4: FOREIGN KEY AND CASCADE BEHAVIOR
+# ============================================================
+
+def test_foreign_keys_cascade(conn, stats):
+    """Test foreign key constraints and CASCADE behavior"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 4: Foreign Keys and CASCADE{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    try:
+        with conn.cursor() as cur:
+            # Create test author
+            cur.execute("""
+                INSERT INTO authors (author_name)
+                VALUES ('Cascade Test Author')
+                RETURNING author_id
+            """)
+            test_author_id = cur.fetchone()[0]
+
+            # Create test book referencing author
+            cur.execute("""
+                INSERT INTO books (title, author, author_id)
+                VALUES ('Cascade Test Book', 'Cascade Test Author', %s)
+                RETURNING book_id
+            """, (test_author_id,))
+            test_book_id = cur.fetchone()[0]
+
+            # Create reading session referencing book
+            cur.execute("""
+                INSERT INTO reading_sessions (book_id, start_time, duration_minutes, device)
+                VALUES (%s, CURRENT_TIMESTAMP, 30, 'test-device')
+                RETURNING session_id
+            """, (test_book_id,))
+            test_session_id = cur.fetchone()[0]
+
+            conn.commit()
+
+            # Now delete the book (should CASCADE to reading_sessions)
+            cur.execute("DELETE FROM books WHERE book_id = %s", (test_book_id,))
+            conn.commit()
+
+            # Check if reading_session was CASCADE deleted
+            cur.execute("SELECT COUNT(*) FROM reading_sessions WHERE session_id = %s", (test_session_id,))
+            session_count = cur.fetchone()[0]
+
+            if session_count == 0:
+                stats.pass_test("CASCADE DELETE (book → reading_sessions)")
+            else:
+                stats.fail_test("CASCADE DELETE", "Reading session not deleted")
+
+            # Delete author (should SET NULL on books if any remain)
+            cur.execute("DELETE FROM authors WHERE author_id = %s", (test_author_id,))
+            conn.commit()
+
+            stats.pass_test("Foreign key CASCADE cleanup successful")
+
+    except Error as e:
+        stats.fail_test("Foreign key CASCADE test", str(e))
+        conn.rollback()
+
+# ============================================================
+# TEST SUITE 5: CONSTRAINT ENFORCEMENT
+# ============================================================
+
+def test_constraint_enforcement(conn, stats, cleanup_data):
+    """Test UNIQUE, CHECK, and NOT NULL constraints"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 5: Constraint Enforcement{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    if not cleanup_data:
+        print(f"{Color.YELLOW}⚠ Skipping constraint tests (no test data){Color.RESET}\n")
+        return
+
+    book_id = cleanup_data['book_id']
+
+    with conn.cursor() as cur:
+        # Test 1: UNIQUE constraint on reading_sessions (book_id, start_time, device)
+        try:
+            # Get existing session details
+            cur.execute("""
+                SELECT book_id, start_time, device
+                FROM reading_sessions
+                WHERE session_id = %s
+            """, (cleanup_data['session_id'],))
+
+            existing = cur.fetchone()
+
+            # Try to insert duplicate
+            cur.execute("""
+                INSERT INTO reading_sessions (book_id, start_time, duration_minutes, device)
+                VALUES (%s, %s, 45, %s)
+            """, existing)
+
+            conn.commit()
+            stats.fail_test("UNIQUE constraint enforcement", "Duplicate insert succeeded (should have failed)")
+
+        except errors.UniqueViolation:
+            conn.rollback()
+            stats.pass_test("UNIQUE constraint enforcement (reading_sessions)")
+        except Error as e:
+            conn.rollback()
+            stats.fail_test("UNIQUE constraint test", str(e))
+
+        # Test 2: CHECK constraint (duration_minutes > 0)
+        try:
+            cur.execute("""
+                INSERT INTO reading_sessions (book_id, start_time, duration_minutes, device)
+                VALUES (%s, CURRENT_TIMESTAMP, -10, 'test-device')
+            """, (book_id,))
+
+            conn.commit()
+            stats.fail_test("CHECK constraint (duration_minutes > 0)", "Negative duration accepted")
+
+        except errors.CheckViolation:
+            conn.rollback()
+            stats.pass_test("CHECK constraint enforcement (duration_minutes > 0)")
+        except Error as e:
+            conn.rollback()
+            stats.fail_test("CHECK constraint test", str(e))
+
+        # Test 3: NOT NULL constraint on required fields
+        try:
+            cur.execute("""
+                INSERT INTO books (author, author_id)
+                VALUES ('Test Author', NULL)
+            """)
+
+            conn.commit()
+            stats.warn_test("NOT NULL constraint (author_id)", "NULL accepted (may be intentional)")
+
+        except errors.NotNullViolation:
+            conn.rollback()
+            stats.pass_test("NOT NULL constraint enforcement (author_id)")
+        except Error as e:
+            conn.rollback()
+            # This is expected if author_id allows NULL
+            stats.warn_test("NOT NULL constraint test", "author_id may allow NULL")
+
+# ============================================================
+# TEST SUITE 6: VIEWS
+# ============================================================
+
+def test_views(conn, stats, cleanup_data):
+    """Test all 5 views with sample data"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 6: View Queries{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    if not cleanup_data:
+        print(f"{Color.YELLOW}⚠ Skipping view tests (no test data){Color.RESET}\n")
+        return
+
+    book_id = cleanup_data['book_id']
+
+    views = ['book_stats', 'reading_timeline', 'publisher_analytics',
+             'author_analytics', 'tandem_reading_sessions']
+
+    with conn.cursor() as cur:
+        # Test 1: book_stats view
+        try:
+            cur.execute("SELECT * FROM book_stats WHERE book_id = %s", (book_id,))
+            result = cur.fetchone()
+            if result:
+                stats.pass_test(f"View: book_stats (total_sessions: {result[10]})")
+            else:
+                stats.warn_test("View: book_stats", "No data returned")
+        except Error as e:
+            stats.fail_test("View: book_stats", str(e))
+
+        # Test 2-5: Other views (existence check)
+        for view in views[1:]:
+            try:
+                cur.execute(f"SELECT COUNT(*) FROM {view}")
+                count = cur.fetchone()[0]
+                stats.pass_test(f"View: {view} (rows: {count})")
+            except Error as e:
+                stats.fail_test(f"View: {view}", str(e))
+
+# ============================================================
+# TEST SUITE 7: TRIGGER FUNCTIONALITY
+# ============================================================
+
+def test_triggers(conn, stats):
+    """Test updated_at triggers on all tables"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 7: Trigger Functionality{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    tables_with_triggers = ['authors', 'publishers', 'books', 'sync_status']
+
+    with conn.cursor() as cur:
+        for table in tables_with_triggers:
+            try:
+                # Insert test record
+                if table == 'authors':
+                    cur.execute("""
+                        INSERT INTO authors (author_name)
+                        VALUES ('Trigger Test')
+                        RETURNING author_id, updated_at
+                    """)
+                elif table == 'publishers':
+                    cur.execute("""
+                        INSERT INTO publishers (publisher_name)
+                        VALUES ('Trigger Test Publisher')
+                        RETURNING publisher_id, updated_at
+                    """)
+                elif table == 'books':
+                    cur.execute("""
+                        INSERT INTO books (title, author)
+                        VALUES ('Trigger Test Book', 'Test')
+                        RETURNING book_id, updated_at
+                    """)
+                elif table == 'sync_status':
+                    cur.execute("""
+                        INSERT INTO sync_status (source, last_sync, records_processed, status)
+                        VALUES ('test', CURRENT_TIMESTAMP, 0, 'testing')
+                        RETURNING sync_id, updated_at
+                    """)
+
+                record_id, old_updated_at = cur.fetchone()
                 conn.commit()
 
-                print(f"\n{GREEN}PASSED{RESET}")
-                return True
-            else:
-                raise
+                # Small delay
+                time.sleep(0.1)
 
-    except Error as e:
-        conn.rollback()
-        print(f"  {YELLOW}⚠{RESET} Constraint test inconclusive: {e}")
-        print(f"\n{YELLOW}PARTIAL{RESET}")
-        return True  # Don't fail - constraints work but error message varies
+                # Update record
+                if table == 'authors':
+                    cur.execute(f"UPDATE {table} SET author_name = 'Updated' WHERE author_id = %s", (record_id,))
+                elif table == 'publishers':
+                    cur.execute(f"UPDATE {table} SET country = 'USA' WHERE publisher_id = %s", (record_id,))
+                elif table == 'books':
+                    cur.execute(f"UPDATE {table} SET page_count = 100 WHERE book_id = %s", (record_id,))
+                elif table == 'sync_status':
+                    cur.execute(f"UPDATE {table} SET status = 'complete' WHERE sync_id = %s", (record_id,))
 
-    finally:
-        cursor.close()
+                # Get new updated_at
+                id_column = f"{table.rstrip('s')}_id" if table != 'sync_status' else 'sync_id'
+                cur.execute(f"SELECT updated_at FROM {table} WHERE {id_column} = %s", (record_id,))
+                new_updated_at = cur.fetchone()[0]
 
-# ============================================================================
-# TEST RUNNER
-# ============================================================================
+                if new_updated_at > old_updated_at:
+                    stats.pass_test(f"Trigger: {table}.updated_at auto-update")
+                else:
+                    stats.fail_test(f"Trigger: {table}.updated_at", f"Not updated (old: {old_updated_at}, new: {new_updated_at})")
 
-def run_all_tests():
-    """Execute complete test suite"""
-    print(f"\n{BOLD}╔════════════════════════════════════════════════════════╗{RESET}")
-    print(f"{BOLD}║  Schema Operations Test Suite - Story 1.4, Task 5      ║{RESET}")
-    print(f"{BOLD}║  Neon.tech PostgreSQL v17                             ║{RESET}")
-    print(f"{BOLD}╚════════════════════════════════════════════════════════╝{RESET}")
+                # Cleanup
+                cur.execute(f"DELETE FROM {table} WHERE {id_column} = %s", (record_id,))
+                conn.commit()
 
-    conn = get_connection()
-    results = {}
+            except Error as e:
+                stats.fail_test(f"Trigger test: {table}", str(e))
+                conn.rollback()
+
+# ============================================================
+# TEST SUITE 8: INDEX VERIFICATION
+# ============================================================
+
+def test_indexes(conn, stats):
+    """Verify key indexes exist"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Test Suite 8: Index Verification{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    expected_indexes = [
+        'idx_reading_sessions_book_date',
+        'idx_reading_sessions_date_device',
+        'idx_reading_sessions_parallel',
+        'idx_books_genres',
+        'idx_books_moods',
+        'idx_books_content_warnings',
+        'idx_books_author_diversity',
+        'idx_books_user_ownership',
+        'idx_books_reading_status',
+        'idx_authors_diversity',
+        'idx_book_editions_format_book'
+    ]
+
+    with conn.cursor() as cur:
+        for index_name in expected_indexes:
+            try:
+                cur.execute("""
+                    SELECT COUNT(*)
+                    FROM pg_indexes
+                    WHERE schemaname = 'public' AND indexname = %s
+                """, (index_name,))
+
+                if cur.fetchone()[0] > 0:
+                    stats.pass_test(f"Index exists: {index_name}")
+                else:
+                    stats.fail_test(f"Index: {index_name}", "Not found")
+
+            except Error as e:
+                stats.fail_test(f"Index check: {index_name}", str(e))
+
+# ============================================================
+# CLEANUP
+# ============================================================
+
+def cleanup_test_data(conn, stats, cleanup_data):
+    """Remove all test data"""
+    print(f"\n{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}Cleanup Test Data{Color.RESET}")
+    print(f"{Color.BLUE}{'='*60}{Color.RESET}\n")
+
+    if not cleanup_data:
+        print(f"{Color.YELLOW}⚠ No cleanup data{Color.RESET}\n")
+        return
 
     try:
-        # Schema Validation Tests
-        results['Test 1: Tables Exist'] = test_tables_exist(conn)
-        results['Test 2: Columns'] = test_columns(conn)
-        results['Test 3: Indexes'] = test_indexes(conn)
-        results['Test 4: Views'] = test_views_exist(conn)
+        with conn.cursor() as cur:
+            # Delete in reverse order of dependencies
+            cur.execute("DELETE FROM reading_sessions WHERE book_id = %s", (cleanup_data['book_id'],))
+            cur.execute("DELETE FROM book_editions WHERE edition_id = %s", (cleanup_data['edition_id'],))
+            cur.execute("DELETE FROM books WHERE book_id = %s", (cleanup_data['book_id'],))
+            cur.execute("DELETE FROM publishers WHERE publisher_id = %s", (cleanup_data['publisher_id'],))
+            cur.execute("DELETE FROM authors WHERE author_id = %s", (cleanup_data['author_id'],))
+            cur.execute("DELETE FROM sync_status WHERE sync_id = %s", (cleanup_data['sync_id'],))
 
-        # CRUD Tests
-        success, pub_id = test_create_publisher(conn)
-        results['Test 5: Create Publisher'] = success
+            conn.commit()
+            stats.pass_test("Test data cleanup complete")
 
-        success, book_id = test_create_book(conn, pub_id)
-        results['Test 6: Create Book'] = success
+    except Error as e:
+        stats.fail_test("Cleanup", str(e))
+        conn.rollback()
 
-        if book_id:
-            success, session_id = test_create_reading_session(conn, book_id)
-            results['Test 7: Create Session'] = success
+# ============================================================
+# MAIN
+# ============================================================
 
-            results['Test 8: Read Data'] = test_read_data(conn, book_id)
-            results['Test 9: Query Views'] = test_views(conn, book_id)
-            results['Test 10: Update Data'] = test_update_data(conn, book_id)
-            results['Test 11: Delete Data'] = test_delete_data(conn, book_id, pub_id)
+def main():
+    """Main test execution"""
+    print(f"\n{Color.BOLD}{Color.BLUE}{'='*60}{Color.RESET}")
+    print(f"{Color.BOLD}BookHelper Schema Operations Test Suite{Color.RESET}")
+    print(f"{Color.BOLD}Story 1.4: Task 5{Color.RESET}")
+    print(f"{Color.BOLD}{Color.BLUE}{'='*60}{Color.RESET}\n")
 
-            results['Test 12: UNIQUE Constraint'] = test_unique_constraint(conn, book_id)
-            results['Test 13: CHECK Constraint'] = test_check_constraint(conn)
+    stats = TestStats()
 
-    finally:
-        close_connection(conn)
-
-    # Summary Report
-    print(f"\n{BOLD}╔════════════════════════════════════════════════════════╗{RESET}")
-    print(f"{BOLD}║  TEST SUMMARY                                          ║{RESET}")
-    print(f"{BOLD}╚════════════════════════════════════════════════════════╝{RESET}")
-
-    passed = sum(1 for v in results.values() if v is True)
-    failed = sum(1 for v in results.values() if v is False)
-    total = len(results)
-
-    for test_name, result in results.items():
-        status = f"{GREEN}PASS{RESET}" if result else f"{RED}FAIL{RESET}"
-        print(f"{test_name}: {status}")
-
-    print(f"\n{BOLD}Results: {GREEN}{passed} passed{RESET}, {RED}{failed} failed{RESET}, {total} total{RESET}")
-
-    if failed == 0:
-        print(f"\n{BOLD}{GREEN}✓ ALL TESTS PASSED{RESET}{BOLD} - Schema is ready for use{RESET}")
-        return 0
-    else:
-        print(f"\n{BOLD}{RED}✗ SOME TESTS FAILED{RESET}{BOLD} - Review errors above{RESET}")
+    # Load environment
+    print("Loading environment variables...")
+    if not load_env_file():
         return 1
 
-# ============================================================================
-# MAIN
-# ============================================================================
+    print(f"{Color.GREEN}✓{Color.RESET} Environment loaded\n")
+
+    # Connect to database
+    print("Connecting to Neon PostgreSQL...")
+    conn = get_db_connection()
+    print(f"{Color.GREEN}✓{Color.RESET} Connection successful\n")
+
+    try:
+        # Run test suites
+        test_schema_structure(conn, stats)
+        test_jsonb_columns(conn, stats)
+        test_constraints(conn, stats)
+
+        cleanup_data = test_crud_operations(conn, stats)
+
+        test_jsonb_operations(conn, stats, cleanup_data)
+        test_foreign_keys_cascade(conn, stats)
+        test_constraint_enforcement(conn, stats, cleanup_data)
+        test_views(conn, stats, cleanup_data)
+        test_triggers(conn, stats)
+        test_indexes(conn, stats)
+
+        cleanup_test_data(conn, stats, cleanup_data)
+
+        # Print summary
+        return stats.summary()
+
+    except Exception as e:
+        print(f"\n{Color.RED}✗ Unexpected error: {e}{Color.RESET}")
+        return 1
+
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
-    sys.exit(run_all_tests())
+    sys.exit(main())

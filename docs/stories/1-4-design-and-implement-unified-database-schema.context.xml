@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>4</storyId>
+    <title>Design and implement unified database schema</title>
+    <storyKey>1-4-design-and-implement-unified-database-schema</storyKey>
+    <status>drafted</status>
+    <generatedAt>2025-10-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-4-design-and-implement-unified-database-schema.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a unified PostgreSQL schema designed and initialized on Neon.tech</iWant>
+    <soThat>reading session data from ebooks and audiobooks can be aggregated and queried for analytics</soThat>
+    <tasks>
+      <task id="1">Provision Neon.tech PostgreSQL database</task>
+      <task id="2">Design and create Books dimension table</task>
+      <task id="3">Design and create Reading_sessions fact table</task>
+      <task id="4">Create performance indexes</task>
+      <task id="5">Test database connectivity and operations</task>
+      <task id="6">Create schema documentation</task>
+      <task id="7">Update tech-spec with final schema</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Neon.tech free-tier PostgreSQL created and accessible</criterion>
+    <criterion id="2">Books dimension table created with fields: book_id, title, author, isbn, asin, source, media_type, cover_url, page_count, duration_minutes, published_date, created_at</criterion>
+    <criterion id="3">Reading_sessions fact table created with fields: session_id, book_id, start_time, end_time, pages_read, duration_minutes, device, media_type, device_stats_source, created_at</criterion>
+    <criterion id="4">Schema supports both ebook + audiobook data via media_type field</criterion>
+    <criterion id="5">Indexes created on frequently queried fields (book_id, start_time, device)</criterion>
+    <criterion id="6">Database connection tested from development environment</criterion>
+    <criterion id="7">Schema documentation created (ERD + field definitions)</criterion>
+    <criterion id="8">Schema version control: documented in tech-spec-epic-1.md</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Core Library Server & Database Foundation</title>
+        <section>Data Models and Contracts § Neon.tech PostgreSQL Schema</section>
+        <snippet>Books Dimension Table and Reading Sessions Fact Table with complete schema definitions, constraints, and indexes for ebook and audiobook analytics aggregation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>BookHelper System Architecture</title>
+        <section>3.1. Data Layer (Multi-Tier Strategy)</section>
+        <snippet>Neon.tech PostgreSQL serves as analytics data warehouse. For the MVP, this will house ebook statistics extracted from statistics.sqlite3 backup. Cloud-hosted PostgreSQL database supporting Facts & Dimensions model for reading session analytics.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements § FR013</section>
+        <snippet>System shall maintain unified database (Neon.tech PostgreSQL) consolidating ebook and audiobook reading data via nightly ETL pipeline with automated conflict resolution for multi-device updates.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>BookHelper - Epic Breakdown</title>
+        <section>Epic 1 § Story 1.4</section>
+        <snippet>Design and implement unified database schema. Neon.tech free-tier PostgreSQL with Books dimension and Reading_sessions fact tables supporting ebook and audiobook analytics.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>resources/scripts/</path>
+        <kind>directory</kind>
+        <reason>Planned location for database initialization scripts if needed</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="cloud">
+        <package name="Neon.tech" version="free-tier">
+          <installed>false</installed>
+          <reason>PostgreSQL database provider; free tier sufficient for MVP</reason>
+        </package>
+      </ecosystem>
+      <ecosystem name="database">
+        <package name="PostgreSQL" version="14+">
+          <installed>false</installed>
+          <reason>SQL database engine for Neon.tech</reason>
+        </package>
+        <package name="psycopg2" version="latest">
+          <installed>false</installed>
+          <reason>Python PostgreSQL adapter for Story 3.2 ETL pipeline connectivity</reason>
+        </package>
+      </ecosystem>
+      <ecosystem name="tools">
+        <package name="psql" version="14+">
+          <installed>false</installed>
+          <reason>PostgreSQL command-line client for testing schema creation</reason>
+        </package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="arch-1">
+      <title>Schema must support Facts & Dimensions model</title>
+      <description>Books table is dimension (reference data), reading_sessions is fact table (measurements). Design enables efficient dimensional analysis without denormalization. [Source: docs/tech-spec-epic-1.md]</description>
+    </constraint>
+    <constraint id="arch-2">
+      <title>Must support ebook and audiobook data in same schema</title>
+      <description>media_type field differentiates between sources. pages_read is ebook-specific, duration_minutes is audiobook-specific; use nullable fields to avoid impedance mismatch. [Source: docs/tech-spec-epic-1.md]</description>
+    </constraint>
+    <constraint id="arch-3">
+      <title>Schema must enable Story 3.2 ETL insertion</title>
+      <description>Tables and indexes must be created before ETL script (Story 3.2) can load data. This is a blocking dependency for downstream stories.</description>
+    </constraint>
+    <constraint id="perf-1">
+      <title>Indexes required for <2 second query response time</title>
+      <description>Indexes on (book_id, start_time, device) required for Story 3.3 query performance targets. [Source: docs/architecture.md § 3.5. Analytics Layer]</description>
+    </constraint>
+    <constraint id="safety-1">
+      <title>Credentials must be environment variables</title>
+      <description>Never hardcode Neon.tech connection string. Use environment variables: NEON_HOST, NEON_USER, NEON_PASSWORD, NEON_DATABASE.</description>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface id="neon-db">
+      <name>Neon.tech PostgreSQL Connection</name>
+      <kind>Database Connection</kind>
+      <signature>psycopg2.connect(host=NEON_HOST, user=NEON_USER, password=NEON_PASSWORD, database=NEON_DATABASE)</signature>
+      <path>Cloud-hosted (Neon.tech)</path>
+      <description>PostgreSQL database connection for schema creation and testing. Must support concurrent connections for ETL and query access.</description>
+    </interface>
+    <interface id="books-table">
+      <name>Books Dimension Table</name>
+      <kind>Database Table</kind>
+      <signature>CREATE TABLE books (book_id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, author VARCHAR(255), isbn VARCHAR(20), asin VARCHAR(20), source VARCHAR(50), media_type VARCHAR(20), cover_url TEXT, page_count INT, duration_minutes INT, published_date DATE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)</signature>
+      <path>Neon.tech database</path>
+      <description>Reference table for book metadata. Used by reading_sessions as foreign key. Supports both ebook and audiobook data via media_type field.</description>
+    </interface>
+    <interface id="sessions-table">
+      <name>Reading Sessions Fact Table</name>
+      <kind>Database Table</kind>
+      <signature>CREATE TABLE reading_sessions (session_id SERIAL PRIMARY KEY, book_id INT NOT NULL REFERENCES books(book_id), start_time TIMESTAMP NOT NULL, end_time TIMESTAMP, pages_read INT, duration_minutes INT, device VARCHAR(50), media_type VARCHAR(20), device_stats_source VARCHAR(100), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)</signature>
+      <path>Neon.tech database</path>
+      <description>Fact table for reading session measurements. Each row represents one reading session on one device. Supports NULL pages_read for audiobooks, NULL duration_minutes for ebooks.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing focuses on database connectivity, schema correctness, and performance. Unit tests validate table creation and constraints; integration tests verify ETL pipeline compatibility (Story 3.2). Schema validation uses SQL inspection commands (psql \d, \di). Performance testing measures query response time with sample data.</standards>
+    <locations>
+      <location>tests/test_1_4_*.py (unit tests for schema creation)</location>
+      <location>tests/integration/test_neon_*.py (integration tests with Neon.tech)</location>
+    </locations>
+    <ideas>
+      <idea acId="1">Test: Verify Neon.tech connection and credentials work; test SELECT/INSERT/UPDATE/DELETE operations</idea>
+      <idea acId="2">Test: Create Books table with all required fields and constraints; verify structure with \d books</idea>
+      <idea acId="3">Test: Create Reading_sessions table with foreign key to Books; verify structure and constraints</idea>
+      <idea acId="4">Test: Verify media_type field correctly differentiates ebook vs audiobook data</idea>
+      <idea acId="5">Test: Verify indexes exist on book_id, start_time, device; test query performance with EXPLAIN ANALYZE</idea>
+      <idea acId="6">Test: Connection from RPi development environment; test psycopg2 connectivity (required for Story 3.2)</idea>
+      <idea acId="7">Test: Schema documentation is complete with ERD and field definitions</idea>
+      <idea acId="8">Test: Tech-spec-epic-1.md is updated with finalized schema version</idea>
+    </ideas>
+  </tests>
+
+</story-context>
